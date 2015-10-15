@@ -1,18 +1,15 @@
 图灵知识库wiki
 =====
 
-thanks for mdwiki！
+__Thanks for mdwiki!__
 
-about
+来自
 --------
 
-  * __turingca__
-  * [turingca](http://www.turingca.com)
-  * 
+  图灵电脑协会，济南大学优秀社团，致力于大学生技能的学习与拓展。
+  了解跟多可以访问我们的网站[turingca](http://www.turingca.com)
 
-
-
-Requirements
+参与
 ------------
 
 * Webspace (or a web server that can serve static files)
