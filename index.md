@@ -1,7 +1,7 @@
 图灵知识库wiki
 =====
 
-__Thanks for mdwiki!__
+Thanks for mdwiki!
 
 项目宗旨
 ----------
@@ -21,6 +21,7 @@ __Thanks for mdwiki!__
 
 加入贡献
 ----------
+
 访问我们在Github上的项目地址参与贡献我们的知识库
 
     http://github.com/turingca/guide
@@ -32,3 +33,8 @@ __Thanks for mdwiki!__
 先后顺序加入的贡献者
 
     http://www.jingchaofang.com 房敬超
+    
+
+操作规范
+----------
+正在整理中……
