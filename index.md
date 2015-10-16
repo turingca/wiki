@@ -12,6 +12,10 @@ __Thanks for mdwiki!__
 
 加入贡献
 ------------
-目前的主要贡献者房敬超
+访问我们在Github上的项目地址[turingca/guide]
 
-    http://www.jingchaofang.com
+    http://github.com/turingca/guide
+
+目前的主要贡献者
+
+    http://www.jingchaofang.com 房敬超
