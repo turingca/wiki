@@ -7,8 +7,8 @@ __Thanks for mdwiki!__
 --------
 
 图灵电脑协会，济南大学优秀社团，致力于大学生技能的学习与拓展。
-了解跟多可以访问我们的网站[turingca](http://www.turingca.com){:target:"__blank"}
+了解更多可以访问我们的网站|http://www.turingca.com
 
 加入贡献
 ------------
-加入我们
+目前的主要贡献者[房敬超]|个人博客http://www.jingchaofang.com
