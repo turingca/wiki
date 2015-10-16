@@ -12,10 +12,14 @@ __Thanks for mdwiki!__
 
 加入贡献
 ------------
-访问我们在Github上的项目地址[turingca/guide]
+访问我们在Github上的项目地址turingca/guide，fork我们的知识库
 
     http://github.com/turingca/guide
+    
+还不知道怎么使用github，访问下面链接，开始你的fork之旅
 
-目前的主要贡献者
+    http://book.haoduoshipin.com/gitbeijing/
+
+先后顺序加入的贡献者
 
     http://www.jingchaofang.com 房敬超
