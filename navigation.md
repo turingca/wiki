@@ -7,9 +7,10 @@
   * [css]()
   * [javascript]()
   * [更多]()
-  
-[test]()
 
-[test]()
+[服务器端]()
 
-  * [test]()
+[平台]()
+
+  * [微信](platform/wechat.md)
+  * [新浪微博]()
