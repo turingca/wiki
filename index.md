@@ -1,4 +1,4 @@
-图灵知识库wiki
+知识库wiki
 =====
 
 Thanks for mdwiki!
