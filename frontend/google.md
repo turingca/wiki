@@ -12,7 +12,7 @@
 插件
 ----
 
-       https://wappalyzer.com/  Wappalyzer 查看网站正在使用的技术
+       https://wappalyzer.com/  Wappalyzer 探测网站正在使用的开源软件技术，web开发者必备利器
 
 技巧
 ----
