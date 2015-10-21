@@ -27,3 +27,4 @@
   * [阳阳的博客](http://piu.pw)
   * [小七的博客](http://sevenskey.sinaapp.com)
   * [少华的博客](http://www.sharefood.space)
+  * [大刀的博客](http://lzzone.top)
