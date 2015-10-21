@@ -8,7 +8,7 @@
   * [javascript](frontend/javascript.md)
   * [google](frontend/google.md)
   * [meteor]()
-  * [nodejs](nodejs.md)
+  * [nodejs](frontend/nodejs.md)
 
 [服务器端]()
 
