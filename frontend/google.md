@@ -13,6 +13,7 @@
 ----
 
        https://wappalyzer.com/  Wappalyzer 探测网站正在使用的开源软件技术，web开发者必备利器
+       Wappalyzer = Appspector + Web Server Notifier Web + Technology Notifier
 
 技巧
 ----
