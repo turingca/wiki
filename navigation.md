@@ -19,4 +19,6 @@
   * [安卓]()
   * [IOS]()
 
-[实践](http://jingchaofang.com)
+[实践]()
+
+ |*敬超的博客(http://www.jingchaofang.com)
