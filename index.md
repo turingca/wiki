@@ -23,7 +23,7 @@ Thanks for mdwiki!
 
 访问我们在Github上的项目地址参与贡献我们的知识库
 
-    http://github.com/turingca/guide
+    http://github.com/turingca/wiki
     
 还不知道怎么使用github？访问下面链接，开始你的fork之旅
 
