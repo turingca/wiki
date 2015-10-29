@@ -1,4 +1,4 @@
-知识库wiki
+wiki
 =====
 
 Thanks for mdwiki!
