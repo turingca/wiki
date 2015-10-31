@@ -40,5 +40,12 @@ Thanks for mdwiki!
 
 实践中的博客
 ------------
+F
+[冯志远的博客](http://vvwall.com)
+[房敬超的博客](http://jingchaofang.com)
+G
+[管宜尧的博客](http://aicode.cc) 
+L
 
-[宜尧](http://aicode.cc)
+Y
+[于晓杰的博客](http://blog.csdn.net/shield_sky)
