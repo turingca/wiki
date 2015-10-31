@@ -24,8 +24,7 @@
   * [安卓]()
   * [苹果]()
 
-[实践]()
-  * [宜尧的博客](http://www.aicode.cc)
+[实践](index.md#实践中的博客)
   * [晓杰的博客](http://blog.csdn.net/shield_sky)
   * [敏材的博客](http://moringsky.github.com)
   * [志远的博客](http://vvwall.com)
