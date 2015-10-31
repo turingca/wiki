@@ -26,7 +26,7 @@
 
 [实践]()
   * [宜尧的博客](http://www.aicode.cc)
-  * [晓杰的博客](http://blog.csdn.com/shield_sky)
+  * [晓杰的博客](http://blog.csdn.net/shield_sky)
   * [敏材的博客](http://moringsky.github.com)
   * [敬超的博客](http://www.jingchaofang.com)
   * [志远的博客](http://vvwall.com)
