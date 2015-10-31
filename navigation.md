@@ -12,10 +12,10 @@
 
 [服务器端]()
 
-  *[linux命令](server/linux.md)
-  *[php]()
-  *[python]()
-  *[ruby]()
+  * [linux命令](server/linux.md)
+  * [php]()
+  * [python]()
+  * [ruby]()
 
 [平台]()
 
