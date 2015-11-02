@@ -15,7 +15,7 @@ Thanks for mdwiki!
 
 图灵电脑协会，济南大学优秀社团，致力于大学生技能的学习与拓展。
 
-    http://www.turingca.com
+    [http://www.turingca.com}(http://www.turingca.com)
 
 
 加入贡献
