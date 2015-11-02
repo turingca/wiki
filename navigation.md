@@ -12,7 +12,7 @@
 
 [服务器端]()
 
-  * [linux命令](server/linux.md)
+  * [linux](server/linux.md)
   * [php]()
   * [python]()
   * [ruby]()
