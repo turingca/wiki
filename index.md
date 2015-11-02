@@ -50,7 +50,7 @@ J
 [纪笑难](http://isunday.top/)
 L
 [刘子钊](http://lzzone.top/)
-[李宇阳](http://leifhome.sinaapp.com/)
+[李宇阳](http://memeda.link/)
 M
 [赖敏材](https://morningsky.github.io/)
 S
