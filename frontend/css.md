@@ -7,7 +7,7 @@
 分辨率
 ------
 
-前提；html body(overflow:hidden) 隐藏滚动轴下
+场景：html body(overflow:hidden) 隐藏滚动轴下
 
 |常见分辨率|窗口大小（win+chrome）|常用比例           |
 |----------|:--------------------:|:------------------|
