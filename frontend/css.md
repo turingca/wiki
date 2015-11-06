@@ -1,6 +1,8 @@
 字体
 ----
 
+#font-size
+
 字体渲染与操作系统、浏览器、字体格式以及CSS属性有关
 
 谷歌浏览器强制字体最小12px,可以通过缩放来解决这个问题
@@ -11,6 +13,9 @@
 注意：-webkit-text-size-adjust:none;只支持到chrome-27.0，现在最新版本为48.0
 
 http://pxtoem.com/
+
+#font-weight
+
 
 分辨率
 ------
