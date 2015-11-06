@@ -7,7 +7,7 @@
 
 -webkit-transform: scale(0.75);  12*0.75 =9
 
-注意：transform：scale()针对块级元素，会影响容器缩放。
+注意：transform：scale()针对块级元素，会影响文字所在容器缩放。
 注意：-webkit-text-size-adjust:none;只支持到chrome-27.0，现在最新版本为48.0
 
 http://pxtoem.com/
