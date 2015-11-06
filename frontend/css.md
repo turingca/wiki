@@ -1,8 +1,8 @@
 字体
 ----
 
-
-取消Chrome强制字体最小12px：
+Chrome强制字体最小12px,可以通过缩放来解决这个问题
+-webkit-transform: scale(0.75);  12*0.75 =9
 
 注意：新版谷歌已经禁用了-webkit-text-size-adjust:none;属性
 
