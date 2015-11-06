@@ -1,10 +1,10 @@
 字体
 ----
 
-取消Chrome强制字体最小12px：
--webkit-text-size-adjust:none;
-注意：不会随着网页放大而变大，对有需要放大网页观看的用户造成了不好的用户体验，不建议全局应用该属性，而是在需要的情况单独使用
 
+取消Chrome强制字体最小12px：
+
+注意：新版谷歌已经禁用了-webkit-text-size-adjust:none;属性
 
 
 http://pxtoem.com/
