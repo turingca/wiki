@@ -3,8 +3,8 @@
 
 Chrome强制字体最小12px,可以通过缩放来解决这个问题
 -webkit-transform: scale(0.75);  12*0.75 =9
-
-注意：新版谷歌已经禁用了-webkit-text-size-adjust:none;属性
+注意：transform：scale()针对块级元素，会影响容器缩放。
+注意：-webkit-text-size-adjust:none;只支持到chrome-27.0，现在最新版本为48.0
 
 
 http://pxtoem.com/
