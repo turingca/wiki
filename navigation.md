@@ -5,6 +5,7 @@
 [前端]()
 
   * [css](frontend/css.md)
+  * [canvas](frontend/canvas.md)
   * [javascript](frontend/javascript.md)
   * [google](frontend/google.md)
   * [meteor](frontend/meteor.md)
