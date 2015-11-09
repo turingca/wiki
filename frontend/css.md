@@ -1,7 +1,7 @@
 字体
 -----
   
-  ####font-size
+  ####①font-size
 
 字体渲染与操作系统、浏览器、字体格式以及CSS属性有关
 
@@ -12,7 +12,7 @@
 注意：transform：scale()针对块级元素，会影响文字所在容器缩放。
 注意：-webkit-text-size-adjust:none;只支持到chrome-27.0，现在最新版本为48.0
   
-  ####unit
+  ####②unit
   
 |css单位|定义       |计算规则|
 |-------|:---------:|:-------|
@@ -24,7 +24,7 @@
 计算工具：http://pxtoem.com/
 
   
-  ####font-weight
+  ####③font-weight
 
 
 分辨率
