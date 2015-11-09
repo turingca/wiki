@@ -12,7 +12,17 @@
 注意：transform：scale()针对块级元素，会影响文字所在容器缩放。
 注意：-webkit-text-size-adjust:none;只支持到chrome-27.0，现在最新版本为48.0
 
-http://pxtoem.com/
+####unit（单位）
+
+
+|css单位|定义|计算规则|
+|-------|:---------:|:----|
+|px     |             |   |
+|em (font size of the element)  |  相对于根元素的字体大小的单位|依赖根元素|
+|rem(font size of the root element)| 相对于父元素的字体大小的单位 |依赖父元素|
+
+
+计算工具：http://pxtoem.com/
 
   
 ####font-weight
