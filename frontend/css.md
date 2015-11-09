@@ -17,8 +17,8 @@
 |css单位|定义       |计算规则|
 |-------|:---------:|:-------|
 |px     |           |        |
-|em (font size of the element)  |  相对于根元素的字体大小的单位|依赖根元素|
-|rem(font size of the root element)| 相对于父元素的字体大小的单位 |依赖父元素|
+|em (font size of the element)  |  相对于父元素的字体大小的单位|依赖父元素|
+|rem(font size of the root element)| 相对于根元素的字体大小的单位 |依赖根元素|
 
 
 计算工具：http://pxtoem.com/
