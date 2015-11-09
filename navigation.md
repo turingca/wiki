@@ -10,6 +10,7 @@
   * [google](frontend/google.md)
   * [meteor](frontend/meteor.md)
   * [nodejs](frontend/nodejs.md)
+  * [模块化开发](frontend/requirejs.md)
 
 [服务器端]()
 
