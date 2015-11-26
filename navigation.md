@@ -10,7 +10,7 @@
   * [google](frontend/google.md)
   * [meteor](frontend/meteor.md)
   * [nodejs](frontend/nodejs.md)
-  * [模块化开发](frontend/requirejs.md)
+  * [标记语言](frontend/mark.md)
 
 [服务器端]()
 
@@ -30,4 +30,3 @@
 
   * [前端](website/frontend.md)
 
-[计算机词汇]()
