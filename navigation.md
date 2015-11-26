@@ -13,7 +13,7 @@
 
 [服务器端]()
 
-  * [linux](server/linux.md)
+  * [类unix](server/linux.md)
   * [php]()
   * [python]()
   * [ruby]()
