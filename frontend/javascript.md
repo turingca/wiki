@@ -8,7 +8,7 @@ ECMAScript是javascript的语言标准版本，现在最新版本为ES6。
 
 以下先对javascript语言做一个快速概览
 ```javascript
-//注释
+//这是注释
 var x; //声明变量
 x=0    //通过等号赋值给变量
 //javascript支持多种数据类型
@@ -26,6 +26,29 @@ var book = {            //对象是由花括号括起来的
   topic: "javascript",  //属性topic的值是javascript
   fat: true             //属性fat的值是true
 }                       //右花括号标记了对象的结束
+//通过“.”和“[]”来访问对象属性
+book.topic                 //=> "javascript"
+book.["fat"]               //=> true 另外一种获取属性的方式
+book.author = "Flanagan";  //通过赋值创建一个新属性
+book.contents = {};        //{}是一个空对象，它没有属性
+//javascript数组（以数字为索引的列表）
+var primes = [2, 3, 5, 7]; //拥有4个值的数组，由“[”和“]”划定边界
+primes[0]                  //=> 2 数组中的第一个元素（索引为0）
+primes.length              //=> 4 数组中元素个数
+primes[primes.length -1]   //=> 7 数组的最后一个元素
+primes[4] = 9;             //通过赋值来添加新元素
+primes[4] = 11;            //或通过赋值来改变已有的元素
+var empty = [];            //[]是空数组，它具有0个元素
+empty.length               //=>0 空数组的长度为0
+//数组和对象都可以包含另一个数组或对象
+var points = {
+    {x: 0, y: 0},
+    {x: 1, y: 1}
+};
+var data = {
+    trial1: [[1,2],[3,4]],
+    trial2: [[2,3],[4,5]]
+};
 ```
 词法结构
 ----------
