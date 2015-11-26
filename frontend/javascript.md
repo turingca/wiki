@@ -23,8 +23,8 @@ x=undefined        //undefined和null非常类似
 //javascript中的最重要的类型就是对象
 //对象是名/值对的集合，或字符串到值映射的集合
 var book = {            //对象是由花括号括起来的
-  topic: "javascript",  //属性topic的值是javascript
-  fat: true             //属性fat的值是true
+    topic: "javascript",  //属性topic的值是javascript
+    fat: true             //属性fat的值是true
 }                       //右花括号标记了对象的结束
 //通过“.”和“[]”来访问对象属性
 book.topic                 //=> "javascript"
@@ -41,14 +41,15 @@ primes[4] = 11;            //或通过赋值来改变已有的元素
 var empty = [];            //[]是空数组，它具有0个元素
 empty.length               //=>0 空数组的长度为0
 //数组和对象都可以包含另一个数组或对象
-var points = {
-    {x: 0, y: 0},
+var points = [             //具有两个元素的数组
+    {x: 0, y: 0},          //每个元素都是一个对象
     {x: 1, y: 1}
+];
+var data = {               //一个包含两个属性的对象
+    trial1: [[1,2],[3,4]], //每一个属性都是数组
+    trial2: [[2,3],[4,5]]  //数组的元素也是数组
 };
-var data = {
-    trial1: [[1,2],[3,4]],
-    trial2: [[2,3],[4,5]]
-};
+//运算符作用于操作数
 ```
 词法结构
 ----------
