@@ -6,6 +6,27 @@ javascript是一门弱类型、非传统面向对象的编程语言。
 javascript和java是完全不同的两种编程语言，之于雷锋与雷峰塔。
 ECMAScript是javascript的语言标准版本，现在最新版本为ES6。
 
+以下先对javascript语言做一个快速概览
+```javascript
+//注释
+var x; //声明变量
+x=0    //通过等号赋值给变量
+//javascript支持多种数据类型
+x=1;               //数字
+x=0.01;            //整数和实数共用一种数据类型
+x="hello world";   //双引号内的文本构成的字符串
+x='javascript';    //单引号内的文本构成的字符串
+x=true;            //布尔值
+x=false;           //布尔值
+x=null;            //null是一个特殊的值，意思是”空“
+x=undefined        //undefined和null非常类似
+//javascript中的最重要的类型就是对象
+//对象是名/值对的集合，或字符串到值映射的集合
+var book = {            //对象是由花括号括起来的
+  topic: "javascript",  //属性topic的值是javascript
+  fat: true             //属性fat的值是true
+}                       //右花括号标记了对象的结束
+```
 词法结构
 ----------
 编程语言的词法结构是一套基础性规则，用来描述如何使用这门语言来编写程序。
