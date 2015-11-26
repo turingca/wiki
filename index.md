@@ -1,8 +1,6 @@
 wiki
 =====
 
-Thanks for mdwiki!
-
 项目宗旨
 ----------
 
