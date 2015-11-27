@@ -95,6 +95,15 @@ var a = [];
 a.push(1, 2, 3);
 a.reverse();
 //我们也可以定义自己的方法，“this”关键字是对定义方法的对象的引用，这里的例子是上文中提到的包含两个点位置信息的数组
+points.dist = function() {
+    var p1 = this[0];
+    var p2 = this[1];
+    var a = p2.x - p1.x;
+    var b = p2.y - p1.y;
+    return Math.sqrt(a * a + b * b);
+}
+points.dist();
+
 ```
 词法结构
 ----------
