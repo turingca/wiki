@@ -29,7 +29,7 @@ wiki
 
 先后顺序加入的贡献者
 
-    房敬超、某某、某某某……   pull request得到merge，这里会留下你的名字
+    房敬超、冯志远、某某某……   pull request得到merge，这里会留下你的名字
     
 规范
 -----
