@@ -91,25 +91,77 @@ var square = function(x) { //函数是一种值，可以赋值给变量
 square(plus1(y))           //=> 16 在一个表达式中调用两个函数
 //当将函数和对象合写在一起时，函数就变成了“方法”（method）
 //当函数赋值给对象的属性，我们称为“方法”，所有的javascript对象都含有方法
-var a = [];
-a.push(1, 2, 3);
-a.reverse();
+var a = [];                           //创建一个空数组
+a.push(1, 2, 3);                      //push()方法向数组中添加元素
+a.reverse();                          //另一个方法：将数组元素的次序反转
 //我们也可以定义自己的方法，“this”关键字是对定义方法的对象的引用，这里的例子是上文中提到的包含两个点位置信息的数组
-points.dist = function() {
-    var p1 = this[0];
-    var p2 = this[1];
-    var a = p2.x - p1.x;
-    var b = p2.y - p1.y;
-    return Math.sqrt(a * a + b * b);
+points.dist = function() {            //定义一个方法用来计算两点之间的距离
+    var p1 = this[0];                 //通过this获得对当前数组的引用
+    var p2 = this[1];                 //并获得调用的数组前两个元素
+    var a = p2.x - p1.x;              //x坐标轴上的距离
+    var b = p2.y - p1.y;              //y坐标轴上的距离
+    return Math.sqrt(a * a + b * b);  //勾股定理，用Math.sqrt()来计算平方根
 }
-points.dist();
-
+points.dist();                        //=> 1.414 求得两个点之间的距离
+//控制语句
+function abs(x) {                     //求绝对值的函数
+    if (x > =0) {                     //if语句
+        return x;                     //如果比较结果为true则执行这里的代码
+    }                                 //子句的结束
+    else {                            //当if条件不满足时执行else子句
+        return - x;                   //返回负x
+    }                                 //如果分支中只有一条语句，花括号是可以省略的
+}                                     //注意if/else中嵌套的return语句
+function factorial(n) {               //计算阶乘的函数
+    var product = 1;                  //给product赋值为1
+    while (n > 1) {                   //当()内的表达式为true时循环执行{}内的代码
+        product *= n;                 //product = product *n的简写形式
+        n--;                          //n = n -1的简写形式
+    }                                 //循环结束
+    return product;                   //返回product
+}
+factorial(4)                          //=> 24 1*4*3*2
+function factorial2(n) {              //实现循环的另一种写法
+    var i, product = 1;               //给product赋值为1
+    for (i = 2; i<=n; i++)            //将i从2自增至n
+        product *= i;                 //循环体，当循环体中只有一句代码，可以省略{}
+    return product;                   //返回计算好的阶乘
+}
+factorial2(5)                         //=> 120 1*2*3*4*5
+//类，在javascript中定义一个类来表示2D平面几何中的点，这个类实例化的对象拥有一个名为r()的方法，用来计算该点到原点的距离
+//定义一个构造函数以初始化一个新的point对象
+function Point(x,y) {                 //按照惯例，构造函数均以大写字母开始
+    this.x = x;                       //关键字this指代初始化的实例
+    this.y = y;                       //将函数参数存储为对象的属性
+}                                     //不需要return
+//使用new关键字和构造函数来创建一个实例
+var p =new Point(1, 1);               //平面几何中的点(1,1)
+//通过给构造函数的prototype对象赋值
+//来给Point对象定义方法
+Point.prototype.r = function() {
+    return Math.sqrt(                 //返回 x*x + y*y的平方根
+    this.x * this.x +                 //this指代调用这个方法的对象
+    this.y * this.y);
+}
+//Point的实例对象p（以及所有的Point实例对象）继承了方法r()
+p.r()                                 //=> 1.414...
 ```
+
+
+todo
+
+
+
 词法结构
 ----------
 编程语言的词法结构是一套基础性规则，用来描述如何使用这门语言来编写程序。
+字符集：
 javascript程序是用Unicode字符集编写的。Unicode是ASCII和Latin-1的超集，并支持地球上几乎所有在用的语言。
-javascript是区分大小写的语言。
+区分大小写：
+javascript是区分大小写的语言。与html中标签和属性同名的javascript必须小写，例如在html中可以写成onClick，但在javascript中必须写成小写onclick。
+空格、换行符和格式控制符：
+javascript会忽略程序中标识[token](https://en.wikipedia.org/wiki/Token)之间的空格
+
 
 类型、值和变量
 --------------
