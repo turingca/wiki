@@ -226,13 +226,13 @@ HTML5 API
 javascript核心参考
 ------------------
 参考文档：包括javascript语言核心定义的类、方法和属性。
-|    1  |     2   |   3    |    4    |
+|1|2|3|4|
 |-------|:--------|:-------|:--------|
 |Arguments|EvalError|Number|String|
 |Array|Function|Object|SyntaxError|
 |Boolean|Global|RangeError|TypeError|
 |Date|JSON|ReferenceError|URIError|
-|Error|Math|RegExp||
+|Error|Math|RegExp| |
 
 客户端javascript核心参考
 -----------------------
