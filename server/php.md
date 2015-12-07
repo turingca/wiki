@@ -1,6 +1,6 @@
-基础知识体系
+知识体系
 ============
-官方中文手册[http://php.net/manual/zh/](http://php.net/manual/zh/)
+PHP官方中文手册[http://php.net/manual/zh/](http://php.net/manual/zh/)
 
 入门
 -----
