@@ -15,7 +15,7 @@
 [服务器端]()
 
   * [linux](server/linux.md)
-  * [php]()
+  * [php](server/php.md)
   * [python]()
   * [ruby]()
   * [jsp]()
