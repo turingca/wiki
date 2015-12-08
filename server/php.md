@@ -28,6 +28,206 @@ PHP官方中文手册[http://php.net/manual/zh/](http://php.net/manual/zh/)
 
 流程控制
 -------
+***include***
+(PHP 4, PHP 5)
+include 语句包含并运行指定文件。
+以下文档也适用于 require。
+被包含文件先按参数给出的路径寻找，如果没有给出目录（只有文件名）时则按照 include_path 指定的目录寻找。
+如果在 include_path 下没找到该文件则 include 最后才在调用脚本文件所在的目录和当前工作目录下寻找。
+如果最后仍未找到文件则 include 结构会发出一条警告；这一点和 require 不同，后者会发出一个致命错误。
+
+如果定义了路径——不管是绝对路径（在 Windows 下以盘符或者 \ 开头，在 Unix/Linux 下以 / 开头）还是当前目录的相对路径（以 . 或者 .. 开头）include_path 都会被完全忽略。例如一个文件以 ../ 开头，则解析器会在当前目录的父目录下寻找该文件。
+
+有关 PHP 怎样处理包含文件和包含路径的更多信息参见 include_path 部分的文档。
+
+当一个文件被包含时，其中所包含的代码继承了include所在行的变量范围。
+从该处开始，调用文件在该行处可用的任何变量在被调用的文件中也都可用。
+不过所有在包含文件中定义的函数和类都具有全局作用域。
+基本的 include 例子：
+```php
+vars.php
+<?php
+
+$color = 'green';
+$fruit = 'apple';
+
+?>
+
+test.php
+<?php
+
+echo "A $color $fruit"; // A
+
+include 'vars.php';
+
+echo "A $color $fruit"; // A green apple
+
+?>
+```
+如果 include 出现于调用文件中的一个函数里，则被调用的文件中所包含的所有代码将表现得如同它们是在该函数内部定义的一样。所以它将遵循该函数的变量范围。此规则的一个例外是魔术常量，它们是在发生包含之前就已被解析器处理的。
+函数中的包含:
+```php
+<?php
+
+function foo()
+{
+    global $color;
+
+    include 'vars.php';
+
+    echo "A $color $fruit";
+}
+
+/* vars.php is in the scope of foo() so     *
+ * $fruit is NOT available outside of this  *
+ * scope.  $color is because we declared it *
+ * as global.                               */
+
+foo();                    // A green apple
+echo "A $color $fruit";   // A green
+
+?>
+```
+当一个文件被包含时，语法解析器在目标文件的开头脱离 PHP 模式并进入 HTML 模式，到文件结尾处恢复。
+由于此原因，目标文件中需要作为 PHP 代码执行的任何代码都必须被包括在有效的 PHP 起始和结束标记之中。
+
+如果“URL fopen wrappers”在 PHP 中被激活（默认配置），可以用URL（通过HTTP或者其它支持的封装协议——见支持的协议和封装协议）而不是本地文件来指定要被包含的文件。
+如果目标服务器将目标文件作为 PHP 代码解释，则可以用适用于HTTPGET的URL请求字符串来向被包括的文件传递变量。
+严格的说这和包含一个文件并继承父文件的变量空间并不是一回事；该脚本文件实际上已经在远程服务器上运行了，而本地脚本则包括了其结果。
+
+Warning
+Windows 版本的 PHP 在 4.3.0 版之前不支持通过此函数访问远程文件，即使已经启用 allow_url_fopen。
+通过HTTP进行的include：
+```php
+<?php
+
+/* This example assumes that www.example.com is configured to parse .php *
+ * files and not .txt files. Also, 'Works' here means that the variables *
+ * $foo and $bar are available within the included file.                 */
+
+// Won't work; file.txt wasn't handled by www.example.com as PHP
+include 'http://www.example.com/file.txt?foo=1&bar=2';
+
+// Won't work; looks for a file named 'file.php?foo=1&bar=2' on the
+// local filesystem.
+include 'file.php?foo=1&bar=2';
+
+// Works.
+include 'http://www.example.com/file.php?foo=1&bar=2';
+
+$foo = 1;
+$bar = 2;
+include 'file.txt';  // Works.
+include 'file.php';  // Works.
+
+?>
+```
+
+Warning
+安全警告
+远程文件可能会经远程服务器处理（根据文件后缀以及远程服务器是否在运行PHP而定），但必须产生出一个合法的PHP脚本，因为其将被本地服务器处理。如果来自远程服务器的文件应该在远端运行而只输出结果，那用 readfile() 函数更好。
+另外还要格外小心以确保远程的脚本产生出合法并且是所需的代码。
+
+相关信息参见使用远程文件，fopen() 和 file()。
+
+处理返回值：在失败时 include 返回 FALSE 并且发出警告。
+成功的包含则返回 1，除非在包含文件中另外给出了返回值。
+可以在被包括的文件中使用 return 语句来终止该文件中程序的执行并返回调用它的脚本。
+同样也可以从被包含的文件中返回值。可以像普通函数一样获得include调用的返回值。
+不过这在包含远程文件时却不行，除非远程文件的输出具有合法的PHP开始和结束标记（如同任何本地文件一样）。
+可以在标记内定义所需的变量，该变量在文件被包含的位置之后就可用了。
+
+因为 include 是一个特殊的语言结构，其参数不需要括号。在比较其返回值时要注意。
+比较 include 的返回值:
+```php
+<?php
+// won't work, evaluated as include(('vars.php') == 'OK'), i.e. include('')
+if (include('vars.php') == 'OK') {
+    echo 'OK';
+}
+
+// works
+if ((include 'vars.php') == 'OK') {
+    echo 'OK';
+}
+?>
+```
+include 和 return 语句:
+```php
+return.php
+<?php
+
+$var = 'PHP';
+
+return $var;
+
+?>
+
+noreturn.php
+<?php
+
+$var = 'PHP';
+
+?>
+
+testreturns.php
+<?php
+
+$foo = include 'return.php';
+
+echo $foo; // prints 'PHP'
+
+$bar = include 'noreturn.php';
+
+echo $bar; // prints 1
+
+?>
+```
+
+$bar 的值为 1 是因为 include 成功运行了。注意以上例子中的区别。第一个在被包含的文件中用了 return 而另一个没有。如果文件不能被包含，则返回 FALSE 并发出一个 E_WARNING 警告。
+
+如果在包含文件中定义有函数，这些函数不管是在 return 之前还是之后定义的，都可以独立在主文件中使用。如果文件被包含两次，PHP 5 发出致命错误因为函数已经被定义，但是 PHP 4 不会对在 return 之后定义的函数报错。推荐使用 include_once 而不是检查文件是否已包含并在包含文件中有条件返回。
+
+另一个将 PHP 文件“包含”到一个变量中的方法是用输出控制函数结合 include 来捕获其输出，例如：
+使用输出缓冲来将 PHP 文件包含入一个字符串:
+```php
+<?php
+$string = get_include_contents('somefile.php');
+
+function get_include_contents($filename) {
+    if (is_file($filename)) {
+        ob_start();
+        include $filename;
+        $contents = ob_get_contents();
+        ob_end_clean();
+        return $contents;
+    }
+    return false;
+}
+
+?>
+```
+要在脚本中自动包含文件，参见 php.ini 中的 auto_prepend_file 和 auto_append_file 配置选项。
+Note: 因为是一个语言构造器而不是一个函数，不能被 可变函数 调用。
+参见 require，require_once，include_once，get_included_files()，readfile()，virtual() 和 include_path。
+
+***include_once***
+(PHP 4, PHP 5)
+include_once 语句在脚本执行期间包含并运行指定文件。此行为和include语句类似，唯一区别是如果该文件中已经被包含过，则不会再次包含。
+如同此语句名字暗示的那样，只会包含一次。
+include_once 可以用于在脚本执行期间同一个文件有可能被包含超过一次的情况下，想确保它只被包含一次以避免函数重定义，变量重新赋值等问题。
+更多信息参见include文档。
+
+Note:
+在 PHP 4中，_once 的行为在不区分大小写字母的操作系统（例如 Windows）中有所不同，例如：
+include_once 在 PHP 4 运行于不区分大小写的操作系统中
+```php
+<?php
+include_once "a.php"; // 这将包含 a.php
+include_once "A.php"; // 这将再次包含 a.php！（仅 PHP 4）
+?>
+```
+此行为在 PHP 5 中改了，例如在 Windows 中路径先被规格化，因此C:\PROGRA~1\A.php 和C:\ProgramFiles\a.php的实现一样，文件只会被包含一次。
 
 函数
 -----
