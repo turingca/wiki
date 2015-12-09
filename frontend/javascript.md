@@ -262,8 +262,6 @@ library_function(inherit(o));   //防止对o的意外修改
 了解其工作原理，需要首先了解javascript中属性的查询和设置机制。接下来会讲到。
 
 
-<a name="inherit" id="inheirt">**继承**</a>
-<span name="原型属性" id="原型属性">原型属性</span>
 
 
 
