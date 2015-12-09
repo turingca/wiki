@@ -263,7 +263,7 @@ library_function(inherit(o));   //防止对o的意外修改
 
 
 <a name="inherit" id="inheirt">**继承**</a>
-<a name="原型属性" id="原型属性">**原型属性**</a>
+<span name="原型属性" id="原型属性">原型属性</span>
 
 
 
