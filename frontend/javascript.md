@@ -215,7 +215,16 @@ var r = new RegExp("js");
 因此，同使用{}创建对象一样，通过new Object()创建的对象也继承自Object.prototype。
 同样，通过new Array()创建的对象的原型就是Array.prototype，通过new Date()创建的对象的原型就是Date.prototype。
 
-没有原型的对象为数不多，Object.prototype就是其中之一。它不继承任何属性。其他原型对象都是普通对象，普通对象都具有原型。所有的内置构造函数（以及大部分自定义的构造函数）都具有一个继承自Object.prototype的原型。例如，Date.prototype的属性继承自Object.prototype，因此由new Date()创建的Date对象的属性同时继承自Date.prototype和Object.prototype。这一系列链接的原型对象就是所谓的“原型链”（prototype chain）。
+没有原型的对象为数不多，Object.prototype就是其中之一。它不继承任何属性。其他原型对象都是普通对象，普通对象都具有原型。
+所有的内置构造函数（以及大部分自定义的构造函数）都具有一个继承自Object.prototype的原型。
+例如，Date.prototype的属性继承自Object.prototype，因此由new Date()创建的Date对象的属性同时继承自Date.prototype和Object.prototype。
+这一系列链接的原型对象就是所谓的“原型链”（prototype chain）。
+
+[继承](#inherit)这节讲述属性继承的工作机制。
+
+<span id="inherit">**继承**</span>
+
+
 
 
 数组
