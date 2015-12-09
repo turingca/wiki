@@ -220,7 +220,7 @@ var r = new RegExp("js");
 例如，Date.prototype的属性继承自Object.prototype，因此由new Date()创建的Date对象的属性同时继承自Date.prototype和Object.prototype。
 这一系列链接的原型对象就是所谓的“原型链”（prototype chain）。
 
-[继承](#inherit)这节讲述属性继承的工作机制。[原型属性](#原型属性)这节将会讲到如何获取对象的原型。[类和模块](#类和模块)将会更详细地讨论原型和构造函数，包括如何通过编写构造函数定义对象的“类”，以及给构造函数的prototype属性赋值可以让其“实例”直接使用这个原型上的属性和方法。
+[继承](javascript.md#inherit)这节讲述属性继承的工作机制。[原型属性](http://wiki.turingca.com/#!frontend/javascript.md#原型属性)这节将会讲到如何获取对象的原型。[类和模块](#类和模块)将会更详细地讨论原型和构造函数，包括如何通过编写构造函数定义对象的“类”，以及给构造函数的prototype属性赋值可以让其“实例”直接使用这个原型上的属性和方法。
 
 **Object.create()**
 ECMAScript5定义了一个名为Object.create()的方法，它创建一个新对象，其中第一个参数是这个对象的原型。Object.create()提供第二个可选参数，用以对对象的属性进行进一步描述。6.7节会详细讲述第二个参数。
