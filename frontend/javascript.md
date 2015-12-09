@@ -220,10 +220,50 @@ var r = new RegExp("js");
 例如，Date.prototype的属性继承自Object.prototype，因此由new Date()创建的Date对象的属性同时继承自Date.prototype和Object.prototype。
 这一系列链接的原型对象就是所谓的“原型链”（prototype chain）。
 
-[继承](#inherit)这节讲述属性继承的工作机制。
+[继承](#inherit)这节讲述属性继承的工作机制。[原型属性](#原型属性)这节将会讲到如何获取对象的原型。[类和模块](#类和模块)将会更详细地讨论原型和构造函数，包括如何通过编写构造函数定义对象的“类”，以及给构造函数的prototype属性赋值可以让其“实例”直接使用这个原型上的属性和方法。
+
+**Object.create()**
+ECMAScript5定义了一个名为Object.create()的方法，它创建一个新对象，其中第一个参数是这个对象的原型。Object.create()提供第二个可选参数，用以对对象的属性进行进一步描述。6.7节会详细讲述第二个参数。
+Object.create()是一个静态函数，而不是提供给某个对象调用的方法。使用它的方法很简单，只须传入所需的原型对象即可；
+```javascript
+var o1 = Object.create({x:1 ,y:2});      //o1继承了属性x和y
+```
+可以通过传入参数null来创建一个没有原型的新对象，但通过这种方式创建的对象不会继承任何东西，甚至不包括基础方法，比如toString(),也就是说，它将不能和“+”运算符一起正常工作:
+```javascript
+var o2 = Object.create(null);            //o2不继承任何属性和方法
+```
+如果想创建一个普通的空对象（比如通过{}或new Object()创建的对象），需要传入Object.prototype:
+```javascript
+var o3 = Object.create(Object.prototype);//o3和{}和new Object()一样
+```
+可以通过任意原型创建新对象（换句话说，可以使任意对象可继承），这是一个强大的特性。在ECMAScript3中可以用类似下例的代码来模拟原型继承：
+例子：通过原型继承创建一个新对象
+//inherit() 返回了一个继承自原型对象p的属性的新对象
+//这里使用ECMAScript5中的Object.create()函数（如果存在的话）
+//如果不存在Object.create()，则退化使用其他方法
+```javascript
+function inherit(p) {
+    if (p == null) throw TypeError();              //p是一个对象，但不能是null
+    if (Object.create)                             //如果Object.create()存在
+        return Object.create(p);                   //直接使用它
+    var t = typeof p;                              //否则进行进一步检测
+    if (t !== "object" && t !== "function") throw TypeError();
+    function f() {};                               //定义一个空构造函数
+    f.prototype = p;                               //将其原型属性设置为p
+    return new f();                                //使用f()创建p的继承对象
+}
+```
+在看完第9章关于构造函数的内容后，上面例子中的inherit()函数会更容易理解。现在只要知道它返回的新对象继承了参数对象的属性就可以了。注意，inherit()并不能完全代替Object.create()。它不能通过传入null原型来创建对象。而且不能接收可选的第二个参数。不过我们仍会在本章和弟9章的示例代码中多次用到inherit()。
+inherit()函数的其中一个用途就是防止库函数无意间（非恶意地）修改那些不受你控制的对象。不是将对象直接作为参数传入函数，而是将它的继承对象传入函数。当函数读取继承对象的属性时，实际上读取的是继承来的值。如果给继承对象的属性赋值，则这些属性只会影响这个继承对象自身，而不是原始对象。
+```javascript
+var o = { x: "don't change this value"};
+library_function(inherit(o));   //防止对o的意外修改
+```
+了解其工作原理，需要首先了解javascript中属性的查询和设置机制。接下来会讲到。
+
 
 <span id="inherit">**继承**</span>
-
+<span id="原型属性">**原型属性**</span>
 
 
 
