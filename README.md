@@ -1,7 +1,10 @@
-wiki.turingca.com
+welcome to wiki.turingca.com
 
-项目驱动来自MDWiki
+domain name binding:
+CNAME wiki.turingca.com 
+nslookup turingca.github.io
+wiki A ip
 
-参与贡献知识库，你需要准备Github和Markdown的一些知识
+Drived By TCA&MDWiki 
 
-图灵电脑协会官方维护
+TCA All Rights Reserved
