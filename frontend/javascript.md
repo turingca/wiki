@@ -261,8 +261,20 @@ library_function(inherit(o));   //防止对o的意外修改
 ```
 了解其工作原理，需要首先了解javascript中属性的查询和设置机制。接下来会讲到。
 
-
-
+***属性的查询和设置***
+4.4节已经提到，可以通过点（.）或方括号（[]）运算符来获取属性的值。运算符左侧应当是一个表达式，它返回一个对象。对于（.）来说，右侧必须是一个以属性名称命名的简单标识符。对于方括号来说（[]），方括号内必须是一个计算结果为字符串的表达式，这个字符串就是属性的名字：
+```javascript
+var author = book.author;      //得到book的“author”属性
+var name = author.surname;     //得到获得author的“surname”属性
+var title = book["main title"];//得到book的“main title”属性
+```
+和查询属性值的写法一样，通过点和方括号也可以创建属性或给属性赋值，但需要将它们放在赋值表达式的左侧：
+```javascript
+book.edition = 6;                  //给book创建一个名为"edition"的属性
+book["main title"] = "ECMAScript"; //给"main title"属性赋值
+```
+在ECMAScript3中，点运算符后的标识符不能是保留字，比如，o.for或o.class是非法的，因为for是javascript的关键字，class是保留字。如果一个对象的属性名是保留字，则必须使用方括号的形式访问它们，比如o["for"]和o["class"]。ECMAScript5对此放宽了限制（包括ECMAScript3的某些实现），可以在点运算符后直接使用保留字。
+当使用方括号时，我们说方括号内的表达式必须返回字符串。其实更严格地讲，表达式必须返回字符串或返回一个可以转换为字符串的值。在第7章里有一些例子中的方括号内使用了数字，这情况是非常常见的。
 
 
 数组
