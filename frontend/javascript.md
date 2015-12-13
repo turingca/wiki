@@ -485,8 +485,26 @@ function range(from, to) {
     return r;
 }
 //原型对象定义方法，这些方法为每个范围对象所继承
-```
+range.methods = {
+    //如果x在范围内，则返回true，否则返回false
+    //这个方法可以比较数字范围，也可以比较字符串和日期范围
+    includes: function(x) { return this.from <= x && x <= this.to; },
+    //对于范围内的每个整数都调用一次f
+    //这个方法只可用做数字范围
+    foreach: function(f) {
+        for(var x = Math.ceil(this.from); x <= this.to; x++) f(x);
+    },
+    //返回表示这个范围的字符串
+    toString: function() { return "(" + this.from + "..." + this.to + ")"; }
+};
 
+//这里是使用“范围对象”的一些例子
+var r = range(1,3);      //创建一个范围对象
+r.includes(2);           // => true: 2 在这个范围内
+r.foreach(console.log);  // 输出 1 2 3
+console.log(r);          // 输出 (1...3)
+```
+在例子9-1中有一些代码是没有用的。这段代码定义了一个工厂方法range(),用来创建新的范围对象。我们注意到，这里给range()函数定义了一个属性range.methods，用以快捷地存放定义类的原型对象。把原型对象挂在函数上没什么大不了，但也不是惯用做法。再者，注意range()函数给每个范围对象都定义了from和to属性，用以定义范围的起始位置和结束位置，这两个属性是非共享的，当然也是不可继承的。最后，注意在range.methods中定义的那些可共享，可继承的方法都用到了from和to属性，而且使用了this关键字，为了指代它们，二者使用this关键字来指代调用这个方法的对象。任何类的方法都可以通过this的这种基本用法来读取对象的属性。
 
 
 **9.2类和构造函数**
