@@ -595,7 +595,19 @@ console.log(r);           // 输出 (1...3)
 
 正则表达式的模式匹配
 --------------------
+正则表达式（regular expression）是一个描述字符模式的对象。javascript的RegExp类表示正则表达式，String和RegExp都定义了方法，后者使用正则表达式进行强大的模式匹配和文本检索与替换功能。javascript的正则表达式语法是Perl5的正则表达式语法的大型子集，所以对于有Perl编程经验的程序员来说，学习javascript中的正则表达式是小菜一碟。
+>有一些Perl正则表达式语法特性并不被ECMAScript支持。
+本章首先介绍用以描述“文本模式”的正则表达式语法。随后讲解了使用正则表达式的String和RegExp方法。
 **10.1正则表达式的定义**
+javascript中的正则表达式用RegExp对象表示，可以使用RegExp()构造函数来创建RegExp对象，不过RegExp对象更多的是通过一种特殊的直接量语法来创建。就像通过引号包裹字符的方式来定义字符串直接量一样，正则表达式直接量定义为包含在一对斜杠（/）之间的字符，例如：
+```javascript
+var pattern = /s$/;
+```
+运行这段代码创建一个新的RegExp对象，并将它赋值给变量pattern。这个特殊的RegExp对象用来匹配所有以字母“s”结尾的字符串。用构造函数RegExp()也可以定义与之等价的正则表达式，代码如下：
+```javascript
+var pattern = new RegExp("s$");
+```
+
 **10.2用于模式匹配的string方法**
 **10.3 regexp对象**
 
