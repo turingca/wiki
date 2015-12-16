@@ -726,7 +726,11 @@ Errors
 文本处理
 字符串
 字符串函数
+
 htmlspecialchars（转换特殊字符为HTML实体）
+
+strlen 获取字符串的长度，成功则返回字符串string的长度，如果string为空，则返回0
+int strlen ( string $string )
 
 
 核心
