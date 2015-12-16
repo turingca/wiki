@@ -1,5 +1,6 @@
 Git
 ----------
+本文修摘自《廖雪峰的git教程》
 Git是什么？Git是目前世界上最先进的分布式版本控制系统（没有之一）
 Git有什么特点？简单来说就是：高端大气上档次！
 
@@ -73,14 +74,12 @@ CVS作为最早的开源而且免费的集中式版本控制系统，直到现�
 如果你正在使用Mac做开发，有两种安装Git的方法。
 一是安装homebrew，然后通过homebrew安装Git，具体方法请参考homebrew的文档：[http://brew.sh](http://brew.sh/)
 第二种方法更简单，也是推荐的方法，就是直接从AppStore安装Xcode，Xcode集成了Git，不过默认没有安装，你需要运行Xcode，选择菜单“Xcode”->“Preferences”，在弹出窗口中找到“Downloads”，选择“Command Line Tools”，点“Install”就可以完成安装了。
-Xcode是Apple官方IDE，功能非常强大，是开发Mac和iOS App的必选装备，而且是免费的！
+Xcode是Apple官方IDE，功能非常强大，是开发Mac和iOS App的必选装备，而且是免费的。
 
 【在Windows上安装Git】
-实话实说，Windows是最烂的开发平台，如果不是开发Windows游戏或者在IE里调试页面，一般不推荐用Windows。
-不过，既然已经上了微软的贼船，也是有办法安装Git的。
 
 Windows下要使用很多Linux/Unix的工具时，需要Cygwin这样的模拟环境，Git也一样。Cygwin的安装和配置都比较复杂，就不建议你折腾了。不过，有高人已经把模拟环境和Git都打包好了，只需要下载一个单独的exe安装程序，其他什么也不用装，绝对好用。
-Git for windows是Windows版的Git，从[http://git-for-windows.github.io](http://git-for-windows.github.io}下载，然后按默认选项安装即可。
+Git for windows是Windows版的Git，从[http://git-for-windows.github.io](http://git-for-windows.github.io)下载，然后按默认选项安装即可。
 
 安装完成后，还需要最后一步设置，在命令行输入：
 
@@ -90,3 +89,50 @@ Git for windows是Windows版的Git，从[http://git-for-windows.github.io](http:
 因为Git是分布式版本控制系统，所以，每个机器都必须自报家门：你的名字和Email地址。你也许会担心，如果有人故意冒充别人怎么办？这个不必担心，首先我们相信大家都是善良无知的群众，其次，真的有冒充的也是有办法可查的。
 
 注意git config命令的--global参数，用了这个参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。
+
+创建版本库
+----------
+
+什么是版本库呢？版本库又名仓库（repository），你可以简单理解成一个目录，这个目录里面的所有文件都可以被Git管理起来，每个文件的修改、删除，Git都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。
+
+所以，创建一个版本库非常简单，首先，选择一个合适的地方，创建一个空目录：
+
+    $ mkdir learngit
+    $ cd learngit
+    $ pwd
+    /Users/michael/learngit
+    
+pwd命令用于显示当前目录。在我的Mac上，这个仓库位于/Users/michael/learngit。
+
+如果使用Windows系统，请确保目录名和文件名不包含中文。
+
+第二步，通过git init命令把这个目录变成Git可以管理的仓库：
+
+    $ git init
+    Initialized empty Git repository in /Users/michael/learngit/.git/
+
+瞬间Git就把仓库建好了，而且是一个空的仓库（empty Git  repository），可以发现当前目录下多了一个.git的目录，这个目录是Git来跟踪管理版本库的，没事千万不要手动修改这个目录里面的文件，不然改乱了，就把Git仓库给破坏了。
+
+如果你没有看到.git目录，那是因为这个目录默认是隐藏的，用ls -ah命令就可以看见。
+也不一定必须在空目录下创建Git仓库，选择一个已经有东西的目录也是可以的。不过，不建议你使用自己正在开发的公司项目来学习Git，否则造成的一切后果概不负责。
+
+【把文件添加到版本库】
+首先这里再明确一下，所有的版本控制系统，其实只能跟踪文本文件的改动，比如TXT文件，网页，所有的程序代码等等，Git也不例外。
+版本控制系统可以告诉你每次的改动，比如在第5行加了一个单词“Linux”，在第8行删了一个单词“Windows”。
+而图片、视频这些二进制文件，虽然也能由版本控制系统管理，但没法跟踪文件的变化，只能把二进制文件每次改动串起来，也就是只知道图片从100KB改成了120KB，但到底改了啥，版本控制系统不知道，也没法知道。
+
+Microsoft的Word格式是二进制格式，因此，版本控制系统是没法跟踪Word文件的改动的，如果要真正使用版本控制系统，就要以纯文本方式编写文件。
+
+因为文本是有编码的，比如中文有常用的GBK编码，日文有Shift_JIS编码，如果没有历史遗留问题，强烈建议使用标准的UTF-8编码，所有语言使用同一种编码，既没有冲突，又被所有平台所支持。
+
+使用Windows的童鞋要特别注意：
+
+千万不要使用Windows自带的记事本编辑任何文本文件。原因是Microsoft开发记事本的团队使用了一个非常弱智的行为来保存UTF-8编码的文件，他们自作聪明地在每个文件开头添加了0xefbbbf（十六进制）的字符，你会遇到很多不可思议的问题，比如，网页第一行可能会显示一个“?”，明明正确的程序一编译就报语法错误，等等，都是由记事本的弱智行为带来的。建议你下载Notepad++代替记事本，不但功能强大，而且免费！记得把Notepad++的默认编码设置为UTF-8 without BOM即可：
+> Unicode规范中的BOM,Unicode规范中有一个BOM的概念。BOM——Byte Order Mark，就是字节序标记。在这里找到一段关于BOM的说明：
+在UCS 编码中有一个叫做"ZERO WIDTH NO-BREAK SPACE"的字符，它的编码是FEFF。而FFFE在UCS中是不存在的字符，所以不应该出现在实际传输中。UCS规范建议我们在传输字节流前，先传输字符"ZERO WIDTH NO-BREAK SPACE"。这样如果接收者收到FEFF，就表明这个字节流是Big-Endian的；如果收到FFFE，就表明这个字节流是Little-Endian的。因此字符"ZERO WIDTH NO-BREAK SPACE"又被称作BOM。
+UTF-8不需要BOM来表明字节顺序，但可以用BOM来表明编码方式。字符"ZERO WIDTH NO-BREAK SPACE"的UTF-8编码是EF BB BF。所以如果接收者收到以EF BB BF开头的字节流，就知道这是UTF-8编码了。
+Windows就是使用BOM来标记文本文件的编码方式的。
+另外unicode网站的FAQ-BOM详细介绍了BOM。官方的自然权威，不过是英文的，看起来比较费劲。
+UTF-8编码的文件中，BOM占三个字节。如果用记事本把一个文本文件另存为UTF-8编码方式的话，用UE打开这个文件，切换到十六进制编辑状态就可以看到开头的FFFE了。这是个标识UTF-8编码文件的好办法，软件通过BOM来识别这个文件是否是UTF-8编码，很多软件还要求读入的文件必须带BOM。可是，还是有很多软件不能识别BOM。我在研究Firefox的时候就知道，在Firefox早期的版本里，扩展是不能有BOM的，不过Firefox 1.5以后的版本已经开始支持BOM了。如今又发现，PHP也不支持BOM。
+PHP在设计时就没有考虑BOM的问题，也就是说他不会忽略UTF-8编码的文件开头BOM的那三个字符。由于必须在<?或者<?php后面的代码才会作为PHP代码执行，所以这三个字符将会直接输出。如果插件的文件有这个问题，将会导致在后台页面里激活或者不激活插件后显示白屏，如果是模版文件有这个问题，将会导致这三个字符直接输出，造成页面上方有一个小空行。国外的英文插件和模版一般都是用的ASCⅡ码的编码方式，不会有BOM，只有国内的插件和模版于作者的不知情造成问题。还有，大家修改模版的时候，由于输出页面使用UTF-8编码，那么修改模版的时候如果有加入中文字符的话，必须把文件转成UTF-8编码才能正常显示，这个时候如果所使用的编辑器自动加上了BOM的话，将会造成在页面上输出这三个字符，显示效果就要看浏览器了，一般是一个空行或是一个乱码。
+
