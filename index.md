@@ -26,6 +26,7 @@ wiki
 还不知道怎么使用github？访问下面链接，开始你的fork之旅
 
     http://book.haoduoshipin.com/gitbeijing/
+    http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/
 
 先后顺序加入的贡献者
 
@@ -42,7 +43,7 @@ wiki
 F
 [冯志远](http://vvwall.com)
 [冯少华](http://www.sharefood.space)
-[房敬超](http://jingchaofang.com)
+[房敬超](http://weibo.com/jingchaofang)
 G
 [管宜尧](http://aicode.cc) 
 J
