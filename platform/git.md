@@ -929,7 +929,10 @@ Git还会自动提示我们当前master分支比远程的master分支要超前1�
     [master 400b400] & simple
     1 file changed, 1 insertion(+), 1 deletion(-)
 
-现在，master分支和feature1分支各自都分别有新的提交。
+现在，master分支和feature1分支各自都分别有新的提交，变成了这样：
+
+![](img/git/5.png)
+
 这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：
 
     $ git merge feature1
@@ -972,7 +975,9 @@ Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，我们修改�
     $ git commit -m "conflict fixed"
     [master 59bc1cb] conflict fixed
     
+现在，master分支和feature1分支变成了下图所示：
 
+![](img/git/6.png)
 
 用带参数的git log也可以看到分支的合并情况：
 
@@ -994,3 +999,5 @@ Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，我们修改�
 【小结】
 当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
 用git log --graph命令可以看到分支合并图。
+
+
