@@ -1000,4 +1000,530 @@ Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，我们修改�
 当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
 用git log --graph命令可以看到分支合并图。
 
+分支管理策略
+------------
 
+通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+
+下面我们实战一下--no-ff方式的git merge：
+首先，仍然创建并切换dev分支：
+
+    $ git checkout -b dev
+    Switched to a new branch 'dev'
+    
+修改readme.txt文件，并提交一个新的commit：
+
+    $ git add readme.txt 
+    $ git commit -m "add merge"
+    [dev 6224937] add merge
+    1 file changed, 1 insertion(+)
+    
+现在，我们切换回master：
+
+    $ git checkout master
+    Switched to branch 'master'
+
+准备合并dev分支，请注意--no-ff参数，表示禁用Fast forward：
+
+    $ git merge --no-ff -m "merge with no-ff" dev
+    Merge made by the 'recursive' strategy.
+    readme.txt |    1 +
+    1 file changed, 1 insertion(+)
+
+因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。
+
+合并后，我们用git log看看分支历史：
+
+    $ git log --graph --pretty=oneline --abbrev-commit
+    *   7825a50 merge with no-ff
+    |\
+    | * 6224937 add merge
+    |/
+    *   59bc1cb conflict fixed
+    ...
+
+
+【分支策略】
+
+在实际开发中，我们应该按照几个基本原则进行分支管理：
+首先，master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+那在哪干活呢？干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，再把dev分支合并到master上，在master分支发布1.0版本；
+你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
+
+【小结】
+Git分支十分强大，在团队开发中应该充分应用。
+合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。
+
+Bug分支
+-------
+
+软件开发中，bug就像家常便饭一样。有了bug就需要修复，在Git中，由于分支是如此的强大，所以，每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除。
+
+当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，但是，等等，当前正在dev上进行的工作还没有提交：
+
+    $ git status
+    # On branch dev
+    # Changes to be committed:
+    #   (use "git reset HEAD <file>..." to unstage)
+    #
+    #       new file:   hello.py
+    #
+    # Changes not staged for commit:
+    #   (use "git add <file>..." to update what will be committed)
+    #   (use "git checkout -- <file>..." to discard changes in working directory)
+    #
+    #       modified:   readme.txt
+    #
+
+并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？
+幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：
+
+    $ git stash
+    Saved working directory and index state WIP on dev: 6224937 add merge
+    HEAD is now at 6224937 add merge
+
+现在，用git status查看工作区，就是干净的（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。
+首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：
+
+    $ git checkout master
+    Switched to branch 'master'
+    Your branch is ahead of 'origin/master' by 6 commits.
+    $ git checkout -b issue-101
+    Switched to a new branch 'issue-101'
+
+现在修复bug，需要把“Git is free software ...”改为“Git is a free software ...”，然后提交：
+
+    $ git add readme.txt 
+    $ git commit -m "fix bug 101"
+    [issue-101 cc17032] fix bug 101
+    1 file changed, 1 insertion(+), 1 deletion(-)
+
+修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：
+
+    $ git checkout master
+    Switched to branch 'master'
+    Your branch is ahead of 'origin/master' by 2 commits.
+    $ git merge --no-ff -m "merged bug fix 101" issue-101
+    Merge made by the 'recursive' strategy.
+    readme.txt |    2 +-
+    1 file changed, 1 insertion(+), 1 deletion(-)
+    $ git branch -d issue-101
+    Deleted branch issue-101 (was cc17032).
+
+太棒了，原计划两个小时的bug修复只花了5分钟！现在，是时候接着回到dev分支干活了！
+
+    $ git checkout dev
+    Switched to branch 'dev'
+    $ git status
+    # On branch dev
+    nothing to commit (working directory clean)
+
+工作区是干净的，刚才的工作现场存到哪去了？用git stash list命令看看：
+
+    $ git stash list
+    stash@{0}: WIP on dev: 6224937 add merge
+
+工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+另一种方式是用git stash pop，恢复的同时把stash内容也删了：
+
+    $ git stash pop
+    # On branch dev
+    # Changes to be committed:
+    #   (use "git reset HEAD <file>..." to unstage)
+    #
+    #       new file:   hello.py
+    #
+    # Changes not staged for commit:
+    #   (use "git add <file>..." to update what will be committed)
+    #   (use "git checkout -- <file>..." to discard changes in working directory)
+    #
+    #       modified:   readme.txt
+    #
+    Dropped refs/stash@{0} (f624f8e5f082f2df2bed8a4e09c12fd2943bdd40)
+
+再用git stash list查看，就看不到任何stash内容了：
+
+    $ git stash list
+
+你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：
+
+    $ git stash apply stash@{0}
+
+【小结】
+修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；
+当手头工作没有完成时，先把工作现场git stash一下，然后去修复bug，修复后，再git stash pop，回到工作现场。
+
+Feature分支
+----------
+
+软件开发中，总有无穷无尽的新的功能要不断添加进来。
+添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。
+
+现在，你终于接到了一个新任务：开发代号为Vulcan的新功能，该功能计划用于下一代星际飞船。
+于是准备开发：
+
+    $ git checkout -b feature-vulcan
+    Switched to a new branch 'feature-vulcan'
+5分钟后，开发完毕：
+
+    $ git add vulcan.py
+    $ git status
+    # On branch feature-vulcan
+    # Changes to be committed:
+    #   (use "git reset HEAD <file>..." to unstage)
+    #
+    #       new file:   vulcan.py
+    #
+    $ git commit -m "add feature vulcan"
+    [feature-vulcan 756d4af] add feature vulcan
+    1 file changed, 2 insertions(+)
+    create mode 100644 vulcan.py
+
+切回dev，准备合并：
+
+    $ git checkout dev
+
+一切顺利的话，feature分支和bug分支是类似的，合并，然后删除。
+但是，
+就在此时，接到上级命令，因经费不足，新功能必须取消！
+虽然白干了，但是这个分支还是必须就地销毁：
+
+    $ git branch -d feature-vulcan
+    error: The branch 'feature-vulcan' is not fully merged.
+    If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
+
+销毁失败。Git友情提醒，feature-vulcan分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用命令git branch -D feature-vulcan。
+现在我们强行删除：
+
+    $ git branch -D feature-vulcan
+    Deleted branch feature-vulcan (was 756d4af).
+
+终于删除成功！
+
+【小结】
+开发一个新feature，最好新建一个分支；
+如果要丢弃一个没有被合并过的分支，可以通过git branch -D <name>强行删除。
+
+多人协作
+--------
+
+当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+要查看远程库的信息，用git remote：
+
+    $ git remote
+    origin
+
+或者，用git remote -v显示更详细的信息：
+
+    $ git remote -v
+    origin  git@github.com:michaelliao/learngit.git (fetch)
+    origin  git@github.com:michaelliao/learngit.git (push)
+
+上面显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。
+
+【推送分支】
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+
+    $ git push origin master
+
+如果要推送其他分支，比如dev，就改成：
+
+    $ git push origin dev
+
+但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+master分支是主分支，因此要时刻与远程同步；
+dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+总之，就是在Git中，分支完全可以在本地自己藏着玩，是否推送，视你的心情而定！
+
+【抓取分支】
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+现在，模拟一个你的小伙伴，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：
+
+    $ git clone git@github.com:michaelliao/learngit.git
+    Cloning into 'learngit'...
+    remote: Counting objects: 46, done.
+    remote: Compressing objects: 100% (26/26), done.
+    remote: Total 46 (delta 16), reused 45 (delta 15)
+    Receiving objects: 100% (46/46), 15.69 KiB | 6 KiB/s, done.
+    Resolving deltas: 100% (16/16), done.
+
+当你的小伙伴从远程库clone时，默认情况下，你的小伙伴只能看到本地的master分支。不信可以用git branch命令看看：
+
+    $ git branch
+    * master
+
+现在，你的小伙伴要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：
+
+    $ git checkout -b dev origin/dev
+
+现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：
+
+    $ git commit -m "add /usr/bin/env"
+    [dev 291bea8] add /usr/bin/env
+    1 file changed, 1 insertion(+)
+    $ git push origin dev
+    Counting objects: 5, done.
+    Delta compression using up to 4 threads.
+    Compressing objects: 100% (2/2), done.
+    Writing objects: 100% (3/3), 349 bytes, done.
+    Total 3 (delta 0), reused 0 (delta 0)
+    To git@github.com:michaelliao/learngit.git
+    fc38031..291bea8  dev -> dev
+    
+你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：
+
+    $ git add hello.py 
+    $ git commit -m "add coding: utf-8"
+    [dev bd6ae48] add coding: utf-8
+    1 file changed, 1 insertion(+)
+    $ git push origin dev
+    To git@github.com:michaelliao/learngit.git
+    ! [rejected]        dev -> dev (non-fast-forward)
+    error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+    hint: Updates were rejected because the tip of your current branch is behind
+    hint: its remote counterpart. Merge the remote changes (e.g. 'git pull')
+    hint: before pushing again.
+    hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+推送失败，因为你的小伙伴的最新提交和你试图推送的提交有冲突，解决办法也很简单，Git已经提示我们，先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：
+
+    $ git pull
+    remote: Counting objects: 5, done.
+    remote: Compressing objects: 100% (2/2), done.
+    remote: Total 3 (delta 0), reused 3 (delta 0)
+    Unpacking objects: 100% (3/3), done.
+    From github.com:michaelliao/learngit
+    fc38031..291bea8  dev        -> origin/dev
+    There is no tracking information for the current branch.
+    Please specify which branch you want to merge with.
+    See git-pull(1) for details
+    git pull <remote> <branch>
+    If you wish to set tracking information for this branch you can do so with:
+    git branch --set-upstream dev origin/<branch>
+
+git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：
+
+    $ git branch --set-upstream dev origin/dev
+    Branch dev set up to track remote branch dev from origin.
+
+再pull：
+
+    $ git pull
+    Auto-merging hello.py
+    CONFLICT (content): Merge conflict in hello.py
+    Automatic merge failed; fix conflicts and then commit the result.
+
+这回git pull成功，但是合并有冲突，需要手动解决，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：
+
+    $ git commit -m "merge & fix hello.py"
+    [dev adca45d] merge & fix hello.py
+    $ git push origin dev
+    Counting objects: 10, done.
+    Delta compression using up to 4 threads.
+    Compressing objects: 100% (5/5), done.
+    Writing objects: 100% (6/6), 747 bytes, done.
+    Total 6 (delta 0), reused 0 (delta 0)
+    To git@github.com:michaelliao/learngit.git
+    291bea8..adca45d  dev -> dev
+    
+因此，多人协作的工作模式通常是这样：
+首先，可以试图用git push origin branch-name推送自己的修改；
+如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+如果合并有冲突，则解决冲突，并在本地提交；
+没有冲突或者解决掉冲突后，再用git push origin branch-name推送就能成功！
+如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream branch-name origin/branch-name。
+这就是多人协作的工作模式，一旦熟悉了，就非常简单。
+
+【小结】
+查看远程库信息，使用git remote -v；
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+标签管理
+-------
+
+发布一个版本时，我们通常先在版本库中打一个标签，这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。
+Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针（跟分支很像对不对？但是分支可以移动，标签不能移动），所以，创建和删除标签都是瞬间完成的。
+
+创建标签
+--------
+
+在Git中打标签非常简单，首先，切换到需要打标签的分支上：
+
+    $ git branch
+    * dev
+    master
+    $ git checkout master
+    Switched to branch 'master'
+
+然后，敲命令git tag <name>就可以打一个新标签：
+
+    $ git tag v1.0
+
+可以用命令git tag查看所有标签：
+
+    $ git tag
+    v1.0
+
+默认标签是打在最新提交的commit上的。有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？
+
+方法是找到历史提交的commit id，然后打上就可以了：
+
+    $ git log --pretty=oneline --abbrev-commit
+    6a5819e merged bug fix 101
+    cc17032 fix bug 101
+    7825a50 merge with no-ff
+    6224937 add merge
+    59bc1cb conflict fixed
+    400b400 & simple
+    75a857c AND simple
+    fec145a branch test
+    d17efd8 remove test.txt
+    ...
+
+比方说要对add merge这次提交打标签，它对应的commit id是6224937，敲入命令：
+
+    $ git tag v0.9 6224937
+
+再用命令git tag查看标签：
+
+    $ git tag
+    v0.9
+    v1.0
+
+注意，标签不是按时间顺序列出，而是按字母排序的。可以用git show <tagname>查看标签信息：
+
+    $ git show v0.9
+    commit 622493706ab447b6bb37e4e2a2f276a20fed2ab4
+    Author: Michael Liao <askxuefeng@gmail.com>
+    Date:   Thu Aug 22 11:22:08 2013 +0800
+    add merge
+    ...
+
+可以看到，v0.9确实打在add merge这次提交上。
+还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：
+
+    $ git tag -a v0.1 -m "version 0.1 released" 3628164
+
+用命令git show <tagname>可以看到说明文字：
+
+    $ git show v0.1
+    tag v0.1
+    Tagger: Michael Liao <askxuefeng@gmail.com>
+    Date:   Mon Aug 26 07:28:11 2013 +0800
+    version 0.1 released
+    commit 3628164fb26d48395383f8f31179f24e0882e1e0
+    Author: Michael Liao <askxuefeng@gmail.com>
+    Date:   Tue Aug 20 15:11:49 2013 +0800
+    append GPL
+
+还可以通过-s用私钥签名一个标签：
+
+    $ git tag -s v0.2 -m "signed version 0.2 released" fec145a
+
+签名采用PGP签名，因此，必须首先安装gpg（GnuPG），如果没有找到gpg，或者没有gpg密钥对，就会报错：
+
+    gpg: signing failed: secret key not available
+    error: gpg failed to sign the data
+    error: unable to sign the tag
+
+如果报错，请参考GnuPG帮助文档配置Key。
+用命令git show <tagname>可以看到PGP签名信息：
+
+    $ git show v0.2
+    tag v0.2
+    Tagger: Michael Liao <askxuefeng@gmail.com>
+    Date:   Mon Aug 26 07:28:33 2013 +0800
+    signed version 0.2 released
+    -----BEGIN PGP SIGNATURE-----
+    Version: GnuPG v1.4.12 (Darwin)
+    iQEcBAABAgAGBQJSGpMhAAoJEPUxHyDAhBpT4QQIAKeHfR3bo...
+    -----END PGP SIGNATURE-----
+    commit fec145accd63cdc9ed95a2f557ea0658a2a6537f
+    Author: Michael Liao <askxuefeng@gmail.com>
+    Date:   Thu Aug 22 10:37:30 2013 +0800
+    branch test
+
+用PGP签名的标签是不可伪造的，因为可以验证PGP签名。验证签名的方法比较复杂，这里就不介绍了。
+
+【小结】
+命令git tag <name>用于新建一个标签，默认为HEAD，也可以指定一个commit id；
+git tag -a <tagname> -m "blablabla..."可以指定标签信息；
+git tag -s <tagname> -m "blablabla..."可以用PGP签名标签；
+命令git tag可以查看所有标签。
+
+操作标签
+--------
+如果标签打错了，也可以删除：
+
+    $ git tag -d v0.1
+    Deleted tag 'v0.1' (was e078af9)
+
+因为创建的标签都只存储在本地，不会自动推送到远程。所以，打错的标签可以在本地安全删除。
+如果要推送某个标签到远程，使用命令git push origin <tagname>：
+
+    $ git push origin v1.0
+    Total 0 (delta 0), reused 0 (delta 0)
+    To git@github.com:michaelliao/learngit.git
+    * [new tag]         v1.0 -> v1.0
+
+或者，一次性推送全部尚未推送到远程的本地标签：
+
+    $ git push origin --tags
+    Counting objects: 1, done.
+    Writing objects: 100% (1/1), 554 bytes, done.
+    Total 1 (delta 0), reused 0 (delta 0)
+    To git@github.com:michaelliao/learngit.git
+    * [new tag]         v0.2 -> v0.2
+    * [new tag]         v0.9 -> v0.9
+
+如果标签已经推送到远程，要删除远程标签就麻烦一点，先从本地删除：
+
+    $ git tag -d v0.9
+    Deleted tag 'v0.9' (was 6224937)
+
+然后，从远程删除。删除命令也是push，但是格式如下：
+
+    $ git push origin :refs/tags/v0.9
+    To git@github.com:michaelliao/learngit.git
+    - [deleted]         v0.9
+
+要看看是否真的从远程库删除了标签，可以登陆GitHub查看。
+
+【小结】
+命令git push origin <tagname>可以推送一个本地标签；
+命令git push origin --tags可以推送全部未推送过的本地标签；
+命令git tag -d <tagname>可以删除一个本地标签；
+命令git push origin :refs/tags/<tagname>可以删除一个远程标签。
+
+使用GitHub
+----------
+
+我们一直用GitHub作为免费的远程仓库，如果是个人的开源项目，放到GitHub上是完全没有问题的。其实GitHub还是一个开源协作社区，通过GitHub，既可以让别人参与你的开源项目，也可以参与别人的开源项目。
+在GitHub出现以前，开源项目开源容易，但让广大人民群众参与进来比较困难，因为要参与，就要提交代码，而给每个想提交代码的群众都开一个账号那是不现实的，因此，群众也仅限于报个bug，即使能改掉bug，也只能把diff文件用邮件发过去，很不方便。
+但是在GitHub上，利用Git极其强大的克隆和分支功能，广大人民群众真正可以第一次自由参与各种开源项目了。
+
+如何参与一个开源项目呢？比如人气极高的bootstrap项目，这是一个非常强大的CSS框架，你可以访问它的项目主页https://github.com/twbs/bootstrap，点“Fork”就在自己的账号下克隆了一个bootstrap仓库，然后，从自己的账号下clone：
+
+    git clone git@github.com:michaelliao/bootstrap.git
+
+一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。
+Bootstrap的官方仓库twbs/bootstrap、你在GitHub上克隆的仓库my/bootstrap，以及你自己克隆到本地电脑的仓库，他们的关系就像下图显示的那样：
+
+![](img/git/0.png)
+
+如果你想修复bootstrap的一个bug，或者新增一个功能，立刻就可以开始干活，干完后，往自己的仓库推送。
+如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request。当然，对方是否接受你的pull request就不一定了。
+如果你没能力修改bootstrap，但又想要试一把pull request，那就Fork一下我的仓库：https://github.com/michaelliao/learngit，创建一个your-github-id.txt的文本文件，写点自己学习Git的心得，然后推送一个pull request给我，我会视心情而定是否接受。
+
+【小结】
+在GitHub上，可以任意Fork开源仓库；
+自己拥有Fork后的仓库的读写权限；
+可以推送pull request给官方仓库来贡献代码。
