@@ -3,29 +3,24 @@
 [首页](index.md)
 
 [前端]()
-
+  * [mark](frontend/mark.md)
   * [css](frontend/css.md)
   * [javascript](frontend/javascript.md)
-  * [google](frontend/google.md)
-  * [meteor](frontend/meteor.md)
   * [security](frontend/websecurity.md)
-  * [标记语言](frontend/mark.md)
-  * [体系](frontend/engineering.md)
+  * [engineering](frontend/engineering.md)
+  * [other](frontend/other.md)
 
-[服务器端]()
-
-  * [linux](server/linux.md)
+[服务端]()
   * [php](server/php.md)
   * [python]()
   * [ruby]()
-  * [jsp]()
-  * [nodejs](frontend/nodejs.md)
+  * [java]()
 
 [平台]()
 
-  * [微信](platform/wechat.md)
-  * [微博]()
-  * [安卓]()
-  * [苹果]()
+  * [linux](platform/linux.md)
+  * [mac]()
+  * [windows]()
+ 
 
 
