@@ -820,10 +820,11 @@ before_needle 若为 TRUE，strstr() 将返回 needle 在 haystack 中的位置�
 返回字符串的一部分或者 FALSE（如果未发现 needle）。
 
 【更新日志】
-|版本|	说明|
-|---|:-------|
-|5.3.0|	新增可选的 before_needle 参数|
-|4.3.0|strstr() 成为二进制安全的|
+
+|版本|说明|
+|-----|:-------|
+|5.3.0|新增可选的before_needle参数|
+|4.3.0|strstr()成为二进制安全的|
 
 【范例】
 
