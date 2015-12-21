@@ -28,7 +28,7 @@ wiki
     http://book.haoduoshipin.com/gitbeijing/
     http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/
    
-或者访问本站整理的[git](platform/git.md) 
+或者访问本站整理的[git教程](platform/git.md) 
 
 先后顺序加入的贡献者
 
