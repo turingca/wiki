@@ -793,6 +793,53 @@ Errors
 
 函数参考
 -------
+数学拓展
+***rand***
+产生一个随机整数
+int rand ( void )
+int rand ( int $min , int $max )
+如果没有提供可选参数min和max，rand() 返回0到getrandmax()之间的伪随机整数。例如想要5到15（包括5和15）之间的随机数，用rand(5, 15)。
+
+Note:在某些平台下（例如 Windows）getrandmax()只有32767。如果需要的范围大于32767，那么指定min和max参数就可以生成更大的数了，或者考虑用 mt_rand()来替代之。
+
+【参数】
+min 返回的最低值（默认：0）
+max 返回的最高值（默认：getrandmax()）
+
+【返回值】
+A pseudo random value between min (or 0) and max (or getrandmax(), inclusive).
+
+【更新日志】
+
+|版本|说明|
+|----|----|
+|4.2.0|随机数发生器自动进行播种|
+
+【范例】 
+
+Example #1 rand()例子
+
+```php
+<?php
+echo rand() . "\n";
+echo rand() . "\n";
+echo rand(5, 15);
+?>
+```
+
+以上例程的输出类似于：
+
+```php
+7771
+22264
+11
+```
+【参见】
+srand() 播下随机数发生器种子
+getrandmax() 显示随机数最大的可能值
+mt_rand() 生成更好的随机数
+
+
 其他基本扩展
 杂项函数
 
@@ -830,6 +877,7 @@ exit(0376); //octal
 ?>
 ```
 Example #3 无论如何，Shutdown函数与析构函数都会被执行
+
 ```php
 <?php
 class Foo
@@ -880,8 +928,10 @@ int strlen ( string $string )
 查找字符串的首次出现  
 string strstr ( string $haystack , mixed $needle [, bool $before_needle = false ] )
 返回 haystack 字符串从 needle 第一次出现的位置开始到 haystack 结尾的字符串。
+
 Note:该函数区分大小写。如果想要不区分大小写，请使用 stristr()。
 Note:如果你仅仅想确定 needle 是否存在于 haystack 中，请使用速度更快、耗费内存更少的 strpos() 函数。
+
 【参数】
 haystack 输入字符串。
 needle 如果 needle 不是一个字符串，那么它将被转化为整型并且作为字符的序号来使用。
