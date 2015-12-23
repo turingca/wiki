@@ -793,6 +793,144 @@ Errors
 
 函数参考
 -------
+
+***unset***
+释放给定的变量
+void unset ( mixed $var [, mixed $... ] )
+unset() 销毁指定的变量。
+unset() 在函数中的行为会依赖于想要销毁的变量的类型而有所不同。
+如果在函数中unset()一个全局变量，则只是局部变量被销毁，而在调用环境中的变量将保持调用unset()之前一样的值。
+
+```php
+<?php
+function destroy_foo() {
+    global $foo;
+    unset($foo);
+}
+$foo = 'bar';
+destroy_foo();
+echo $foo;
+?>
+```
+
+以上例程会输出：
+```php
+bar
+```
+
+如果您想在函数中unset()一个全局变量，可使用$GLOBALS数组来实现：
+
+```php
+<?php
+function foo() 
+{
+    unset($GLOBALS['bar']);
+}
+$bar = "something";
+foo();
+?>
+```
+
+如果在函数中unset()一个通过引用传递的变量，则只是局部变量被销毁，而在调用环境中的变量将保持调用unset()之前一样的值。
+
+```php
+<?php
+function foo(&$bar) {
+    unset($bar);
+    $bar = "blah";
+}
+$bar = 'something';
+echo "$bar\n";
+foo($bar);
+echo "$bar\n";
+?>
+```
+
+以上例程会输出：
+```php
+something
+something
+```
+
+如果在函数中unset()一个静态变量，那么在函数内部此静态变量将被销毁。但是，当再次调用此函数时，此静态变量将被复原为上次被销毁之前的值。
+
+```php
+<?php
+function foo()
+{
+    static $bar;
+    $bar++;
+    echo "Before unset: $bar, ";
+    unset($bar);
+    $bar = 23;
+    echo "after unset: $bar\n";
+}
+foo();
+foo();
+foo();
+?>
+```
+以上例程会输出：
+
+```php
+Before unset: 1, after unset: 23
+Before unset: 2, after unset: 23
+Before unset: 3, after unset: 23
+```
+【参数】
+var 要销毁的变量。
+... 其他变量……
+
+【返回值】没有返回值。
+
+【更新日志】
+
+|版本|说明|
+|----|----|
+|4.0.1|添加了多个参数的支持|
+
+【范例】
+
+Example #1 unset()示例
+
+```php
+<?php
+// 销毁单个变量
+unset ($foo);
+// 销毁单个数组元素
+unset ($bar['quux']);
+// 销毁一个以上的变量
+unset($foo1, $foo2, $foo3);
+?>
+```
+Example #2 使用 (unset) 类型强制转换
+(unset)类型强制转换常常和函数unset()引起困惑。 为了完整性，(unset)是作为一个NULL类型的强制转换。它不会改变变量的类型。
+```php
+<?php
+$name = 'Felipe';
+var_dump((unset) $name);
+var_dump($name);
+?>
+```
+以上例程会输出：
+```php
+NULL
+string(6) "Felipe"
+```
+【注释】
+
+Note:因为是一个语言构造器而不是一个函数，不能被可变函数调用。
+Note:It is possible to unset even object properties visible in current context.
+Note:在 PHP 5 之前无法在对象里销毁 $this。
+Note:在 unset() 一个无法访问的对象属性时，如果定义了 __unset() 则对调用这个重载方法。
+
+【参见】 
+isset() 检测变量是否设置
+empty() 检查一个变量是否为空
+__unset()
+array_splice() 把数组中的一部分去掉并用其它值取代
+
+
 数学拓展
 ***rand***
 产生一个随机整数
