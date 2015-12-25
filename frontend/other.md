@@ -33,6 +33,7 @@ chrome://flags/
 
 微信
 ------
+[微信JS-SDK说明文档](other/wechat.md)
 
 微博
 ------
