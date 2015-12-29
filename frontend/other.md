@@ -7,10 +7,12 @@
 ![](img/top-bar.png)
 
 【快捷键】
+MAC: ctrl == Command
 
 |快捷键    |功能|
 |----------|:-----------|
 |Ctrl + N  |打开新的窗口|
+|Ctrl + W  or  Ctrl + F4 |关闭当前标签页｜
 |Ctrl + T  |打开新的标签页|
 |Ctrl + Shift + N|打开新的隐身窗口|
 |Ctrl + O |浏览器中打开计算机中的文件|
