@@ -7,7 +7,7 @@
 ![](img/top-bar.png)
 
 【快捷键】
-MAC:  Command == Ctrl 切换标签页的时 Control == Ctrl
+MAC:  Command == Ctrl 切换上下标签页的时 Control == Ctrl
 
 |快捷键    |功能|
 |----------|:-----------|
