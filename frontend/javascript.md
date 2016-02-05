@@ -1,6 +1,6 @@
 概述
 -------
-本文修摘自《javascript权威指南》
+本文修摘自《javascript权威指南》第6版
 javascript是一门弱类型、非传统面向对象的编程语言。
 javascript和java是完全不同的两种编程语言，之于雷锋与雷峰塔。
 ECMAScript是javascript的语言标准版本，现在最新版本为ES6。
