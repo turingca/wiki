@@ -9,20 +9,8 @@
   * [javascript](frontend/javascript.md)
   * [security](frontend/websecurity.md)
   * [engineering](frontend/engineering.md)
+  * [server]()
   * [other](frontend/other.md)
-
-[服务端]()
-
-  * [php](server/php.md)
-  * [python]()
-  * [ruby]()
-  * [java]()
-
-[平台]()
-
-  * [linux](platform/linux.md)
-  * [mac]()
-  * [windows]()
  
 
 
