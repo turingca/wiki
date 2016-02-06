@@ -5,8 +5,9 @@ javascript是一门弱类型、非传统面向对象的编程语言。
 javascript和java是完全不同的两种编程语言，之于雷锋与雷峰塔。
 ECMAScript是javascript的语言标准版本，现在最新版本为ES6。
 
-以下先对javascript语言做一个快速概览
+以下先对javascript做一个快速概览
 ```javascript
+javascript语言核心快速概览
 //这是注释
 var x; //声明变量
 x=0    //通过等号赋值给变量
@@ -146,8 +147,22 @@ Point.prototype.r = function() {
 p.r()                                 //=> 1.414...
 ```
 
-
-todo
+```html
+客户端javascript快速概览
+//javascript代码可以通过<script>标签来嵌入到HTML文件中：
+<html>
+<head>
+<script src="library.js"></script> <!-- 引入一个javascript库 -->
+</head>
+<body>
+<p>this is a paragraph of HTML</p>
+<script>
+//在这里编写嵌入到HTML文件中的javascript代码
+</script>
+<p>here is more HTML.</p>
+</body>
+</html>
+```
 
 
 
