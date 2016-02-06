@@ -162,6 +162,10 @@ p.r()                                 //=> 1.414...
 <p>here is more HTML.</p>
 </body>
 </html>
+
+web浏览器端的脚本技术，涵盖客户端javascript中的一些重要全局函数
+<script>
+</script>
 ```
 
 
