@@ -7,9 +7,9 @@
   * [mark](frontend/mark.md)
   * [css](frontend/css.md)
   * [javascript](frontend/javascript.md)
-  * [security](frontend/websecurity.md)
+  * [web-security](frontend/websecurity.md)
   * [engineering](frontend/engineering.md)
-  * [server]()
+  * [server](server/)
   * [other](frontend/other.md)
  
 
