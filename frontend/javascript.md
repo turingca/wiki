@@ -147,22 +147,22 @@ Point.prototype.r = function() {
 p.r()                                 //=> 1.414...
 ```
 
-```javascript
+```
 客户端javascript快速概览
-//javascript代码可以通过<script>标签来嵌入到HTML文件中：
-/*<html>
+javascript代码可以通过<script>标签来嵌入到HTML文件中：
+<html>
 <head>
-//引入一个javascript库
+引入一个javascript库
 <script src="library.js"></script>
 </head>
 <body>
 <p>this is a paragraph of HTML</p>
 <script>
-//在这里编写嵌入到HTML文件中的javascript代码
+在这里编写嵌入到HTML文件中的javascript代码
 </script>
 <p>here is more HTML.</p>
 </body>
-</html>*/
+</html>
 ```
 
 ```javascript
