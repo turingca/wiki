@@ -1,4 +1,4 @@
-浏览器
+工具
 -------
 【调试工具】
 掌握Chrome浏览器的开发调试工具，也很容易上手其他客户端调试工具，例如火狐的firebug。
@@ -6,7 +6,7 @@
 
 ![](img/top-bar.png)
 
-【快捷键】
+【chrome快捷键】
 MAC:  Command == Ctrl 切换上下标签页的时 Control == Ctrl
 
 |快捷键    |功能|
