@@ -147,7 +147,7 @@ Point.prototype.r = function() {
 p.r()                                 //=> 1.414...
 ```
 
-```html
+```javascript
 客户端javascript快速概览
 javascript代码可以通过<script>标签来嵌入到HTML文件中：
 <html>
