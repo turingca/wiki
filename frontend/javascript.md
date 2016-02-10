@@ -162,12 +162,13 @@ javascript代码可以通过<script>标签来嵌入到HTML文件中：
 <p>here is more HTML.</p>
 </body>
 </html>
+```
 
+```javascript
 web浏览器端的脚本技术，涵盖客户端javascript中的一些重要全局函数
 <script>
 </script>
 ```
-
 
 
 词法结构
