@@ -150,7 +150,7 @@ p.r()                                 //=> 1.414...
 ```javascript
 客户端javascript快速概览
 //javascript代码可以通过<script>标签来嵌入到HTML文件中：
-<html>
+/*<html>
 <head>
 //引入一个javascript库
 <script src="library.js"></script>
@@ -162,7 +162,7 @@ p.r()                                 //=> 1.414...
 </script>
 <p>here is more HTML.</p>
 </body>
-</html>
+</html>*/
 ```
 
 ```javascript
