@@ -1,3 +1,7 @@
+百度地图JavaScript API v2.0
+
+    http://lbsyun.baidu.com/index.php?title=jspopular
+
 概述
 ----
 JavaScript API v2.0
