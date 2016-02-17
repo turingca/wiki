@@ -1,6 +1,6 @@
 百度地图JavaScript API v2.0
 
-    http://lbsyun.baidu.com/index.php?title=jspopular
+    [http://lbsyun.baidu.com/index.php?title=jspopular](http://lbsyun.baidu.com/index.php?title=jspopular)
 
 概述
 ----
@@ -9,3 +9,22 @@ JavaScript API v2.0
 该套API免费对外开放。自v1.5版本起，您需先[申请密钥（ak）](http://lbsyun.baidu.com/apiconsole/key?application=key)才可使用，接口（除发送短信功能外）无使用次数限制。
 在您使用百度地图JavaScript API之前，请先阅读百度地图API[使用条款](http://lbsyun.baidu.com/index.php?title=open/law#qa001)。任何非营利性应用请直接使用，商业应用请参考[使用须知](http://lbsyun.baidu.com/index.php?title=open/question)。
 JavaScript API首家支持Https，如需要申请Https服务，请您[认证企业信息](http://lbsyun.baidu.com/apiconsole/auth)，成为企业认证用户后，https将自动开通，同时获得更高的服务配额。
+
+简介
+----
+百度地图JavaScript API是一套由JavaScript语言编写的应用程序接口，它能够帮助您在网站中构建功能丰富、交互性强的地图应用，包含了构建地图基本功能的各种接口，提供了诸如本地搜索、路线规划等数据服务。
+
+*基本地图功能：展示（支持2D图、3D图、卫星图）、平移、缩放、拖拽等。
+*地图控件展示功能：可以在地图上添加/删除鹰眼、工具条、比例尺、自定义版权、地图类型及定位控件，并可以设置各类控件的显示位置。
+*覆盖物功能：支持在地图上添加/删除点、线、面、热区、行政区划、用户自定义覆盖物等；开源库提供富标注、标注管理器、聚合marker、自定义覆盖物等功能。
+*工具类功能：提供经纬度坐标与屏幕坐标互转功能；开源库里提供测距、几何运算及GPS坐标/国测局坐标转百度坐标等功能。
+*定位功能：支持IP定位及浏览器（支持html5特性浏览器）定位功能。
+*右键菜单功能：支持在地图上添加右键菜单。
+*鼠标交互功能：支持动态修改鼠标样式、鼠标拖拽/缩放地图及鼠标绘制等功能。
+*图层功能：支持重设地图底图、地图上叠加实时交通图层或自定义图层功能。
+*本地搜索功能：包括根据城市、矩形范围、圆形范围等条件进行POI搜索；且支持用户自有数据的检索。
+*公交检索：支持起始点坐标、起始点名称、LocalSearchPoi实例三种检索条件的检索；检索结果支持便捷、可换乘、少步行、不乘地铁四种方案。
+*驾车检索：支持起始点坐标、起始点名称、LocalSearchPoi实例三种检索条件的检索；返回最短时间、最短距离、避开高速的驾车导航结果；且提供计算打车费用服务。
+*步行导航：提供步行导航方案。
+*逆/地理编码：支持百度坐标与地址描述信息之间的转换服务。
+*个性化数据展示功能：用户自有数据存储到LBS.云后，JavaScript API可以提供以麻点图形式展示自有数据功能。
