@@ -1,4 +1,4 @@
-百度地图JavaScript API v2.0
+百度地图JavaScript API v2.0(有删减，访问该完整百度文档见下链接)
 
     http://lbsyun.baidu.com/index.php?title=jspopular
 
@@ -41,3 +41,13 @@ JavaScript API首家支持Https，如需要申请Https服务，请您[认证企�
 * 逆/地理编码：支持百度坐标与地址描述信息之间的转换服务。
 
 * 个性化数据展示功能：用户自有数据存储到LBS.云后，JavaScript API可以提供以麻点图形式展示自有数据功能。
+
+坐标体系
+--------
+
+百度地图api中采用两种坐标体系，经纬度坐标系和墨卡托投影坐标系。前者单位是度，后者单位是米，具体定义可以参见百科词条解释：[http://baike.baidu.com/view/61394.htm](http://baike.baidu.com/view/61394.htm) 和 [http://baike.baidu.com/view/301981.htm](http://baike.baidu.com/view/301981.htm) 。
+
+国际经纬度坐标标准为WGS-84,国内必须至少使用国测局制定的GCJ-02,对地理位置进行首次加密。百度坐标在此基础上，进行了BD-09二次加密措施,更加保护了个人隐私。百度对外接口的坐标系并不是GPS采集的真实经纬度，需要通过坐标转换接口进行转换。
+
+从其他体系的坐标迁移到百度坐标，开发者可以使用坐标转换接口进行转换。
+
