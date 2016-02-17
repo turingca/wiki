@@ -71,3 +71,15 @@ JavaScript API首家支持Https，如需要申请Https服务，请您[认证企�
     <script src="http://api.map.baidu.com/api?v=2.0&ak=您的密钥" type="text/javascript"></script>
 
 其中参数v为API当前的版本号，目前最新版本为2.0。在1.2版本之前您还可以设置services参数，以告知API是否加载服务部分，true表示加载，false表示不加载，默认为true。
+
+API自1.1版本起开始支持iPhone、Android这样的移动平台。
+用户通过手机浏览器就可以访问由地图API创建出来的应用。移动平台的屏幕尺寸通常比PC或笔记本要小，操作方式也有所不同。为了更好的在手机浏览器上展示地图，我们有如下建议：
+
+* 将地图容器高设置为100%，使其充满整个屏幕，或者您也可以计算浏览器窗口的大小并进行设置。
+* 添加下面的meta标签： <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+这样做是为了让页面以正常比例进行显示并且禁止用户缩放页面的操作。
+您可以参考 [Apple's Developer documentation](https://developer.apple.com/devcenter/safari/index.action) 和 [Android documentation ](http://developer.android.com/index.html)获得更多信息。
+移动端开发具体实现请参考[相关下载_示例代码](http://lbsyun.baidu.com/index.php?title=jspopular/js-download)提供的Demo源码。
+
+
