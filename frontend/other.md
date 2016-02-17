@@ -45,3 +45,8 @@ chrome://flags/
 
 ios
 -------
+
+地图
+-------
+
+［百度地图JavaScript API v2.0](other/bdmap.md)
