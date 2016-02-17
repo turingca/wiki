@@ -61,7 +61,7 @@ JavaScript API首家支持Https，如需要申请Https服务，请您[认证企�
 
 其中参数v为API当前的版本号，目前最新版本为2.0。在1.2版本之前您还可以设置services参数，以告知API是否加载服务部分，true表示加载，false表示不加载，默认为true。
 
-地图API是由JavaScript语言编写的，您在使用之前需要通过<script></script>标签将API引用到页面中：
+地图API是由JavaScript语言编写的，您在使用之前需要通过script标签将API引用到页面中：
 使用V1.4及以前版本的引用方式:
 
     <script src="http://api.map.baidu.com/api?v=1.4" type="text/javascript"></script>
