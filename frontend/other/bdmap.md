@@ -54,14 +54,16 @@ JavaScript API首家支持Https，如需要申请Https服务，请您[认证企�
 引用
 ----
 
-自JS APIv1.5之后，最新版本为2.0，您需要首先申请密钥（ak），才可成功加载API JS文件。ak的使用方法如下：
+自JS APIv1.5之后，最新版本为2.0，您需要首先申请密钥（ak），才可成功加载API JS文件。ak的使用方法如下:
 
     <script src="http://api.map.baidu.com/api?v=2.0&ak=您的密钥" type="text/javascript"></script>
 
+
 其中参数v为API当前的版本号，目前最新版本为2.0。在1.2版本之前您还可以设置services参数，以告知API是否加载服务部分，true表示加载，false表示不加载，默认为true。
-地图API是由JavaScript语言编写的，您在使用之前需要通过<script>标签将API引用到页面中：
-使用V1.4及以前版本的引用方式：
-    
+
+地图API是由JavaScript语言编写的，您在使用之前需要通过<script></script>标签将API引用到页面中：
+使用V1.4及以前版本的引用方式:
+
     <script src="http://api.map.baidu.com/api?v=1.4" type="text/javascript"></script>
 
 使用V2.0版本的引用方式：
