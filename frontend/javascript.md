@@ -840,6 +840,64 @@ window.onload = function() {
 <!-- 新的聊天消息会插入到该元素中-->
 <input id="input" style="width:100%"/>
 ```
+例22-17是一个基于websocket的聊天服务器，运行在node中（见12.2节）。通过将该例和例18-17作比较，可以发现，websocket将聊天应用的服务器端简化成和客户端一样。
+例22-17：使用websocket和node的聊天服务器
+```javascript
+/*
+ * This is server-side JavaScript, intended to be run with NodeJS.这是运行在nodejs上的服务器端javascript
+ * It runs a WebSocket server on top of an HTTP server, using an external
+ *在HTTP服务器之上，它运行一个websocket服务器，该服务器使用自https://github.com/miksago/node-websocket-server/的第三方websocket库实现
+ * websocket library from https://github.com/miksago/node-websocket-server/
+ * If it gets an  HTTP request for "/" it returns the chat client HTML file.
+ *如果得到“／”的一个HTTP请求，则返回聊天客户端的HTML文件
+ * Any other HTTP requests return 404. Messages received via the 
+ *除此之外任何HTTP请求都返回404
+ * WebSocket protocol are simply broadcast to all active connections.
+ *通过websocket协议接收到的消息都仅广播给所有激活状态的连接
+ */
+var http = require('http');            // Use Node's HTTP server API，使用node的HTTP服务器api
+var ws = require('websocket-server');  // Use an external WebSocket library，使用第三方websocket库
+
+// Read the source of the chat client at startup. Used below.
+//启动阶段，读取聊天客户端的资源文件
+var clientui = require('fs').readFileSync("wschatclient.html");
+
+// Create an HTTP server，创建一个HTTP服务器
+var httpserver = new http.Server();  
+
+// When the HTTP server gets a new request, run this function
+//当HTTP服务器获得一个新请求时，运行此函数
+httpserver.on("request", function (request, response) {
+    // If the request was for "/", send the client-side chat UI.
+    //如果请求“／”，则返回客户端聊天UI
+    if (request.url === "/") {  // A request for the chat UI，请求聊天UI
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write(clientui);
+        response.end();
+    }
+    else {  // Send a 404 "Not Found" code for any other request，对任何其他的请求返回404无法找到编码
+        response.writeHead(404);
+        response.end();
+    }
+});
+
+// Now wrap a WebSocket server around the HTTP server，在HTTP服务器上包装一个websocket服务器
+var wsserver = ws.createServer({server: httpserver});
+
+// Call this function when we receive a new connection request，当调用一个新的连接请求的时候，调用此函数
+wsserver.on("connection", function(socket) {
+    socket.send("Welcome to the chat room."); // Greet the new client，向新客户端打招呼
+    socket.on("message", function(msg) {      // Listen for msgs from the client，监听来自客户端的消息
+        wsserver.broadcast(msg);              // And broadcast them to everyone，并将它们广播给每个人
+    });
+});
+
+// Run the server on port 8000. Starting the WebSocket server starts the
+//在8000端口运行服务器。启动websocket服务器的时候也会启动HTTP服务器。
+// HTTP server as well. Connect to http://localhost:8000/ to use it.
+//连接到http://localhost:8000/，并开始使用它
+wsserver.listen(8000);
+```
 
 javascript核心参考
 ------------------
