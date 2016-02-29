@@ -799,7 +799,47 @@ websocket完全是双向的，并且一旦建立了websocket连接，客户端�
 1.8节介绍了EventSource API，并通过一个在线聊天的客户端和服务器展示了这些api如何使用。有了websocket，写这类应用就变得更加容易了。例22-16就是一个简单的聊天客户端：它和例18-5很像，不同的是它采用了websocket来实现双向通信，而没有使用EventSource来获取消息以及XMLHttpRequest来发送消息。
 
 例22-16：基于WebSocket的聊天客户端：
-
+```javascript
+<script>
+window.onload = function() {
+    // Take care of some UI details，关心一些UI细节
+    var nick = prompt("Enter your nickname");     // Get user's nickname，获取用户昵称
+    var input = document.getElementById("input"); // Find the input field，查找input字段
+    input.focus();                                // Set keyboard focus，设置光标
+    // Open a WebSocket to send and receive chat messages on，打开一个websocket用于发送和接收聊天消息
+    // Assume that the HTTP server we were downloaded from also functions as
+    //假设下载的HTTP服务器作为websocket服务器运作，并且使用相同de主机名和端口
+    // a websocket server, and use the same host name and port, but change
+    //只是协议由http变成了ws
+    // from the http:// protocol to ws://
+    var socket = new WebSocket("ws://" + location.host + "/");
+    // This is how we receive messages from the server through the web socket
+    //下面展示了如何通过websocket从服务器获取消息
+    socket.onmessage = function(event) {          // When a new message arrives，当收到一条消息
+        var msg = event.data;                     // Get text from event object，从事件对象中获取消息内容
+        var node = document.createTextNode(msg);  // Make it into a text node，将它标记为一个文本节点
+        var div = document.createElement("div");  // Create a <div>，创建一个div
+        div.appendChild(node);                    // Add text node to div，将文本节点添加到该div
+        document.body.insertBefore(div, input);   // And add div before input，在input前添加该div
+        input.scrollIntoView();                   // Ensure input elt is visible，确保输入框可见
+    }
+    // This is how we send messages to the server through the web socket
+    //下面展示了如何通过websocket发送消息给服务器端
+    input.onchange = function() {                 // When user strikes return，当用户敲击回车键
+        var msg = nick + ": " + input.value;      // Username plus user's input，用户昵称加上用户的输入
+        socket.send(msg);                         // Send it through the socket，通过套接字传递该内容
+        input.value = "";                         // Get ready for more input，等待更多内容的输入
+    }
+};
+</script>
+```
+```html
+<!-- The chat UI is just a single, wide text input field -->
+<!-- 聊天窗口UI很简单，一个宽的文本输入框-->
+<!-- New chat messages will be inserted before this element -->
+<!-- 新的聊天消息会插入到该元素中-->
+<input id="input" style="width:100%"/>
+```
 
 javascript核心参考
 ------------------
