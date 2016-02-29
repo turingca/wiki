@@ -778,6 +778,28 @@ HTML5 API
 websocket api的使用非常简单。首先，通过websocket()构造函数创建一个套接字：
 
     var socket = new WebSocket("ws://ws.example.com:1234/resource");
+    
+创建了套接字之后，通常需要在上面注册一个事件处理程序：
+```javascript
+    socket.onopen = function(e){/*套接字已经连接*/};
+    socket.onclose = function(e){/*套接字已经关闭*/};
+    socket.onerror = function(e){/*出错了*/};
+    socket.onmessage = function(e){
+        var message = e.data;/*服务器发送一条消息*/
+    };
+```
+为了通过套接字发送数据给服务器，可以调用套接字的send()方法：
+```javascript
+    socket.send("hello,server");
+```
+当前版本的websocket api仅支持文本消息，并且必须以UTF-8编码形式的字符串传递给该消息。然而，当前websocket协议还包含对二进制消息的支持，未来版本的api可能会允许在客户端和websocket服务器端进行二进制数据的交换。
+当完成和服务器的通信之后，可以通过调用close方法来关闭websocket。
+websocket完全是双向的，并且一旦建立了websocket连接，客户端和服务器端都可以在任何时候互相传送消息，与此同时，这种通信机制采用的不是请求和响应的形式。每个基于websocket的服务都要定义自己的“子协议”，用于在客户端和服务器端传输数据。慢慢的，这些“子协议”也可能发生演变，可能最终要求客户端和服务器端需要支持多个版本的子协议。幸运的是，websocket协议包含一种协商机制，用于选择客户端和服务器端都能“理解”的子协议。可以传递一个字符串数组给WebSocket()构造函数。服务器端会将该数组作为客户端能够理解的子协议列表。然后，它会选择其中一个使用，并将它传递给客户端。一旦连接建立之后，客户端就能够通过套接字protocol属性监测当前在使用的是哪种子协议。
+
+1.8节介绍了EventSource API，并通过一个在线聊天的客户端和服务器展示了这些api如何使用。有了websocket，写这类应用就变得更加容易了。例22-16就是一个简单的聊天客户端：它和例18-5很像，不同的是它采用了websocket来实现双向通信，而没有使用EventSource来获取消息以及XMLHttpRequest来发送消息。
+
+例22-16：基于WebSocket的聊天客户端：
+
 
 javascript核心参考
 ------------------
