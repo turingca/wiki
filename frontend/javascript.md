@@ -833,7 +833,7 @@ window.onload = function() {
 };
 </script>
 ```
-```html
+```
 <!-- The chat UI is just a single, wide text input field -->
 <!-- 聊天窗口UI很简单，一个宽的文本输入框-->
 <!-- New chat messages will be inserted before this element -->
@@ -841,6 +841,7 @@ window.onload = function() {
 <input id="input" style="width:100%"/>
 ```
 例22-17是一个基于websocket的聊天服务器，运行在node中（见12.2节）。通过将该例和例18-17作比较，可以发现，websocket将聊天应用的服务器端简化成和客户端一样。
+
 例22-17：使用websocket和node的聊天服务器
 ```javascript
 /*
