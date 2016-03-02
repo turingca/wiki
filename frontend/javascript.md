@@ -800,7 +800,6 @@ websocket完全是双向的，并且一旦建立了websocket连接，客户端�
 
 例22-16：基于WebSocket的聊天客户端：
 ```javascript
-<script>
 window.onload = function() {
     // Take care of some UI details，关心一些UI细节
     var nick = prompt("Enter your nickname");     // Get user's nickname，获取用户昵称
@@ -831,9 +830,8 @@ window.onload = function() {
         input.value = "";                         // Get ready for more input，等待更多内容的输入
     }
 };
-</script>
 ```
-```
+```html
 <!-- The chat UI is just a single, wide text input field -->
 <!-- 聊天窗口UI很简单，一个宽的文本输入框-->
 <!-- New chat messages will be inserted before this element -->
