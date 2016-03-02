@@ -799,7 +799,10 @@ websocket完全是双向的，并且一旦建立了websocket连接，客户端�
 1.8节介绍了EventSource API，并通过一个在线聊天的客户端和服务器展示了这些api如何使用。有了websocket，写这类应用就变得更加容易了。例22-16就是一个简单的聊天客户端：它和例18-5很像，不同的是它采用了websocket来实现双向通信，而没有使用EventSource来获取消息以及XMLHttpRequest来发送消息。
 
 例22-16：基于WebSocket的聊天客户端：
+```html
 
+<input id="input" style="width:100%"/>
+```
 
 例22-17是一个基于websocket的聊天服务器，运行在node中（见12.2节）。通过将该例和例18-17作比较，可以发现，websocket将聊天应用的服务器端简化成和客户端一样。
 
