@@ -804,7 +804,7 @@ websocket完全是双向的，并且一旦建立了websocket连接，客户端�
 <!-- 聊天窗口UI很简单，一个宽的文本输入框-->
 <!-- New chat messages will be inserted before this element -->
 <!-- 新的聊天消息会插入到该元素中-->
-<!-- <input id="input" style="width:100%"/>-->
+<input id="input" style="width:100%">
 ```
 
 例22-17是一个基于websocket的聊天服务器，运行在node中（见12.2节）。通过将该例和例18-17作比较，可以发现，websocket将聊天应用的服务器端简化成和客户端一样。
