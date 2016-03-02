@@ -801,9 +801,9 @@ websocket完全是双向的，并且一旦建立了websocket连接，客户端�
 例22-16：基于WebSocket的聊天客户端：
 ```javascript
 //The chat UI is just a single, wide text input field 
-//聊天窗口UI很简单，一个宽的文本输入框-->
+//聊天窗口UI很简单，一个宽的文本输入框
 // New chat messages will be inserted before this element 
-// 新的聊天消息会插入到该元素中-->
+// 新的聊天消息会插入到该元素中
 <input id="input" style="width:100%"/>
 ```
 
