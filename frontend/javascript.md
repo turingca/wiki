@@ -756,7 +756,22 @@ IE6中的XMLHttpRequest  TODO
 * 一个响应头集合
 * 响应主体
 
-接下来的前面两节
+接下来的前面两节会展示如何设置http请求的每个部分和如何查询http响应的每个部分，随后的核心章节会涵盖更多的专门议题。
+
+http的基础请求／响应架构非常简单且易于使用。但在实践中会有各种各样随之而来的复杂问题：客户端和服务器交换cookie，服务器重定向浏览器到其他服务器，缓存某些资源而剩下的不缓存，某些客户端通过代理服务器发送所有的请求等。XMLHttpRequestAPI不是协议级的HTTP API而是浏览器级的API。浏览器需要考虑cookie，重定向，缓存和代理。但代码只需要担心请求和响应。
+
+XMLHttpRequest和本地文件，网页中可以使用相对url的能力通常意味着我们能使用本地文件系统来开发和测试html，并避免对web服务器进行不必要的部署。然后当使用XMLHttpRequest进行ajax编程时，这通常是不可行的。XMLHttpRequest用于同http和https协议一起工作。理论上，它能够同像ftp这样的其他协议一起工作，但比如像请求方法和响应状态码等部分api是http特有的。如果从本地文件中加载网页，那么该页面中的脚本将无法通过相对url使用XMLHttpRequest，因为这些url将相对于file://url而不是http://url。而同源策略通常会阻止使用绝对http://url（请参见18.1.6节）。如果是当使用XMLHttpRequest时，为了测试它们通常必须把文件上传到web服务器（或运行一个本地服务器）。
+
+18.1.1指定请求
+
+创建XMLHttpRequest对象之后，发起http请求的下一步是调用XMLHttpRequest对象的open()方法去指定这个请求的两个必需部分：方法和URL。
+
+    rquest.open("GET",      //开始一个HTTP GET请求
+                "data.csv");//URL的内容
+
+open()第一个参数指定http方法或者动作。这个字符串不区分大小写，但通常大家用大写字母来匹配HTTP协议。“GET”和“POST”方法是得到广泛支持的。“GET”用于常规请求，它适用于当url完全指定请求资源，当请求对服务器没有任何副作用以及当服务器的响应是可缓存时。“POST”方法常用于html表单。它在请求主体中包含额外数据（表单数据）且这些数据常存储到服务器上的数据库中（副作用）。相同url的重复post请求从服务器得到的响应可能不同，同时不应该缓存使用这个方法的请求。除了“GET”和“POST”之外，xmlhttprequest也允许把“DELETE”、“HEAD”、“OPTIONS”和“PUT”作为open()的第一个参数。（“HTTP CONNECT”、“TRACE”和“TRACK”因为安全风险已被明确禁止。）旧浏览器并不支持所有的这些方法，但至少“HEAD”得到了广泛支持，例18-13演示如何使用它。
+
+
 
 **18.2借助[script]发送http请求：jsonp**
 **18.3基于服务器端推送事件的comet技术**
