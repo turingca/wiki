@@ -85,14 +85,43 @@ API自1.1版本起开始支持iPhone、Android这样的移动平台。
 JavaScript API首家支持Https，如需要申请Https服务，请您认证企业信息，成为企业认证用户后，https将自动开通，同时获得更高的服务配额。
 注意：仅JavaScript API V2.0 版本支持https，其他JavaScript API版本均不支持。使用https服务，请先检查您的版本。
 
-1 如果使用JavaScript API ，需要加一个特殊字段 (s=1)：
+如果使用JavaScript API ，需要加一个特殊字段 (s=1)：
 
     https://api.map.baidu.com/api?v=2.0&ak=你的密钥& s=1；
 
-2 对于Web API 无需加特殊字段，直接使用 HTTPS协议访问即可，如Geocoding：
+对于Web API 无需加特殊字段，直接使用 HTTPS协议访问即可，如Geocoding：
 
     https://api.map.baidu.com/geocoder/v2/?ak=你的秘钥&callback=renderReverse&location=39.983424,116.322987&output=xml&pois=1
     
-3 如果对数据安全要求高，建议使用 POST请求，避免把请求参数放到 URI中敏感信息被泄露；
+如果对数据安全要求高，建议使用 POST请求，避免把请求参数放到 URI中敏感信息被泄露；
 
+异步加载
+--------
 
+JavaScript API支持异步加载，您可以在引用脚本的时候添加callback参数，当脚本加载完成后callback函数会被立刻调用。请参考下面的使用示例：
+
+    <!DOCTYPE html>  
+    <html>  
+    <head>  
+    <meta charset="utf-8"/>  
+    <title>异步加载</title>  
+    <script type="text/javascript">  
+    function initialize() {  
+      var mp = new BMap.Map('map');  
+      mp.centerAndZoom(new BMap.Point(121.491, 31.233), 11);  
+    }  
+       
+    function loadScript() {  
+      var script = document.createElement("script");  
+      script.src = "http://api.map.baidu.com/api?v=2.0&ak=您的密钥&callback=initialize";//此为v2.0版本的引用方式  
+      // http://api.map.baidu.com/api?v=1.4&ak=您的密钥&callback=initialize"; //此为v1.4版本及以前版本的引用方式  
+      document.body.appendChild(script);  
+    }  
+       
+    window.onload = loadScript;  
+    </script>  
+    </head>  
+    <body>  
+      <div id="map" style="width:500px;height:320px"></div>  
+    </body>  
+    </html>
