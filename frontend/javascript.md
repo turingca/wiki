@@ -352,6 +352,22 @@ function f() {
 
 “声明提前”这步操作是在javascript引擎的“预编译”时进行的，是在代码开始运行之前，更多细节请阅读相关ppt：www.slideshare.net/lijing00333/javascript-engine。
 
+**3.10.2作为属性的变量**
+
+当声明一个javascript全局变量时，实际上是定义了全局对象的一个属性（3.5节）。当使用var声明一个变量时，创建的这个属性是不可配置的（见6.7节），也就是说这个变量无法通过delete运算符删除。可能你已经注意到了，如果你没有使用严格模式并给一个未声明的变量赋值的话，javascript会自动创建一个全局变量。以这种方式创建的变量是全局对象的正常的可配值属性，并可以删除它们。
+
+```javascript
+var truevar = 1;//声明一个不可删除的全局变量
+fakevar = 2;//创建全局对象的一个可删除的属性
+this.fakevar2 = 3;//同上
+delete truevar //=>false 变量并没有被删除
+delete fakevar //=>true 变量被删除
+delete this.fakevar2 //=>true 变量被删除
+```
+javascript全局变量是全局对象的属性，这是在ECMAScript规范中强制规定的。对于局部变量则没有如此规定，但我们可以想象得到，局部变量当做跟函数调用相关的某个对象的属性。ECMAScript3规范称该对象为“调用对象”（call object），ECMAScript5规范称“声明上下文对象”（declarative environment record）。javascript可以允许使用this关键字来引用全局对象，却没有方法可以引用局部变量中存放的对象。这种存放局部变量的对象的特有性质，是一种对我们不可见的内部实现。然而，这些局部变量对象存在的观念是非常重要的。我们会在下一节展开讲述。
+
+
+
 表达式和运算符
 --------------
 **4.1原始表达式**
