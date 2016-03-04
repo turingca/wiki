@@ -82,4 +82,17 @@ API自1.1版本起开始支持iPhone、Android这样的移动平台。
 您可以参考 [Apple's Developer documentation](https://developer.apple.com/devcenter/safari/index.action) 和 [Android documentation ](http://developer.android.com/index.html)获得更多信息。
 移动端开发具体实现请参考[相关下载_示例代码](http://lbsyun.baidu.com/index.php?title=jspopular/js-download)提供的Demo源码。
 
+JavaScript API首家支持Https，如需要申请Https服务，请您认证企业信息，成为企业认证用户后，https将自动开通，同时获得更高的服务配额。
+注意：仅JavaScript API V2.0 版本支持https，其他JavaScript API版本均不支持。使用https服务，请先检查您的版本。
+
+1 如果使用JavaScript API ，需要加一个特殊字段 (s=1)：
+
+    https://api.map.baidu.com/api?v=2.0&ak=你的密钥& s=1；
+
+2 对于Web API 无需加特殊字段，直接使用 HTTPS协议访问即可，如Geocoding：
+
+    https://api.map.baidu.com/geocoder/v2/?ak=你的秘钥&callback=renderReverse&location=39.983424,116.322987&output=xml&pois=1
+    
+3 如果对数据安全要求高，建议使用 POST请求，避免把请求参数放到 URI中敏感信息被泄露；
+
 
