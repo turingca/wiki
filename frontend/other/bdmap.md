@@ -99,7 +99,7 @@ JavaScript API首家支持Https，如需要申请Https服务，请您认证企�
 --------
 
 JavaScript API支持异步加载，您可以在引用脚本的时候添加callback参数，当脚本加载完成后callback函数会被立刻调用。请参考下面的使用示例：
-
+```html
     <!DOCTYPE html>  
     <html>  
     <head>  
@@ -125,3 +125,4 @@ JavaScript API支持异步加载，您可以在引用脚本的时候添加callba
       <div id="map" style="width:500px;height:320px"></div>  
     </body>  
     </html>
+```
