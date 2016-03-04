@@ -268,8 +268,89 @@ y
 
 **3.10变量作用域**
 
+一个变量的作用域（scope）是程序源代码中定义这个变量的区域。全局变量拥有全局作用域，在javascript代码中的任何地方都是有定义的。
+然而在函数内声明的变量只在函数体内有定义。它们是局部变量，作用域是局部性的。函数参数也是局部变量，它们只在函数体内有定义。
+在函数体内，局部变量的优先级高于同名的全局变量。如果在函数内声明的一个局部变量或者函数参数中带有的变量和全局变量重名，那么全局变量就被局部变量所遮盖。
 
+```javascript
+var scope = "global";   //声明一个全局变量
+function checkscope() {
+    var scope = "local";//声明一个同名的局部变量
+    return scope;       //返回局部变量的值，而不是全局变量的值
+}
+checkscope();           //=>"local"
+```
+尽管在全局作用域编写代码时可以不写var语句，但声明局部变量时则必须使用var语句。思考一下如果不这样做会怎样：
 
+```javascript
+scope = "global";           //声明一个全局变量，甚至不用var来声明
+function checkscope2() {    
+    scope = "local";        //糟糕！我们刚刚修改了全局变量
+    myscope = "local";      //这里显式地声明了一个新的全局变量
+    return [scope,myscope]; //返回两个值
+}
+checkscope2();//=>["local","local"]，产生了副作用
+scope//=>"local"，全局变量修改了
+myscope//=>"local"，全局命名空间搞乱了
+```
+函数定义是可以嵌套的。由于每个函数都有它自己的作用域，因此会出现几个局部作用域嵌套的情况，例如：
+
+```javascript
+var scope = "global scope";//全局变量
+    function checkscope() {
+        var scope = "local scope";//局部变量
+        function nested() {
+            var scope = "nested scope";//nested(嵌套)，嵌套作用域内的局部变量
+            return scope;//返回当前作用域内的值
+        }
+        return nested();
+    }
+checkscope(); //"nested scope"，嵌套作用域
+```
+
+**3.10.1函数作用域和声明前提**
+
+在一些类似c语言的编程语言中，花括号内的每一段代码都具有各自的作用域，而且变量在声明它们的代码段之外是不可见的，我们称为块级作用域（block scope），而javascript中没有块级作用域。
+javascript取而代之地使用了函数作用域（function scope），变量在声明它们的函数体以及这个函数体嵌套的任意函数体内都是有定义的。
+
+在如下所示的代码中，在不同位置定义了变量i、j和k，它们都在同一个作用域内——这三个变量在函数体内均是有定义的。
+
+```javascript
+function test(o){
+    var i = 0;                      //i在整个函数体内均是有定义的
+    if(typeof o == "object") {
+        var j = 0;                  //j在函数体内是有定义的，不仅仅是在这个代码段内
+        for (var k=0; k < 10; k++){ //k在函数体内是有定义的，不仅仅是在循环里
+            console.log(k);         //输出数字0～9
+        }
+        console.log(k);             //k已经定义了，输出10
+    }           
+    console.log(j);                 //j已经定义了，但可能没有初始化
+}
+```
+javascript的函数作用域是指在函数内声明的所有变量在函数体内始终是可见的。有意思的是，这意味着变量在声明之前甚至已经可用。javascript的这个特性被非正式地称为声明前提（hoisting），即javascript函数里声明的所有变量（但不涉及赋值）都被提前至函数体的顶部，看一下如下代码：
+
+```javascript
+var scope = "global";
+function f() {
+    console.log(scope);//输出"undefined"，而不是"global"
+    var scope = "local";//变量在这里赋初始值，但变量本身在函数体内任何地方均是有定义的
+    console.log(scope);//输出"local"
+}
+```
+你可能会误以为函数中的第一行会输出“global”，因为代码还没有执行到var语句声明局部变量的地方。其实不然，由于函数作用域的特性，局部变量在整个函数体始终是有定义的，也就是说，在函数体内局部变量遮盖了同名全局变量。尽管如此，只有在程序执行到var语句的时候，局部变量才会被真正赋值。因此，上述过程等价于：将函数内的变量声明“提前”至函数体顶部，同时变量初始化留在原来的位置：
+
+```javascript
+function f() {
+    var scope;//在函数顶部声明了局部变量
+    console.log(scope);//变量存在，但其值是"undefined"
+    scope = "local";//这里将其初始化并赋值
+    console.log(scope);//这里它具有了我们所期望的值
+}
+```
+在具有块级作用域的编程语言中，在狭小的作用域里让变量声明和使用变量的代码尽可能靠近彼此，通常来讲，这是一个非常不错的编程习惯。由于javascript没有块级作用域，因此一些程序员特意将变量声明放在函数体顶部，而不是将声明靠近在使用变量之处。这种做法使得他们的源代码非常清晰地反映了真实的变量作用域。
+
+“声明提前”这步操作是在javascript引擎的“预编译”时进行的，是在代码开始运行之前，更多细节请阅读相关ppt：www.slideshare.net/lijing00333/javascript-engine。
 
 表达式和运算符
 --------------
