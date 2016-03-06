@@ -671,7 +671,27 @@ for(i = 0; i<4; i++){
 }
 ```
 这段代码读取customer的adderss0、address1、address2和address3属性，并将它们连接起来。
-这个例子主要说明了使用数组写法和用字符串表达式来访问对象属性的灵活性。这段代码
+这个例子主要说明了使用数组写法和用字符串表达式来访问对象属性的灵活性。这段代码也可以通过点运算符来重写，但是很多场景只能通过数组写法来完成。假设你正在写一个程序，这个程序利用网络资源计算当前用户股票市场投资的金额。程序允许用户输入每只股票的名称和购股份额。该程序使用名为portfolio的对象来存储这些信息。每只股票在这个对象中都有对应的属性，属性名称就是股票名称，属性值就是购股数量，例如，如果用户持有IBM的50股，那么portfolio.ibm属性的值就为50。
+下面是程序的部分代码，这个函数用来给portfolio添加新的股票：
+```javascript
+function addstock(portfolio,stockname,shares){
+    portfolio[stockname] = shares;
+}
+```
+由于用户是在程序运行时输入股票名称，因此在之前无法得知这些股票的名称是什么。而由于在写程序的时候不知道属性名称，因此无法通过点运算符来访问对象portfolio的属性。但可以使用[]运算符，因为它使用字符串值（字符串值是动态的，可以在运行时更改）而不是标识符(标识符是静态的，必须写死在程序中)作为索引对属性进行访问。
+
+第5章介绍了for／in循环（6.5节还会进一步介绍）。当使用for／in循环遍历关联数组时，就可以清晰地体会到for／in的强大之处。下面例子就是利用for／in计算portfolio的总计值：
+```javascript
+function getvalue(portfolio) {
+    var total = 0.0;
+    for(stock in portfolio) {           //遍历portfolio中的每只股票
+        var shares = portfolio[stock];  //得到每只股票的份额
+        var price = getquote(stock);    //查找股票价格
+        total += shares * price;        //将结果累加至total中
+    }
+    return total;                       //返回total的值
+}
+```
 
 **6.2.2继承**
 javascript对象具有“自有属性”（own property），也有一些属性是从原型对象继承而来的。为了更好地理解这种继承，必须更深入地了解属性访问的细节。本节中的许多示例代码借用了例6-1中的inherit()函数，通过给它传入指定原型对象来创建实例。
