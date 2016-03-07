@@ -1103,7 +1103,134 @@ var uniqueInteger = (function() {//定义函数并立即调用
     return function() {return counter++;};
 }())；
 ```
+你需要仔细阅读这段代码才能理解其含义。粗略来看，第一行代码看起来像将函数值给一个变量uniqueInteger，实际上，这段代码定义了一个立即调用的函数（函数的开始带有左圆括号），因此是这个函数的返回值赋值给变量uniqueInteger。现在，我们来看函数体，这个函数返回另外一个函数，这是一个嵌套的函数，我们将它赋值给变量uniqueInteger，嵌套的函数是可以访问作用域内的变量的，而且可以访问外部函数中定义的counter变量。当外部函数返回之后，其他任何代码都无法访问counter变量，只有内部的函数才能访问它。
 
+像counter一样的私有变量不是只能用在一个单独的闭包内，在同一个外部函数内定义的多个嵌套函数也可以访问它，这多个嵌套函数都共享一个作用域链，看一下这段代码：
+```javascript
+function counter() {
+    var n = 0;
+    return {
+        count: function() { return n++; },
+        reset: function() { n=0; }
+    };
+}
+var c = counter(), d = counter();//创建两个计数器
+c.count();//=> 0
+d.count();//=> 0 它们互不干扰
+c.reset();//reset() 和 count() 方法共享状态
+c.count();//=> 0 因为我们重置了c 
+d.count();//=> 1 而没有重置d
+```
+counter()函数返回一个“计数器”对象，这个对象包含两个方法：count()返回下一个整数，reset()将计数器重置为内部状态。首先要理解，这两个方法都可以访问私有变量n。再者，每次调用counter()都会创建一个新的作用域链和一个新的私有变量。因此，如果调用counter()两次，则会得到两个计数器对象，而且彼此包含不同的私有变量，调用其中一个计数器对象的count()或reset()不会影响到另一个对象。
+
+从技术角度看，其实可以将这个闭包合并为属性存取器方法getter和setter。下面这段代码所示的counter()函数的版本是6.6节中代码的变种，所不同的是，这里私有状态的实现是利用了闭包，而不是利用普通的对象属性来实现。
+```javascript
+function counter(n) {//函数参数n是一个私有变量
+    return {
+        //属性getter方法返回并给私有计数器var递增1
+        get count() {return n++},
+        //属性setter不允许n递减
+        set count(m) {
+        if (m>=n) n=m;
+        else throw Error("count can only be set to a larger value");
+        }
+    };
+}
+var c = counter(1000);
+c.count //=> 1000
+c.count //=> 1001
+c.count = 2000
+c.count //=> 2000
+c.count = 2000//=> Error!
+```
+需要注意的是，这个版本的counter()函数并未声明局部变量，而这是使用参数n来保存私有状态，属性存取器方法可以访问n。这样的话，调用counter()函数就可以指定私有变量的初始值了。
+
+例8-4是这种使用闭包技术来共享的私有状态的通用做法。这个例子定义了addPrivateProperty()函数，这个函数定义了一个私有变量，以及两个嵌套的函数用来获取和设置这个私有变量的值。它将这些嵌套函数添加为所指定对象的方法。
+```javascript
+// This function adds property accessor methods for a property with
+//这个函数给对象o增加了属性存取器方法
+// the specified name to the object o.  The methods are named get<name>
+//方法名称为get<name>和set<name>。如果提供了一个判定函数
+// and set<name>.  If a predicate function is supplied, the setter
+//setter方法就会用它来检测参数的合法性，然后在存储它
+// method uses it to test its argument for validity before storing it.
+// If the predicate returns false, the setter method throws an exception.
+//如果判定函数返回false，setter方法抛出一个异常
+// The unusual thing about this function is that the property value
+//这个函数有一个非同寻常之处，就是getter和setter函数
+// that is manipulated by the getter and setter methods is not stored in
+//所操作的属性值并没有存储在对象o中
+// the object o.  Instead, the value is stored only in a local variable
+// 相反，这个值仅仅是保存在函数中的局部变量
+// in this function.  The getter and setter methods are also defined
+//getter和setter方法同样是局部函数，因此可以访问这个局部变量
+// locally to this function and therefore have access to this local variable.
+// This means that the value is private to the two accessor methods, and it 
+// 也就是说，对于两个存取器方法来说这个变量是私有的
+// cannot be set or modified except through the setter method.
+//没有办法绕过存取器方法来设置或修改这个值
+function addPrivateProperty(o, name, predicate) {
+    var value;  // This is the property value，这是一个属性值
+    // The getter method simply returns the value.，getter方法简单地将其返回
+    o["get" + name] = function() { return value; };
+    //The setter method stores the value or throws an exception if
+    //setter方法首先检查值是否合法，若不合法就抛出异常
+    // the predicate rejects the value.
+    //否则就将其存储起来
+    o["set" + name] = function(v) {
+        if (predicate && !predicate(v))
+            throw Error("set" + name + ": invalid value " + v);
+        else
+            value = v;
+    };
+}
+
+// The following code demonstrates the addPrivateProperty() method.
+//下面的代码展示了addPrivateProperty()方法
+var o = {};  // Here is an empty object，设置一个空对象
+
+// Add property accessor methods getName and setName()，增加属性存取器方法getName()和setName()
+// Ensure that only string values are allowed，确保只允许字符串值
+addPrivateProperty(o, "Name", function(x) { return typeof x == "string"; });
+
+o.setName("Frank");       // Set the property value，设置属性值
+console.log(o.getName()); // Get the property value，得到属性值
+o.setName(0);             // Try to set a value of the wrong type，试图设置一个错误类型的值
+```
+我们已经给出了很多例子，在同一个作用域链中定义两个闭包，这两个闭包共享同样的私有变量或变量。这是一种非常重要的技术，但还是要特别小心那些不希望共享的变量往往不经意间共享给了其他的闭包，了解这一点也很重要。看一下下面这段代码：
+```javascript
+//这个函数返回一个总是返回v的函数
+function constfunc(v) { return function() {return v;};}
+//创建一个数组用来存储常数函数
+var funcs = [];
+for (var i = 0; i< 10; i++) func[i] = constfunc(i);
+//在第5个位置的元素所表示的函数返回值为5
+funcs[5]()//=> 5
+```
+这段代码利用了循环创建了很多个闭包，当写类似这种代码的时候往往会犯一个错误，那就是试图将循环代码移入定义这个闭包的函数之内，看一下这段代码：
+```javascript
+//返回一个函数组成的数组，它们的返回值是0～9
+function constfuncs() {
+    var funcs = [];
+    for (var i =0; i < 10; i++) {
+        funcs[i] = function() {return i;};
+        return funcs;
+    }
+}
+var funcs = constfuncs();
+funcs[5]()//返回值是什么
+```
+上面这段代码创建了10个闭包，并将它们存储到一个数组中。这些闭包都是在同一个函数调用中定义的，因此它们可以共享变量i。当constfuncs()返回时，变量i的值是10，所有的闭包都共享这一个值，因此，数组中的函数的返回值都是同一个值，这不是我们想要的结果。关联到闭包的作用域链都是“活动的”，记住这一点非常重要。嵌套的函数不会将作用域内的私有成员复制一份，也不会对所绑定的变量生成静态快照（static snapshot）。
+
+书写闭包的时候还需注意一件事情，this是javascript的关键字，而不是变量。正如之前讨论的，每个函数调用都包含一个this值，如果闭包在外部函数里是无法访问this的（严格讲，闭包内的逻辑是可以使用this的，但这个this和当初定义函数时的this不是同一个，即便是同一个this，this的值是随着调用栈的变化而变化的，而闭包里的逻辑所取到的this的值也是不确定的，因此外部函数内的闭包是可以使用this的，但要非常小心地使用才行，作者在这里提到的将this转存为一个变量的做法就可以避免this的不确定性带来的歧义。），除非外部函数将this转存为一个变量：
+```javascript
+    var self = this;//将this保存至一个变量中，以便嵌套的函数能够访问它
+```
+绑定arguments的问题与之类似。arguments并不是一个关键字，但在调用每个函数时都会自动声明它，由于闭包具有自己所绑定的arguments，因此闭包内无法直接访问外部函数的参数数组，除非外部函数将参数数组保存到另一个变量中：
+```javascript
+var outerArguments = arguments;//保存起来以便嵌套的函数能使用它
+```
+在本章接下来讲到的例8-5中就利用了这种编程技巧来定义闭包，以便在闭包中可以访问外部函数的this和arguments值。
 
 **8.7函数属性、方法和构造函数**
 **8.8函数式编程**
