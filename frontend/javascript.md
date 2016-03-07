@@ -1062,6 +1062,90 @@ for(p in o){
 例6-2定义了一些有用的工具函数来操控对象的属性，这些函数用到了for/in循环。实际上extend()函数经常出现在javascript实用工具库中。
 这里实现的extend()逻辑虽然正确，但并不能弥补IE中有一些众所周知的bug，在例8-3中会有更健壮的extend()实现。
 例6-2：用来枚举属性的对象工具函数
+```javascript
+/*
+ * Copy the enumerable properties of p to o, and return o.
+ * If o and p have a property by the same name, o's property is overwritten.
+ * This function does not handle getters and setters or copy attributes.
+ *把p中的可枚举属性复制到o中，并返回o，如果o和p中含有同名属性，则覆盖o中的属性，这个函数并不处理getter和setter以及复制属性
+ */
+function extend(o, p) {
+    for(prop in p) {                         // For all props in p，遍历p中的所有属性
+        o[prop] = p[prop];                   // Add the property to o，将属性添加至o中
+    }
+    return o;
+}
+
+/*
+ * Copy the enumerable properties of p to o, and return o.
+ * If o and p have a property by the same name, o's property is left alone.
+ * This function does not handle getters and setters or copy attributes.
+ *将p中的可枚举属性复制至o中，并返回o，如果o和p中同名的属性，o中的属性将不受影响，这个函数将不处理getter和setter以及复制属性 
+ */
+function merge(o, p) {
+    for(prop in p) {                           // For all props in p，遍历p中所有的属性
+        if (o.hasOwnProperty[prop]) continue;  // Except those already in o，过滤掉已经在o中存在的属性
+        o[prop] = p[prop];                     // Add the property to o，将属性添加至o中
+    }
+    return o;
+}
+
+/*
+ * Remove properties from o if there is not a property with the same name in p.
+ * Return o.
+ *如果o中的属性在p中没有同名属性，则从o中删除这个属性，返回o
+ */
+function restrict(o, p) {
+    for(prop in o) {                         // For all props in o，遍历o中所有的属性
+        if (!(prop in p)) delete o[prop];    // Delete if not in p，如果在p中不存在，则删除之
+    }
+    return o;
+}
+
+/*
+ * For each property of p, delete the property with the same name from o.
+ * Return o.
+ *如果o中的属性在p中存在同名属性，则从o中删除这个属性，返回o
+ */
+function subtract(o, p) {
+    for(prop in p) {                         // For all props in p，遍历p中所有的属性
+        delete o[prop];                      // Delete from o (deleting a
+                                             // nonexistent prop is harmless)，从o中删除（删除一个不存在的属性不会报错）
+    }
+    return o;
+}
+
+/*
+ * Return a new object that holds the properties of both o and p.
+ * If o and p have properties by the same name, the values from o are used.
+ *返回一个新对象，这个对象同时拥有o的属性和p的属性，如果o和p中有重名属性，使用p中的属性值
+ */
+function union(o,p) { return extend(extend({},o), p); }
+
+/*
+ * Return a new object that holds only the properties of o that also appear
+ * in p. This is something like the intersection of o and p, but the values of
+ * the properties in p are discarded
+ *返回一个新对象，这个对象拥有同时在o和p中出现的属性，很像求o和p的交集，但p中属性的值被忽略
+ */
+function intersection(o,p) { return restrict(extend({}, o), p); }
+
+/*
+ * Return an array that holds the names of the enumerable own properties of o.
+ *返回一个数组，这个数组包含的是o中可枚举的自有属性的名字
+ */
+function keys(o) {
+    if (typeof o !== "object") throw TypeError();  // Object argument required，参数必须是对象
+    var result = [];                 // The array we will return，将要返回的数组
+    for(var prop in o) {             // For all enumerable properties，遍历所有可枚举的属性
+        if (o.hasOwnProperty(prop))  // If it is an own property，判断是否是自有属性
+            result.push(prop);       // add it to the array.将属性名添加至数组中
+    }
+    return result;                   // Return the array.返回这个数组
+}
+```
+除了for/in循环之外，ECMAScript5定义了两个用以枚举属性名称的函数。第一个是Object.keys()，它返回一个数组，这个数组由对象中可枚举的自有属性的名称组成，它的工作原理和例6-2中的工具函数keys()类似。
+ECMAScript5中第二个枚举的属性的函数是Object.getOwnPropertyNames(),它和Object.keys()类似，只是它返回对象的所有自有属性的名称，而不仅仅是可枚举的属性。在ECMAScript3中是无法实现的类似的函数的，因为ECMAScript3中没有提供任何方法来获取对象不可枚举的属性。
 
 **6.6属性getter和setter**
 **6.7属性的特性**
