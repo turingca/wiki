@@ -580,7 +580,16 @@ new Date
 **4.8算术表达式**
 **4.9关系表达式**
 
+本节介绍javascript的关系运算符。关系运算符用于测试两个值之间的关系（比如“相等”，“小于”，或“是……的属性”），根据关系是否存在返回true或false。关系表达式总是返回一个布尔值，通常if、while或者for语句（参照第5章）中使用关系表达式，用以控制程序的执行流程。接下来的几节将会讲述相等和不等运算符、比较运算符和javascript中其他两个关系运算符in和instanceof。
+
 **4.9.1相等和不等运算符**
+
+“==”和“===”运算符用于比较两个值是否相等，当然它们对相等的定义不尽相同。两个运算符允许任意类型的操作数，如果操作数相等则放回true，否则返回false。“===”也称为严格相等运算符（strict equality）（有时也称做恒等运算符（identity operator）），它用来检测两个操作数是否严格相等。“==”运算符称做相等运算符（equality operator），它用来检测两个操作数是否相等，这里“相等”的定义非常宽松，可以允许进行类型转换。
+
+javascript支持“=”、“==”和“===”运算符。你应当理解这些（赋值、相等、恒等）运算符之间的区别，并在编码过程中小心使用，尽管它们都可以称做“相等”，但为了减少概念混淆，应该把“=”称做“得到或赋值”，把“==”称做“相等”，把“===”称做严格相等。
+
+“!=”和“!==”运算符的检测规则是“==”和“===”运算符的求反。如果两个值通过“==”的比较结果为true，那么通过“!=”的比较结果则为false。如果两值通过“===”的比较结果为true，那么通过“!==”的比较结果则为false。4.10节会提到，“!”运算符是布尔非运算符。我们只要记住“!=”称做“不相等”、“!===”称做“不严格相等”就可以了。
+
 **4.9.2比较运算符**
 **4.9.3in运算符**
 
@@ -915,10 +924,94 @@ Object.prototype = 0;//赋值失败，但没报错，Object.prototype没有修�
 
 **6.3删除属性**
 
-delete运算符（见4.13.3节）可以删除对象的属性。它的操作数应当是一个属性访问表达式。让人意外的是，delete只是断开属性和宿主对象的联系，而不会去操作属性中的属性。
+delete运算符（见4.13.3节）可以删除对象的属性。它的操作数应当是一个属性访问表达式。让人意外的是，delete只是断开属性和宿主对象的联系，而不会去操作属性中的属性(a={p:{x:1}};b=a.p;delete a.p;执行这段代码之后b.x的值依然是1。由于已经删除的属性的引用依然存在，因此在javascript的某些实现中，可能因为这种不严谨的代码而造成内存泄漏。所以在销毁对象的时候，要遍历属性中的属性，依次删除)：
+
+    delete book.author;//book不再有属性author
+    delete book["main title"];//book也不再有属性“main title”
+
+delete运算符只能删除自由属性，不能删除继承属性（要删除继承属性必须从定义这个属性的原型对象上删除它，而且这会影响到所有继承自这个原型的对象）。
+当delete表达式删除成功或没有任何副作用（比如删除不存在的属性）时，它返回true。如果delete后不是一个属性访问表达式，delete同样返回true：
+```javascript
+o = {x:1};//o有一个属性x，并继承属性toString
+delete o.x;//删除x，返回true
+delete o.x;//什么都没做（x已经不存在了），返回true
+delete o.toString;//什么也没做（toString是继承来的），返回true
+delete 1;//无意义，返回true
+```
+delete不能删除那些可配置性为false的属性（尽管可以删除不可扩展对象的可配置属性）。某些内置对象的属性是不可配置的，比如通过变量声明和函数声明创建的全局对象的属性。在严格模式中，删除一个不可配置属性会报一个类型错误。在非严格模式中（以及ECMAScript3中），在这些情况下的delete操作会返回false：
+```javascript
+delete Object.prototype;//不能删除，属性是不可配置的
+var x = 1;//声明一个全局变量
+delete this.x//不能删除这个属性
+function f() {}//声明一个全局函数
+delete this.f;//也不能删除全局函数
+```
+当在非严格模式中删除全局对象的可配置属性时，可以省略对全局对象的引用，直接在delete操作符后跟随要删除的属性名即可。
+```javascript
+this.x = 1;//创建一个可配置的全局属性（没有用var）
+delete x;//将它删除
+```
+然而在严格模式中，delete后跟随一个非法的操作数（比如x），则会报一个语法错误，因此必须显式指定对象及其属性：
+```javascript
+delete x;//在严格模式下报语法错误
+delete this.x//正常工作
+```
 
 **6.4检测属性**
+
+javascript对象可以看做属性的集合，我们经常会检测集合中成员的所属关系——判断某个属性是否存在于某个对象中。可以通过in运算符、hasOwnPreperty()和propertyIsEnumerable()方法来完成这个工作，甚至仅通过属性查询也可以做到这一点。
+
+in运算符的左侧是属性名（字符串），右侧是对象。如果对象的自有属性或继承属性中包含这个属性则返回true：
+```javascript
+var o = {x:1};//
+"x" in o;//true: "x"是o的属性
+"y" in o;//false: "y"不是o的属性
+"toString" in o;//true: o继承toString属性
+```
+对象的hasOwnProperty()方法用来检测给定的名字是否是对象的自有属性。对于继承属性它将返回false：
+```javascript
+var o = {x:1};
+o.hasOwnProperty("x");//true: o有一个自有属性x
+o.hasOwnProperty("y");//false: o中不存在属性y
+o.hasOwnProperty("toString");//false: toString是继承属性
+```
+propertyIsEnumerable()是hasOwnProperty()的增强版，只有检测到是自有属性且这个属性的可枚举性（enumerable attribute）为true时它才返回true。某些内置属性是不可枚举的。通常由javascript代码创建的属性都是可枚举的，除非在javascript5中使用一个特殊的方法来改变属性的可枚举性，随后会提到：
+```javascript
+var o = inherit({y:2});
+o.x = 1;
+o.propertyIsEnumerable("x");//true o有一个可枚举的自有属性x
+o.propertyIsEnumerable("y");//false y是继承来的
+Object.prototype.propertyIsEnumerable("toString");//false 不可枚举
+```
+除了使用in运算符之外，另一种更简便的方法是使用“!==”判断一个属性是否是undefined：
+```javascript
+var o {x:1}
+o.x !== undefined;//true o中有属性x
+o.y !== undefined;//false o中没有属性y
+o.toString !== undefined;//true o继承了toString属性
+```
+然而有一种场景只能使用in运算符而不能使用上述属性访问的方式。in可以区分不存在的属性和存在但值为undefined的属性。例如下面的代码：
+```javascript
+var o ={x:undefined};//属性被显式赋值为undefined
+o.x !== undefined;//false 属性存在，但值为undefined
+o.y !== undefined;//false 属性不存在
+"x" in o;//true 属性存在
+"y" in o;//false 属性不存在
+delete o.x;//删除了属性x
+"x" in o;//false 属性不再存在
+```
+注意，上述代码中使用的是“!==”运算符，而不是“!=”。“!==”可以区分undefined和null。有时则不必作这些区分：
+```javascript
+//如果o中含有属性x，且x的值不是null或undefined，o.x乘以2
+if(o.x != null) o.x*=2;
+//如果o中含有属性x，且x的值不能转换为false，o.x乘以2
+//如果x是undefined、null、false、""、0或NaN，则它保持不变
+if(o.x) o.x*=2;
+```
 **6.5枚举属性**
+
+
+
 **6.6属性getter和setter**
 **6.7属性的特性**
 **6.8对象的三个属性**
