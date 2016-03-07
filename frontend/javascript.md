@@ -1050,7 +1050,18 @@ o.propertyIsEnumerable("toString")//=>false，不可枚举
 for(p in o)//遍历属性
 console.log(p)//输出x、y和z，不会输出toSring
 ```
-
+有很多实用工具库给Object.prototype添加了新的方法或属性，这些方法和属性可以被所有对象继承并使用。然而在ECMAScript5标准之前，这些新添加的方法是不能定义为不可枚举的，因此它们都可以在for/in循环中枚举出来。为了避免这种情况，需要过滤for/in循环返回的属性，下面两种方式是最常见的：
+```javascript
+for(p in o){
+    if(!o.hasOwnProperty(p)) continue;//跳过继承的属性
+}
+for(p in o){
+    if(typeof o[p] === "function") continue;//跳过方法
+}
+```
+例6-2定义了一些有用的工具函数来操控对象的属性，这些函数用到了for/in循环。实际上extend()函数经常出现在javascript实用工具库中。
+这里实现的extend()逻辑虽然正确，但并不能弥补IE中有一些众所周知的bug，在例8-3中会有更健壮的extend()实现。
+例6-2：用来枚举属性的对象工具函数
 
 **6.6属性getter和setter**
 **6.7属性的特性**
