@@ -1048,7 +1048,7 @@ if(o.x) o.x*=2;
 var o = {x:1, y:2, z:3};//三个可枚举的自有属性
 o.propertyIsEnumerable("toString")//=>false，不可枚举
 for(p in o)//遍历属性
-console.log(p)//输出x、y和z，不会输出toSring
+console.log(p)//输出x、y和z，不会输出toString
 ```
 有很多实用工具库给Object.prototype添加了新的方法或属性，这些方法和属性可以被所有对象继承并使用。然而在ECMAScript5标准之前，这些新添加的方法是不能定义为不可枚举的，因此它们都可以在for/in循环中枚举出来。为了避免这种情况，需要过滤for/in循环返回的属性，下面两种方式是最常见的：
 ```javascript
