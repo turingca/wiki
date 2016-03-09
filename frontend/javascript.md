@@ -1197,20 +1197,142 @@ console.log(q.theta);
 ```
 这段代码使用存取器属性定义api，api提供了表示同一组数据的两种方法（笛卡尔坐标系表示法和极坐标系表示法）。还有很多场景可以用到存取器属性，比如智能检测属性的写入值以及在每次属性读取时返回不同值：
 ```javascript
-//
+//这个对象产生严格自增的序列号
 var serialnum = {
-//
-//
+//这个数组属性包含下一个序列号
+//$符号暗示这个属性是一个私有属性
 $n: 0,
-//
+//返回当前值，然后自增
 get next() { return this.$n++; },
-//
+//给n设置新的值，但只有当它比当前值大时才设置成功
 set next(n) {
+    if(n >= this.$n) this.$n = n;
+    else throw "序列号的值不能比当前值小";
 }
 }
 ```
+最后我们再来看一个例子，这个例子使用getter方法实现一种“神奇”的属性：
+```javascript
+//这个对象有一个可以返回随机数的存取器属性
+//例如，表达式“random.octet”产生一个随机数
+//每次产生的随机数都在0~255之间
+var random = {
+    get octet() {return Math.floor(Math.random()*256);},
+    get uint16() {return Math.floor(Math.random()*65536);},
+    get int16() {return Math.floor(Math.random()*65536)-32768;}
+};
+```
+本节介绍了如何给对象直接量定义存取器属性。下一步会介绍如何给一个已经存在的对象添加一个存取器属性。
 
 **6.7属性的特性**
+
+除了名字和值之外，属性还包含一些标识它们可写、可枚举和可配置的特性。在ECMAScript3中无法设置这些特性，所有通过ECMAScript3的程序创建的属性都是可写的、可枚举的和可配置的，且无法对这些特性做修改。本节将讲述ECMAScript5中查询和设置这些属性特性的api，这些api对于库的开发者来说非常重要，因为：
+
+* 可以通过这些api给原型对象添加方法，并将它们设置成不可枚举的，这让它们看起来更像内置方法。
+* 可以通过这些api给对象定义不能修改或删除的属性，借此“锁定”这个对象。
+
+在本节里，我们将存取器属性的getter和setter方法看成是属性的特性。按照这个逻辑，我们也可以把数据属性的值同样看做属性的特性。因此，可以认为一个属性包含一个名字和4个特性。数据属性的4个特性分别是它的值（value）、可写性（writable）、可枚举性（enumerable）和可配置性（configurable）。存取器属性不具有值（value）特性和可写性，它们的可写性是由setter方法存在与否决定的。因此存取器属性的4个特性是读取（get）、写入（set）、可枚举性和可配置性。   
+
+为了实现属性特性的查询和设置操作，ECMAScript5中定义了一个名为“属性描述符”（property descriptor）的对象，这个对象代表那4个特性。描述符对象的属性和它们所描述的属性特性是同名的。因此，数据属性的描述符对象的属性有value、writable、enumerable和configurable。存取器属性的描述符对象则用get属性和set属性代替value和writable。其中writable、enumerable和configurable都是布尔值，当然，get属性和set属性是函数值。
+
+通过调用Object.getOwnPropertyDescriptor()可以获得某个对象特定属性的属性描述符：
+```javascript
+//返回{value:1,writable:true,enumerable:true;configurable:true}
+Object.getOwnPropertyDescripor({x:1},"x");
+//查询上下文中定义的random对象的octet属性
+//返回{get:/*func*/, set:undefined,enumerable:true;configurable:true}
+Object.getOwnPropertyDescriptor(random,"octet");
+//对于继承属性和不存在的属性，返回undefined
+Object.getOwnPropertyDescriptor({},"x"); //undefined，没有这个属性
+Object.getOwnPropertyDescriptor({},"toString");//undefined，继承属性
+```
+从函数名字就可以看出，Object.getOwnPropertyDescriptor()只能得到自有属性的描述符。要想获得继承属性的特性，需要遍历原型链（参照6.8.1节的Object.getPrototypeOf()）。
+
+要想设置属性的特性，或者想让新建属性具有某种特性，则需要调用Object.definePeoperty()，传入要修改的对象、要创建或修改的属性的名称以及属性描述符对象。
+```javascript
+var o = {};//创建一个空对象
+//添加一个不可枚举的数据属性x，并赋值为1
+Object.defineProperty(o,"x",{value:1,writable:true,enumerable:false,configurable:true});
+//属性是存在的，但不可枚举
+o.x;//=>1
+Object.kes(o)//=>[]
+//现在只对属性x做修改，让它变为只读
+Object.defineProperty(o,"x",{writable:false});
+//试图更改这个属性的值
+o.x = 2;//操作失败，但不报错，而在严格模式中抛出类型错误异常
+o.x //=> 1
+//属性依然是可配置的，因此可以通过这种方式对它进行修改：
+Object.defineProperty(o,"x",{value:2});
+o.x //=>2
+//现在将x从数据属性修改为存取器属性
+Object.defineProperty(o,"x",{get:function(){return o;}});
+o.x //=>0
+```
+传入Object.defineProperty()的属性描述符对象不必包含所有4个特性。对于新创建的属性来说，默认的特征值是false或undefined。对于修改的已有属性来说，默认的特性值没有做任何修改。注意，这个方法要么修改已有属性要么新建自有属性，但不能修改继承属性。
+
+如果同时修改或创建多个属性，则需要使用Object.defineProperties()。第一个参数是要修改的对象，第二个参数是一个映射表，它包含要新建或修改的属性的名称，以及它们的属性描述符，例如：
+```javascript
+var p = Object.defineProperties({},{
+    x:{value:1,writable:true,enumerable:true,configurable:true},
+    y:{value:1,writable:true,enumerable:true,configurable:true},
+    r:{
+        get: function(){return Math.sqrt(this.x*this.x + this.y*this.y)},
+        enumerable: true,
+        configurable: true
+    }
+});
+```
+这段代码从一个空对象开始，然后给它添加两个数据属性和一个只读存取器属性。最终Object.defineProperties()返回修改后的对象（和Object.defineProperty()一样）。
+
+对于那些不允许创建或修改的属性来说，如果用Object.defineProperty()和Object.defineProperties()对其操作（新建或修改）就会抛出类型错误异常，比如，给一个不可扩展的对象（参照6.8.3节）新增属性就会抛出类型错误异常。造成这些方法抛出类型错误异常的其他原因则和特性本身有关。可写性控制着对值特性的修改。可配置性控制着对其他特性（包括属性是否可以删除）的修改。然而规则远不止这么简单，例如，如果属性是可配置的话，则可以修改不可写属性的值。同样，如果属性是不可配置的，仍然可以将可写属性修改为不可写属性。下面是完整的规则，任何对Object.defineProperty()或Object.defineProperties()违反规则的使用都会抛出类型错误异常：
+
+* 如果对象是不可扩展的，则可以编辑已有的自有属性，但不能给它添加新属性。
+* 如果属性是不可配置的，则不能修改它的可配置性和可枚举性。
+* 如果存取器属性是不可配置的，则不能修改其getter和setter方法，也不能将它转换为数据属性。
+* 如果数据属性是不可配置的，则不能将它转换为存取器属性。
+* 如果数据属性是不可配置的，则不能将它的可写性从false修改为true，但可以从true修改为false。
+* 如果数据属性是不可配置且不可写的，则不能修改它的值。然而可配置但不可写属性的值是可以修改的（实际上是先将它标记为可写的，然后修改它的值，最后转换为不可写的）
+
+例6-2实现了extend()函数，这个函数把一个对象的属性复制到另一个对象中。这个函数只是简单地复制属性名和值，没有复制属性的特性，而且也没有复制存取器属性的getter和setter方法，只是将它们简单地转换为静态的数据属性。例6-3给出了改进的extend()，它使用Object.getOwnPropertyDescriptor()和Object.defineProperty()对属性的所有特性进行复制。新的extend()作为不可枚举属性添加到Object.prototype中，因此它是Object上定义的新方法，而不是一个独立的函数。
+
+```javascript
+/*
+ * Add a nonenumerable extend() method to Object.prototype.
+ * This method extends the object on which it is called by copying properties
+ * from the object passed as its argument.  All property attributes are
+ * copied, not just the property value.  All own properties (even non-
+ * enumerable ones) of the argument object are copied unless a property
+ * with the same name already exists in the target object.
+ *给Object.prototype添加一个不可枚举的extend()方法
+ *这个方法继承自调用它的对象，将作为参数传入对象的属性一一复制
+ *除了值之外，也复制属性的所有特性，除非在目标对象中存在同名的属性,
+ *参数对象的所有自有对象（包括不可枚举的属性）也会一一复制
+ */
+Object.defineProperty(Object.prototype,
+    "extend",                  // Define Object.prototype.extend，定义Object.prototype.extend
+    {
+        writable: true,
+        enumerable: false,     // Make it nonenumerable，将其定义为不可枚举的
+        configurable: true,
+        value: function(o) {   // Its value is this function，值就是这个函数
+            // Get all own props, even nonenumerable ones，得到所有的自有属性，包括不可枚举属性
+            var names = Object.getOwnPropertyNames(o);
+            // Loop through them，遍历它们
+            for(var i = 0; i < names.length; i++) {
+                // Skip props already in this object，如果属性已经存在，则跳过
+                if (names[i] in this) continue;
+                // Get property description from o，获得o中的属性的描述符
+                var desc = Object.getOwnPropertyDescriptor(o,names[i]);
+                // Use it to create property on this，用它给this创建一个属性
+                Object.defineProperty(this, names[i], desc);
+            }
+        }
+    });
+```
+getter和setter的老式api：
+可以通过6.6节描述的对象直接量语法给新对象定义存取器属性，但不能查询属性的getter和setter方法或给已有的对象添加新的存取器属性。在ECMAScript5中，可以通过Object.getOwnPropertyDescriptor()和Object.defineProperty()来完成这些工作。
+在ECMAScript5标准被采纳之前，大多数javascript的实现（IE浏览器除外）已经可以支持对象直接量语法中的get和set写法。这些实现提供了非标准的老式api用来查询和设置getter和setter。这些api由4个方法组成，所有对象都拥有这些方法。__lookupGetter__()和__lookupSetter__()用以返回一个命名属性的getter和setter方法。__defineGetter__()和__defineSetter__()用以定义getter和setter，这两个函数的第一个参数是属性名字，第二个参数是getter和setter方法。这4个方法都是以两条下划线作前缀，两条下划线做后缀，以表明它们是非标准的方法。本书第三部分没有对非标准方法做介绍。
+
 **6.8对象的三个属性**
 **6.9序列化对象**
 **6.10对象方法**
