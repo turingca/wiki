@@ -1148,6 +1148,68 @@ function keys(o) {
 ECMAScript5中第二个枚举的属性的函数是Object.getOwnPropertyNames(),它和Object.keys()类似，只是它返回对象的所有自有属性的名称，而不仅仅是可枚举的属性。在ECMAScript3中是无法实现的类似的函数的，因为ECMAScript3中没有提供任何方法来获取对象不可枚举的属性。
 
 **6.6属性getter和setter**
+
+我们知道，对象属性是由名字、值和一组特性（attribute）构成的。在ECMAScript5中（包括除IE之外的最新主流浏览器的ECMAScript3的实现），属性值可以用一个或两个方法替代，这两个方法就是getter和setter。有getter和setter定义的属性称做“存取器属性”（accessor property），它不同于“数据属性”（data property），数据属性只有一个简单的值。
+
+当程序查询存取器属性的值时，javascript调用getter方法（无参数）。这个方法的返回值就是属性存取表达式的值。当程序设置一个存取器属性的值时，javascript调用setter方法，将赋值表达式右侧的值当做参数传入setter。从某种意义上讲，这个方法负责“设置”属性值。可以忽略setter方法的返回值。
+
+和数据属性不同，存取器属性不具有可写性（writable attribute）。如果属性同时具有getter和setter方法，那么它是一个读／写属性。如果它只有setter方法，那么它是一个只写属性（数据属性中有一些例外），读取只写属性总是返回undefined。
+
+定义存取器属性最简单的方法是使用对象直接量语法的一种扩展写法：
+```javascript
+var o = {
+//普通的数据属性
+data_prop: value,
+//存取器属性都是成对定义的函数
+get accessor_prop(){/*这里是函数体*/}
+set accessor_prop(value){/*这里是函数体*/}
+};
+```
+存取器属性定义为一个或两个和属性同名的函数，这个函数定义没有使用function关键字，而是使用get和（或）set。注意，这里没有使用冒号将属性名和函数体分隔开，但在函数体的结束和下一个方法或数据属性之间有逗号分隔。例如，思考下面这个表示2D笛卡尔点坐标的对象。它有两个普通的属性x和y分别表示对应点的x坐标和y坐标，它还有两个等价的存取器属性用来表示点的极坐标：
+```javascript
+var p = {
+//x和y是普通的可读写的数据属性
+x:1.0,
+y:1.0,
+//r是可读写的存取器属性，它有getter和setter
+//函数体结束后不要忘记带上逗号
+get r() {return Math.sqrt(this.x*this.x+this.y*this.y);},
+set r(newvalue) {
+    var oldvalue = Math.sqrt(this.x*this.x+this.y*this.y);
+    var ratio = newvalue/oldvalue;
+    this.x *= ratio;
+    this.y *= ratio;
+},
+//theta是只读存取器属性，它只有getter方法
+get theta() { return Math.atan2(this.y,this.x);}
+};
+```
+注意在这段代码中getter和setter里this关键字的用法。javascript把这些函数当做对象的方法的来调用，也就是说，在函数体内的this指向表示这个点的对象，因此，r属性的getter方法可以通过this.x和this.y引用x和y属性。8.2.2节会对方法和this关键字做更详尽的讲述。
+
+和数据属性一样，存取器属性是可以继承的，因此可以将上述代码中的对象p当做另一个“点”的原型。可以给新对象定义它的x和y属性。8.2.2节会对方法和this关键字做更详尽的讲述。
+
+和数据属性一样，存取器属性是可以继承的，因此可以将上述代码中的对象p当做另一个“点”的原型。可以给新对象定义它的x和y属性，但r和theta属性是继承来的：
+```javascript
+var q = inherit(p);//创建一个继承getter和setter的新对象
+q.x = 1, q,y = 1;//给q添加两个属性
+console.log(q.r);//可以使用继承的存取器属性
+console.log(q.theta);
+```
+这段代码使用存取器属性定义api，api提供了表示同一组数据的两种方法（笛卡尔坐标系表示法和极坐标系表示法）。还有很多场景可以用到存取器属性，比如智能检测属性的写入值以及在每次属性读取时返回不同值：
+```javascript
+//
+var serialnum = {
+//
+//
+$n: 0,
+//
+get next() { return this.$n++; },
+//
+set next(n) {
+}
+}
+```
+
 **6.7属性的特性**
 **6.8对象的三个属性**
 **6.9序列化对象**
