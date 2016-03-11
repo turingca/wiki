@@ -608,6 +608,24 @@ var data = [7,8,9];//拥有三个元素的数组
 
 **4.9.4instanceof运算符**
 
+instanceof运算符希望左操作数是一个对象，右操作数标识对象的类。如果左侧对象是右侧的类的实例，则表达式返回true；否则返回false。第9章将会讲到，javascript中对象的类是通过初始化它们的构造函数来定义的。这样的话，instanceof的右操作数应当是一个函数。比如：
+```javascript
+var d = new Date();//通过Date()构造函数来创建一个新对象
+d instanceof Date();//计算结果为true，d是由Date()创建的
+d instanceof Object();//计算结果为true，所有对象都是Object的实例
+d instanceof Number();//计算结果为false，d不是一个Number对象
+var a = [1,2,3];//通过数组直接量的方法创建一个数组
+a instanceof Array;//计算结果为true，a是一个数组
+a instanceof Object;//计算结果为true，所有的数组都是对象
+a instanceof RegExp;//计算结果为false，数组不是正则表达式
+```
+需要注意的是，所有的对象都是Object的实例。当通过instanceof判断一个对象是否是一个类的实例的时候，这个判断也会包含对“父类”(superclass)的检测。如果instanceof的左操作数不是对象的话，instanceof返回false。如果右操作数不是函数，则抛出一个类型错误异常。
+
+为了理解instanceof运算符是如何工作的，必须首先理解“原型链”（prototype chain）。
+原型链作为javascript的继承机制，将在6.2.2节详细描述。为了计算表达式o instanceof f，javascript首先计算f.prototype，然后在原型链中查找o，如果找到，那么o是f（或者f的父类）的一个实例，表达式返回true。如果f.prototype不在o的原型链中的话，那么o就不是f的实例，instanceof返回false。
+对象o中存在一个隐藏的成员，这个成员指向其父类的原型，如果父类的原型是另外一个类的实例的话，则这个原型对象中也存在一个隐藏成员指向另一个类的原型，这种链条将许多对象或类串接起来，既是原型链。原文所讲f.prototype不在o的原型链中也就是说f和o没有派生关系，更多细节请参照6.2.2节。
+
+
 **4.10逻辑表达式**
 
 逻辑运算符“&&”、“||”和“!”是对操作数进行布尔算术运算，经常和关系运算符一起配合使用，逻辑运算符将多个关系表达式组合起来组成一个更复杂的表达式。这些运算符在下面几节中会一一讲述，为了更好地理解它们，应当首先回顾一下3.3节提到的“真值”和“假值”的概念。
@@ -1334,6 +1352,30 @@ getter和setter的老式api：
 在ECMAScript5标准被采纳之前，大多数javascript的实现（IE浏览器除外）已经可以支持对象直接量语法中的get和set写法。这些实现提供了非标准的老式api用来查询和设置getter和setter。这些api由4个方法组成，所有对象都拥有这些方法。__lookupGetter__()和__lookupSetter__()用以返回一个命名属性的getter和setter方法。__defineGetter__()和__defineSetter__()用以定义getter和setter，这两个函数的第一个参数是属性名字，第二个参数是getter和setter方法。这4个方法都是以两条下划线作前缀，两条下划线做后缀，以表明它们是非标准的方法。本书第三部分没有对非标准方法做介绍。
 
 **6.8对象的三个属性**
+
+每一个对象都有与之相关的原型（prototype）、类（class）和可扩展性（extensible attribute）。下面几节将会展开描述这些属性有什么作用，以及如何查询和设置它们。
+
+**6.8.1原型属性**
+
+对象的原型属性是用来继承属性的（关于原型和原型继承的更多内容请参照6.1.3节和6.2.2节），这个属性如此重要，以至于我们经常把“o的原型属性”直接叫做“o的原型”。
+
+原型属性是在实例对象创建之初就设置好的，回想一下6.1.3节提到的，通过对象直接量创建的对象使用Object.prototype作为它们的原型。通过new创建的对象使用构造函数的prototype属性作为它们的原型。通过Object.create()创建的对象使用第一个参数（也可以是null）作为它们的原型。
+
+在ECMAScript5中，将对象作为参数传入Object.getPrototypeOf()可以查询它的原型。在ECMAScript3中，则没有与之等价的函数，但经常使用表达式o.constructor.prototype来检测一个对象的原型。通过new表达式创建的对象，通常继承一个constructor属性，这个属性指代创建这个对象的构造函数。更多细节将会放在9.2节进一步讨论，9.2节还解释了使用这种方法来检测对象原型的方式并不可靠的原因。注意，通过对象直接量或Object.create()创建的对象包含一个名为constructor的属性，这个属性指代Object()构造函数。因此，constructor.prototype才是对象直接量的真正的原型，但对于通过Object.create()创建的对象则往往不是这样。
+要想检测一个对象是否是另一个对象的原型（或处于原型链中），请使用isPrototypeOf()方法。例如，可以通过p.isPrototypeOf(o)来检测p是否是o的原型：
+```javascript
+var p = {x:1}//定义一个原型对象
+var o = Object.create(p);//使用这个原型创建一个对象
+p.isPrototypeOf(o); //=>true　o继承自p
+Object.prototype.isPrototypeOf(o) //=>true o继承自Object.prototype
+Object.prototype.isPrototypeOf(p) //=>true p继承自Object.prototype
+```
+需要注意的是，isPrototypeOf()函数实现的功能和instcanceof运算符非常类似（参照4.9.4节）。
+Mozilla实现的javascript（包括早些年的netscape）对外暴露了一个专门命名__proto__的属性，用以直接查询/设置对象的原型。但并不推荐使用__proto__，因为尽管Safari和Chrome的当前版本都支持它，但IE和Opera还未实现它（可能以后也不会实现）。实现了ECMAScript5的firefox版本依然支持__proto__，但对修改不可扩展的对象的原型做了限制。
+
+**6.8.2类属性**
+**6.8.3可扩展性**
+
 **6.9序列化对象**
 **6.10对象方法**
 
