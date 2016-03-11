@@ -344,7 +344,7 @@ var t = s.len;//查询这个属性
 当运行这段代码时，t的值是undefined。第二行代码创建一个临时字符串对象，并给其len属性赋值4，随即销毁这个对象。第三行通过原始的（没有修改过）字符串值创建一个新字符串对象，尝试读取其len属性，这个属性自然是不存在的，表达式求值结果为undefined。这段代码说明了在读取字符串、数字和布尔值的属性值（或方法）的时候，表现的像对象一样。但如果你试图给其属性赋值，则会忽略这个操作：修改只是发生在临时对象身上，而这个临时对象并未继续保留下来。
 
 存取字符串、数字或布尔值的属性时创建的临时对象称做包装对象，它只是偶尔用来区分字符串值和字符串对象、数字和数值对象以及布尔值和布尔对象。通常，包装对象只是被看做是一种实现细节，而不用特别关注。由于字符串、数字和布尔值的属性都是只读的，并且不能给它们定义新属性，因此你需要明白它们是有别于对象。
-
+lei
 需要注意的是，可通过String()、Number()或Boolean()构造函数来显式创建包装对象：
 ```javascript
 var s = "test",n = 1,b = true;//一个字符串、数字和布尔值
@@ -1374,7 +1374,43 @@ Object.prototype.isPrototypeOf(p) //=>true p继承自Object.prototype
 Mozilla实现的javascript（包括早些年的netscape）对外暴露了一个专门命名__proto__的属性，用以直接查询/设置对象的原型。但并不推荐使用__proto__，因为尽管Safari和Chrome的当前版本都支持它，但IE和Opera还未实现它（可能以后也不会实现）。实现了ECMAScript5的firefox版本依然支持__proto__，但对修改不可扩展的对象的原型做了限制。
 
 **6.8.2类属性**
+
+对象的类属性（class attribute）是一个字符串，用以表示对象的类型信息。ECMAScript3和ECMAScript5都未提设置这个属性的方法，并只有一种间接的方法可以查询它。默认的toString()方法（继承自Object.prototype）返回了如下这种格式的字符串：
+
+    [object class]
+    
+因此，要想获得对象的类，可以调用对象的toString()方法，然后提取已返回字符串的第8个到倒数第二个位置之间的字符。不过让人感觉棘手的是，很多对象继承的toString()方法重写了，为了能调用正确的toString()版本，必须间接地调用Function.call()方法（参照8.7.3节）。例6-4中的classof()函数可以返回传递给它的任意对象的类：
+```javascript
+function classof(o) {
+    if (o === null) return "Null";
+    if (o === undefined) return "Undefined";
+    return Object.prototype.toString.call(o).slice(8,-1);
+}
+```
+classof()函数可以传入任何类型的参数。数字、字符串和布尔值可以直接调用toString()方法，就和对象调用toString()方法一样，并且这个函数包含了对null和undefined的特殊处理（在ECMAScript5中不需要对这些特殊情况做处理）。通过内置构造函数（比如Array和Date）创建的对象包含“类属性”（class attribute），它与构造函数名称相匹配。宿主对象也包含有意义的“类属性”，但这和具体的javascript实现有关。通过对象直接量和Object.create创建的对象的类属性是“Object”，那些自定义构造函数创建的对象也是一样，类属性也是“Object”，因此对于自定义的类来说，没办法通过类属性来区分对象的类：
+```javascript
+classof(null)//=> "Null"
+classof(1)//=> "Number"
+classof("")//=> "String"
+classof(false)//=> "Boolean"
+classof({})//=> "Object"
+classof([])//=> "Array"
+classof(/./)//=> "Regexp"
+classof(new Date())//=> "Date"
+classof(window)//=> "Window"(这是客户端宿主对象)
+function f() {};//定义一个自定义的构造函数
+classof(new f());//=> "Object"
+```
+
 **6.8.3可扩展性**
+
+对象的可扩展性用以表示是否可以给对象添加新属性。所有内置对象和自定义对象都是显式可扩展的，宿主对象的可扩展性是由javascript引擎定义的。在ECMAScript5中，所有的内置对象和自定义对象都是可扩展的，除非将它们转换为不可扩展的，同样，宿主对象的可扩展性也是由实现ECMAScript5的javascript引擎定义的。
+
+ECMAScript5定义了用来查询和设置对象可扩展性的函数。通过将对象传入Object.esExtensible()，来判断该对象是否是可扩展的。如果想将对象转换为不可扩展的，需要调用Object.preventExtensions(),将待转换的对象作为参数传进去。注意，一旦将对象转换为不可扩展的，就无法再将其转换回可扩展的了。同样需要注意的是，preventExtensions()只影响到对象本身的可扩展性。如果给一个不可扩展的对象的原型添加属性，这个不可扩展的对象同样会继承这些新属性。
+
+可扩展属性的目的是将对象“锁定”，以避免外界的干扰。对象的可扩展性通常和属性的可配值性与可写性配合使用，ECMAScript5定义的一些函数可以更方便地设置多种属性。
+
+Object.seal()和Object.
 
 **6.9序列化对象**
 **6.10对象方法**
