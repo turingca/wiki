@@ -1412,16 +1412,114 @@ ECMAScript5定义了用来查询和设置对象可扩展性的函数。通过将
 
 Object.seal()和Object.preventExtensions()类似，除了能够将对象设置为不可扩展的，还可以将对象的所有自有属性都设置为不可配置的。也就是说，不能给这个对象添加新属性，而且它已有的属性也不能删除或配置，不过它已有的可写属性依然可以设置。可于那些已经封闭（sealed）起来的对象是不能解封的。可以使用Object.isSealed()来检测对象是否封闭。
 
-Object.freeze()将更严格地锁定对象——“冻结”（frozen）。除了将对象设置为不可扩展和将其属性设置为
+Object.freeze()将更严格地锁定对象——“冻结”（frozen）。除了将对象设置为不可扩展和将其属性设置为不可配置的之外，还可以将它自有的所有数据属性设置为只读（如果对象的存取器属性具有setter方法，存取器属性将不受影响，仍可以通过给属性赋值调用它们）。使用Object.isFrozen()来检测对象是否冻结。
+Object.preventExtensions()、Object.seal()和Object.freeze()都返回传入的对象，也就是说，可以通过函数嵌套的方式调用它们：
+```javascript
+//创建一个封闭对象，包括一个冻结的原型和一个不可枚举的属性
+var o = Object.seal(Object.create(Object.freeze({x:1}),{y:{value:2, writable:true}})):
+```
 
 **6.9序列化对象**
+
+对象序列化（serialization）是指将对象的状态转换为字符串，也可将字符串还原为对象。ECMAScript5提供了内置函数JSON.stringify()和JSON.parse()用来序列化和还原javascript对象。这些方法都使用JSON作为数据交换格式，JSON的全称是“JavaScript Object Notation”——javascript对象表示法，它的语法和javascript对象与数组直接量的语法非常相近：
+```javascript
+o = {x:1, y:{z:[false,null,""]}};//定义一个测试对象
+s = JSON.stringify(o);//s是 '{x:1, y:{z:[false,null,""]}}'
+p = JSON>parse(s);//p是o的深拷贝
+```
+
+    ECMAScript5中的这些函数的本地实现和http://json.org/json2.js中的公共域ECMAScript3版本的实现非常类似，或者说完全一样，因此可以通过引入json2.js模块在ECMAScript3的环境中使用ECMAScript5中的这些函数。
+    
+json的语法是javascript语法的子集，它并不能表示javascript里的所有值。支持对象、数组、字符串、无穷大数字、true、false和null，并且它们可以序列化和还原。NaN、Infinity和-Infinity序列化的结果是null，日期对象序列化的结果是ISO格式的日期字符串（参照Date.toJSON()函数），但JSON.parse()依然保留它们的字符串形态，而不会将它们还原为原始日期对象。函数、RegExp、Error对象和undefined值不能序列化和还原。JSON.stringify()只能序列化对象可枚举的自有属性。对于一个不能序列化的属性来说，在序列化后的输出字符串中会将这个属性省略掉。JSON.stringify()和JSON.parse()都可以接收第二个可选参数，通过传入需要序列化或还原的属性列表来定制自定义的序列化或还原操作。第三部分有关于这些函数的详细文档。
+
 **6.10对象方法**
 
+上文已经讨论过，所有的javascript对象都从Object.prototype继承属性（除了那些不通过原型显式创建的对象）。这些继承属性主要是方法，因为javascript程序员普遍对继承方法更感兴趣。我们已经讨论过hasOwnProperty()、propertyIsEnumerable()和isPrototypeOF()这三个方法，以及在Object构造函数里定义的静态函数Object.create()和Object.getPrototypeOf()等。这节将对定义在Object.prototype里的对象方法展开讲解，这些方法非常好用而且使用广泛，但一些特定的类会重写这些方法。
+
+**6.10.1toString()方法**
+
+toString()方法没有参数，它将返回一个表示调用这个方法的对象值的字符串。在需要将对象转换为字符串的时候，javascript都会调用这个方法。比如，当使用“+”运算符连接一个字符串和一个对象时或者在希望使用字符串的方法中使用了对象时都会调用toString()。
+
+默认的toString()方法的返回值带有的信息量很少（尽管它在检测对象的类型时非常有用，参照6.8.2），例如，下面这行代码的计算结果为字符串“[object Object]”：
+
+    var s = {x:1, y:1}.toString();
+
+由于默认的toString()方法并不会输出很多有用的信息。因此很多类都带有自定义的toString()。例如，当数组转换为字符串的时候，结果是一个数组元素列表，只是每个元素都转换成了字符串，再比如，当函数转换为字符串的时候，得到函数的源代码。第三部分有关于toString()的详细文档说明，比如Array.toString()、Date.toString()以及Function.toString()。
+9.3.6节介绍如何给自定义类重写toString()方法。
+
+**6.10.2toLocaleString()方法**
+
+除了基本的toString()方法之外，对象都包含toLocaleString()方法，这个方法返回一个表示这个对象的本地化字符串。Object中默认的toLocaleString()方法并不做任何本地化自身的操作，它仅调用toString()方法并返回对应值。Date和Numer类对toLocaleString()做了定制，可以用它对数字、日期和时间做本地化的转换。Array类的toLocaleString()方法和toString()方法很像，唯一的不同是每个数组元素会调用toLocaleString()方法转换为字符串，而不是调用各自的toString()方法。
+
+**6.10.3toJSON()方法**
+
+Object.prototype实际上没有定义toJSON()方法，但对于需要执行序列化的对象来说，JSON.stringify()方法会调用toJSON()方法。如果在待序列化的对象中存在这个方法，则调用它，返回值即是序列化的结果，而不是原始的对象。具体示例参加Date.toJSON()。
+
+**6.10.4valueOf()方法**
+
+valueOf()方法和toString()方法非常类似，但往往当Javascript需要将对象转换为某种原始值而非字符串的时候才会调用它，尤其是转换为数字的时候。如果在需要使用原始值的上下文中使用了对象，javascript就会自动调用这个方法。默认的valueOF()方法不足为奇，但有些内置类自定义了valueOf()方法（比如Date.valueOf()），9.6.3节讨论如何给自定义对象类型定义valueOf()方法。
 
 数组
 ----
+
+数组是值得有序集合。每个值叫做一个元素，而每个元素在数组中有一个位置，以数字表示，称为索引。javascript数组是无类型的：数组元素可以是任意类型，并且同一个数组中的不同元素也可能有不同的类型。数组的元素甚至也可能是对象或其他数组，这允许创建复杂的数据结构，如对象的数组和数组的数组。javascript数组的索引是基于零的32位数值：第一个索引是0，最大可能的索引为4294967294（2的32次方减去2），数组最大能容纳4294967295个元素。javascript数组是动态的，根据需要它们会增长或缩减，并且在创建数组时无须声明一个固定的大小或者在数组大小变化时无须重新分配空间。javascript数组可能是稀疏的：数组元素的索引不一定是连续的，它们之间可以有空缺。每个javascript数组都有一个length属性。针对非稀疏数组，该属性就是数组元素的个数。针对稀疏数组，length比所有元素索引要大。
+
+javascript数组是javascript对象的特殊形式，数组索引实际上和碰巧是整数的属性名差不多。我们将在本章的其他地方更多地讨论特殊化的数组。通常，数组的实现是经过优化的，用数字索引来访问数组元素一般来说比访问常规的对象属性要快很多。
+
+数组继承自Array.prototype中的属性，它定义了一套丰富的数组操作方法，7.8节和7.9节涵盖这方面的内容。大多数这些方法是通用的，这意味着它们不仅对真正的数组有效，而且对“类数组对象”同样有效。7.11节讨论类数组对象。在ECMAScript5中，字符串的行为与字符数组类似，我们将在7.12节讨论。
+
 **7.1创建数组**
+
+使用数组直接量是创建数组最简单的方法，在方括号中将数组元素用逗号隔开即可。例如：
+```javascript
+var empty = [];//没有元素的数组
+var primes = [2, 3, 5, 7, 11];//有5个数值的数组
+var misc = [1.1, true, "a" ,]//3个不同类型的元素和结尾的逗号
+```
+数组直接量中的值不一定要是常量：它们可以是任意的表达式：
+```javascript
+var base = 1024;
+var table = [base, base+1, base+2, base+3]; 
+```
+它可以包含对象直接量或其他数组直接量：
+
+    var b = [[1,{x:1,y:2}],[2,{x:3,y:4}]];
+
+如果省略数组直接量中的某个值，省略的元素将被赋予undefined值：
+```javascript
+var count = [1,,3];//数组有3个元素，中间的那个元素值为undefined
+var undefs =  [,,];//数组有2个元素，都是undefined
+```
+数组直接量的语法允许有可选的结尾的逗号，故[,,]只有两个元素而非三个。
+
+调用构造函数Array()是创建数组的另一种方法。可以用三种方式调用构造函数。
+
+* 调用时没有参数：
+
+
+    var a = new Array();
+    
+该方法创建一个没有任何元素的空数组，等同于数组直接量[]。
+
+* 调用时有一个数值参数，它指定长度：
+
+
+    var a = new Array(10);
+    
+该技术创建指定长度的数组。当预先知道所需要元素个数时，这种形式的Array()构造函数可以用来预分配一数组空间。注意，数组中没有存储值，甚至数组的索引属性“0”、“1”等还没未定义。
+
+* 显式指定两个或多个数组元素或者数组的一个非数值元素：
+
+
+    var a = new Array(5,4,3,2,1,"testing, testing");
+    
+以这种形式，构造函数的参数将会成为新数组的元素。使用数组字面量比这样使用Array()构造函数要简单多了。
+
 **7.2数组元素的读和写**
+
+
+
+
 **7.3稀疏数组**
 **7.4数组长度**
 **7.5数组元素的添加和删除**
