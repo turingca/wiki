@@ -1649,13 +1649,180 @@ for(var i =0, len = keys.length; i < len; i++){
     //循环体仍然不变
 }
 ```
+这些例子假设数组是稠密的，并且所有的元素都是合法数据。否则，使用数组元素之前应该先检测它们。如果想要排除null、undefined和不存在的元素，代码如下：
+```javascript
+for (var i = 0 ;i < a.length; i++){
+    if(!a[i]) continue;//跳过null、undefined和不存在的元素
+    //循环体
+}
+```
+如果只想跳过undefined和不存在的元素，代码如下：
+```javascript
+for(var i = 0; i<a.length; i++){
+    if(a[i] === undefined) continue;//跳过undefined和不存的元素
+    //循环体
+}
+```
+最后，如果只想跳过不存在的元素而仍然要处理存在的undefined元素，代码如下：
+```javascript
+for(var i = 0; i < a.length; i++){
+    if(!(i in a)) continue;//跳过不存在的元素
+    //循环体
+}
+```
+还可以使用for/in循环（见5.5.4节）处理稀疏数组。循环每次将一个可枚举的属性名（包括数组索引）赋值给循环变量。不存在的索引将不会遍历到：
+```javascript
+for(var index in sparseArray){
+    var value = sparseArray[index];
+    //此处可以使用索引和值做一些事情
+}
+```
+在6.5节已经注意到for/in循环能够枚举继承的属性名，如添加Array.prototype中的方法。由于这个原因，在数组上不应该使用for/in循环，除非使用额外的检测方法来过滤不想要的属性。如下检测代码取其一即可：
+```javascript
+for (var i in o){
+    if(!a.hasOwnProperty(i)) continue;//跳过继承的属性
+    //循环体
+}
+for (var i in a){
+    //跳过不是非负整数的i
+    if(String(Math.floor(Math.abs(Number(i)))) !== i) continue;
+}
+```
+ECMAScript规范允许for/in循环以不同的顺序遍历对象的属性。通常数组元素的遍历实现是升序的，但不能保证一定是这样的。特别地，如果数组同时拥有对象属性和数组元素，返回的属性名很可能是按照创建的顺序而非数值的大小顺序。如何处理这个问题的实现各不相同，如果算法依赖于遍历的顺序，那么最好不要使用for/in而用常规的for循环。
+
+ECMAScript5定义了一些遍历数组元素的新方法，按照索引的顺序按个传递给定义的一个函数。这些方法中最常用的就是forEach()方法：
+```javascript
+var data = [1,2,3,4,5];//这是需要遍历的数组
+var sumOfSquares = 0;//要得到数据的平方和
+data.forEach(function(x){//把每个元素传递给此函数
+    sumOfSquares += x*x;//平方相加
+})；
+sumOfSquares //=>55 1+4+9+16+25
+```
+forEach()和相关的遍历方法使得数组拥有简单而强大的函数式编程风格。它们涵盖在7.9节中，当涉及函数式编程时，还将在8.8节再次碰到它们。
 
 **7.7多维数组**
+
+javascript不支持真正的多维数组，但可以用数组的数组来近似。访问数组的数组中的元素，只要简单地使用两次[]操作符即可。
+例如，假设变量matrix是一个数组的数组，它的基本元素是数值，那么matrix[x]的每个元素是包含一个数值数组，访问数组中特定数值的代码为matrix[x][y]。这里有一个具体的例子，它使用二维数组作为一个九九乘法表：
+```javascript
+//创建一个多维数组
+var table = new Array(10);//表格有10行
+for(var i = 0; i < table.length; i++)
+table[i] = new Array(10);//每行有10列
+//初始化数组
+for(var row = 0; row < table.length; row++){
+    for(col = 0; col < table[row].length; col++){
+        table[row][col] = row*col;
+    }
+}
+//使用多维数组来计算（查询）5*7
+var product = table[5][7];//35
+```
+
 **7.8数组方法**
+
+ECMAScript3在Array.prototype中定义了一些很有用的操作数组的函数，这意味着这些函数作为任何数组的方法都是可用的。下面几节介绍ECMAScript3中的这些方法。像通常一样，完整的细节参见第四部分关于数组内容。ECMAScript5中新增加了一些新的数组遍历方法：它们涵盖在7.9节中。
+
+**7.8.1join()**
+
+Array.join()方法将数组中所有元素都转化为字符串并连接在一起，返回最后生成的字符串。可以指定一个可选的字符串在生成的字符串中来分隔数组中的各个元素。如果不指定分隔符，默认使用逗号。如以下代码所示：
+```javascript
+var a = [1,2,3]//创建一个包含三个元素的数组
+a.join();//=> "1,2,3"
+a.join(" ")//=> "1 2 3"
+a.join("");//=> "123"
+var b = new Array(10);//长度为10的空数组
+b.join('-');//=>'---------' 9个连字号组成的字符串
+```
+Array.join()方法是String.split()方法的逆向操作，后者是将字符串分割成若干块来创建一个数组。
+
+**7.8.2reverse()**
+
+Array.reverse()方法将数组中的元素颠倒顺序，返回逆序的数组。它采取了替换，换句话说，它不通过重新排列的元素创建新的数组，而是在原先的数组中重新排列它们。例如，下面的代码使用reverse()和join()方法生成字符串“3，2，1”：
+```javascript
+var a = [1,2,3];
+a.reverse().join() //=> "3,2,1" 并且现在的a是[3,2,1]
+```
+
+**7.8.3sort()**
+
+Array.sort()方法将数组中的元素排序并返回排序后的数组。当不带参数调用sort()时，数组元素以字母表顺序排序（如有必要将临时转化为字符串进行比较）：
+```javascript
+var a = new Array("banana","cherry","apple");
+a.sort();
+var s = a.join(", ");//s == "apple, banana, cherry"
+```
+如果数组包含undefined元素，它们会被排到数组的尾部。
+为了按照其他方式而非字母表顺序进行数组排序，必须给sort()方法传递一个比较函数。该函数决定了它的两个参数在排好序的数组中的先后顺序。假设第一个参数应该在前，比较函数应该返回一个小于0的数值。反之，假设第一个参数应该在后，函数应该返回一个大于0的数值。并且，假设两个值相等（也就是说，它们的顺序无关紧要），函数应该返回0。因此，例如，用数值大小而非字母表顺序进行数组排序，代码如下：
+```javascript
+var a = [33, 4, 1111, 222];
+a.sort();//字母表顺序：111，22，33，4
+a.sort(function(a,b) {//数值排序 4，33，222，1111
+    return a-b;//根据顺序，返回负数、0、正数
+})
+a.sort(function (a,b){return b-a});//数值大小相反的顺序
+```
+注意，这里使用匿名函数表达式非常方便。既然比较函数只使用一次，就没必要给它们命名了。
+另外一个数组元素排序的例子，也许需要对一个字符串数组执行不区分大小写的字母表排序，比较函数首先将参数都转化为小写字符串（使用toLowerCase()方法），再开始比较：
+```javascript
+a = ['ant', 'Bug', 'cat', 'Dog'];
+a.sort();//区分大小写的排序，['Bug','Dog','ant','cat']
+a.sort(function(s,t){//不区分大小写的排序
+    var a = s.toLowerCase();
+    var b = t.toLowerCase();
+    if(a < b) return -1;
+    if(a > b) return 1;
+    return 0;
+});//=> ['ant','Bug','cat','Dog']
+```
+
+**7.8.4concat()**
+
+Array.concat()方法创建并返回一个新数组，它的元素包括调用concat()的原始数组的元素和concat()的每个参数。如果这些参数中的任何一个自身是数组，则连接的是数组的元素，而非数组本身。但要注意，concat()不会递归扁平化数组的数组。concat()也不会修改调用的数组。下面有一些示例：
+```javascript
+var a = [1,2,3];
+a.contact(4,5);//返回[1,2,3,4,5]
+a.contact([4,5]);//返回[1,2,3,4,5]
+a.contact([4,5],[6,7]);//返回[1,2,3,4,5,6,7]
+a.contact(4,[5,[6,7]]);//返回[1,2,3,4,5,[6,7]]
+```
+
+**7.8.5slice()**
+
+Array.slice()方法返回指定数组的一个片段或子数组。它的两个参数分别指定了片段的开始和结束的位置。返回的数组包含第一个参数指定的位置和所有到但不含第二个参数指定的位置之间的所有数组元素。如果只指定一个参数，返回的数组将包含从开始位置到数组结尾的所有元素。如参数中出现负数，它表示相对于数组中最后一个元素的位置。例如，参数-1指定了最后一个元素，而-3指定了倒数第三个元素。注意，slice()不会修改调用的数组。下面有一些示例：
+```javascript
+var a = [1,2,3,4,5];
+a.slice(0,3);//返回[1,2,3]
+a.slice(3);//返回[4,5]
+a.slice(1,-1);//返回[2,3,4]
+a.slice(-3,-2);//返回[3]
+```
+
+**7.8.6splice()**
+
+Array.splice()方法是在数组中插入或删除元素的通用方法。不同于slice()和concat()，splice()会修改调用的数组。注意，splice()和slice()拥有非常相似的名字，但它们的功能却有本质的区别。
+
+splice()的前两个参数指定了需要删除的数组元素。紧随其后的任意个数的参数指定了需要插入到数组中的元素，从第一个参数
+
+**7.8.7push()和pop()**
+**7.8.8unshift()和shift()**
+**7.8.9toString()和toLocaleString()**
+
 **7.9ecmascript5中的数组方法**
+
+**7.9.1forEach()**
+**7.9.2map()**
+**7.9.3filter()**
+**7.9.4every()和some()**
+**7.9.5reduce()和reduceRight()**
+**7.9.6indexOf()和lastIndexOf()**
+
 **7.10数组类型**
 **7.11类数组对象**
 **7.12作为数组的字符串**
+
+
 函数
 ----
 **8.1函数定义**
