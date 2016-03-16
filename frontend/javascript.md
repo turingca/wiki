@@ -1869,12 +1869,56 @@ ECMAScript5定义了9个新的数组方法来遍历、映射、过滤、检测�
 forEach()方法从头至尾遍历数组，为每个元素调用指定的函数。如上所述，传递的函数作为forEach()的第一个参数。然后forEach()使用三个参数调用该函数：数组元素、元素的索引和数组本身。如果只关心数组元素的值，可以编写只有一个参数的函数——额外的参数将忽略：
 ```javascript
 var data = [1,2,3,4,5];//
-
+//计算数组元素的值
+var sum = 0;//
+data.forEach(function(value){sum +=value});//
+sum //
+//每个数组元素的值自加1
+data.forEach(function(v,i,a){a[i]=v+1;});
+data//
+```
+注意，forEach()无法在所有元素都传递给调用的函数之前终止遍历。也就是说，没有像for循环中使用的相应的break语句。如果要提前终止，必须把forEach()方法放在一个try块中，并能抛出一个异常，如果forEach()调用的函数抛出foreach.break异常，循环会提前终止：
+```javascript
+function foreach(a,f,t) {
+    try {a.forEach(f,t);}
+    catch(e) {
+        if(e === foreach.break) return;
+        else throw e;
+    }
+}
+foreach.break = new Error("StopIteration");
 ```
 
 **7.9.2map()**
+
+map()方法将调用的数组的每个元素传递给指定的函数，并返回一个数组，它包含该函数的返回值。例如：
+```javascript
+a = [1,2,3];
+b = a.map(function(x){return x*x});// b是[1,4,9]
+```
+传递给map()的函数的调用方式和传递给forEach()的函数的调用方式一样。但传递给map()的函数应该有返回值。注意，map()返回的是新数组，它不修改调用的数组。如果是稀疏数组，返回的也是相同方式的稀疏数组：它具有相同的长度，相同的缺失元素。
+
 **7.9.3filter()**
+
+filter()方法返回的数组元素是调用的数组的一个子集。传递的函数是用来逻辑判定的：
+该函数返回true或false。调用判定函数就像调用forEach()和map()一样。如果返回值为true或能转化为true的值，那么传递给判定函数的元素就是这个子集的成员，它将被添加到一个作为返回值的数组中。例如：
+```javascript
+a = [5,4,3,2,1];
+smallvalues = a.filter(function(x){return x < 3});//
+everyother = a.filter(function(x,i){return i%2 ==0});//
+```
+注意，filter()会跳过稀疏数组中缺少的元素，它的返回数组总是稠密的。为了压缩稀疏数组的空缺，代码如下：
+
+    var dense = sparse.filter(function(){return true}):
+    
+甚至，压缩空缺并删除undefined和null元素，可以这样使用filter():
+
+    a = a.filter(function(x){return x !== undefined && x != null;});
+
 **7.9.4every()和some()**
+
+every()和some()方法是数组的逻辑判定：它们对数组元素应用指定的函数进行判定，返回true或false。
+
 **7.9.5reduce()和reduceRight()**
 **7.9.6indexOf()和lastIndexOf()**
 
