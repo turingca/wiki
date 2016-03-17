@@ -418,9 +418,9 @@ n + " objects"//
 表3-2简要说明了在javascript中如何进行类型转换。表3-2中的粗体部分突出显示了那些让你倍感意外的类型转换。空单元格表示不必要也没有执行转换。
 
 表3-2：javascript类型转换
+
 |原始值|字符串|数字|布尔值|对象|
 | ----- | -------- | ------- | ----- | ---- |
-|       |字符串  |数字   |布尔值|对象|
 |undefined|"undefined"|NaN|false|throws TypeError|
 |null|"null"|0|false|throws TypeError|
 |true|"true"|1|true|new Boolean(true)|
