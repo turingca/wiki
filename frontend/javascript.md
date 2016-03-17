@@ -419,7 +419,7 @@ n + " objects"//
 
 表3-2：javascript类型转换
 |值     |转换为：|       |      |    |
-|:-----:|--------|-------|----- |----|
+| ----- | -------- | ------- | ----- | ---- |
 |       |字符串  |数字   |布尔值|对象|
 |undefined|"undefined"|NaN|false|throws TypeError|
 |null|"null"|0|false|throws TypeError|
