@@ -408,6 +408,26 @@ function equalArrays(a,b){
 ```
 **3.8类型转换**
 
+javascript中的取值类型非常灵活，我们已经从布尔值看到了这一点：当javascript期望使用一个布尔值的时候，你可以提供任意类型值，javascript将根据需要自行转换类型。一些值（真值）转换为true，其他值（假值）转换为false。这在其他类型中同样适用：如果javascript期望使用一个字符串，它把给定的值将转换为字符串。如果javascript期望使用一个数字，它把给定的值将转换为字符串。如果javascript期望使用一个数字，它把给定的值将转换为数字（如果转换结果无意义的话将返回NaN），一些例子如下：
+```javascript
+10 + " objects"//
+"7" * "4" //
+var n = 1 - "x";
+n + " objects"//
+```
+表3-2简要说明了在javascript中如何进行类型转换。表3-2中的粗体部分突出显示了那些让你倍感意外的类型转换。空单元格表示不必要也没有执行转换。
+
+表3-2：javascript类型转换
+|值     |转换为：|       |      |    |
+|:-----:|--------|-------|----- |----|
+|       |字符串  |数字   |布尔值|对象|
+|undefined|"undefined"|NaN|false|throws TypeError|
+|null|"null"|0|false|throws TypeError|
+|true|"true"|1| |new Boolean(true)|
+|false|"false"|0| |new Boolean(false)|
+|""(空字符串)| |0|false|new String("")|
+|"1.2"(非空，数字)| |1.2|true|new String("")|
+
 **3.9变量声明**
 
 **3.10变量作用域**
@@ -1918,8 +1938,24 @@ everyother = a.filter(function(x,i){return i%2 ==0});//
 **7.9.4every()和some()**
 
 every()和some()方法是数组的逻辑判定：它们对数组元素应用指定的函数进行判定，返回true或false。
+every()方法就像数学中的“针对所有”的量词：当且仅当针对数组中的所有元素调用判定函数都返回true，它才返回true：
+```javascript
+a = [1,2,3,4,5];
+a.every(function(x){return x < 10})//=>true 所有的值<10
+a.every(function(x){return x % 2 === 0})//=>false 不是所有的值都是偶数
+```
+some()方法就像数学中的“存在”的量词：当数组中至少有一个元素调用判定函数返回true，它就返回true：并且当且仅当数值中的所有元素调用判定函数都返回false，它才返回false：
+```javascript
+a = [1,2,3,4,5];
+a.some(function(x){return x%2 ===0;})//=> true a含有偶数值
+a.some(isNaN)//=> false a不包含非数值元素
+```
+注意，一旦every()和some()确认该返回什么值它们就会停止遍历数组元素。some()在判定函数第一次返回true后就返回true，但如果判定函数一直返回false，它就会遍历整个数组。every恰好相反：它在判定函数第一次返回false后就返回false，但如果判定函数一直返回true，它将会遍历整个数组。注意，根据数学上的惯例，在空数组上调用时，every()返回true，some()返回false。
 
 **7.9.5reduce()和reduceRight()**
+
+
+
 **7.9.6indexOf()和lastIndexOf()**
 
 **7.10数组类型**
