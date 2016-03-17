@@ -420,13 +420,23 @@ n + " objects"//
 表3-2：javascript类型转换
 
 |原始值|字符串|数字|布尔值|对象|
-| ----- | -------- | ------- | ----- | ---- |
+|:-----:|:--------:|:-------:|:-----:|:------:|
 |undefined|"undefined"|NaN|false|throws TypeError|
 |null|"null"|0|false|throws TypeError|
 |true|"true"|1|true|new Boolean(true)|
 |false|"false"|0|false|new Boolean(false)|
 |""(空字符串)|"" |0|false|new String("")|
-|"1.2"(非空，数字)|"1.2" |1.2|true|new String("")|
+|"1.2"(非空，数字)|"1.2" |1.2|true|new String("1.2")|
+|"one"(非空，非数字)|"one" |NaN|true|new String("one")|
+|0|"0" |0|false|new Number(0)|
+|-0|"0" |-0|false|new Number(-0)|
+|NaN|"NaN"|NaN|false|new Number(NaN)|
+|Infinity|"Infinity"|Infinity|true|new Number(Infinity)|
+|-Infinity|"-Infinity"|Infinity|true|new Number(-Infinity)|
+|1（无穷大，非零）|"1"|1|true|new Number(1)|
+|{}（任意对象）|参考3.8.3节|参考3.8.3节|true|{}|
+|[]（任意数组）|""|0|true|[]|
+|[9]（任意数组）|""|0|true|[]|
 
 **3.9变量声明**
 
