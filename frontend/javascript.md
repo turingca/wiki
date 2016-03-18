@@ -424,7 +424,43 @@ later.getUTCHours() //使用UTC表示小时的时间，基于时区
 字符串（string）是一组由16位值组成的不可变的有序序列，每个字符通常来自于Unicode字符集。javascript通过字符串类型来表示文本。字符串的长度（length）是其所含16位值的个数。javascript字符串（和其数组）的索引从零开始：第一个字符的位置是0，第二个字符的位置是1，以此类推。空字符串（empty string）长度为0，javascript中并没有表示单个字符的“字符型”。要表示一个16位值，只需将其赋值给字符串变量即可，这个字符串长度为1。
 
 字符集，内码和javascript字符串：
-javascript采用UTF-16编码的Unicode字符集，javascript字符串是由一组无符号的16位值组成的序列。最常用的Unicode字符（zjhe'xi）
+javascript采用UTF-16编码的Unicode字符集，javascript字符串是由一组无符号的16位值组成的序列。最常用的Unicode字符（这些字符属于“基于多语种平面”）都是通过16位的内码表示，并代表字符串中的单个字符，那些不能表示为16位的Unicode字符则遵循UTF-16编码规则——用两个16位值组成的一个序列（亦称做“代理项对”）表示。这意味着一个长度为2的javascript字符串（两个16位值）有可能表示一个Unicode字符：
+```javascript
+var p = "π";//π由16位内码表示0x03c0
+var e = "e";//e由17位内码表示0x1d452
+p.length //=>1 p包含一个16位值
+e.length //=>2 e通过UTF-16编码后包含两个16位值："\ud835\udc52"
+```
+javascript定义的各式字符串操作方法均作用于16位值，而非字符，且不会对代理项对做单独处理，同样javascript不会对字符串做标准化的加工，甚至不能保证字符串是合法的UTF-16格式。
+
+
+**3.2.1字符串直接量**
+
+在javascript程序中的字符串直接量，是由单引号或双引号括起来的字符序列。由单引号定界的字符串中可以包含双引号，由双引号定界的字符串中也可以包含单引号。这里有几个字符串直接量的例子：
+```javascript
+""//空字符串，它包含0个字符
+'testing'
+"3.14"
+'name="myform"'
+"wouldn't you prefer O'Reilly's book?"
+"this string\nhas two lines"
+"π is the ratio of a circle's circumference to its diameter"
+```
+在ECMAScript3中，字符串直接量必须写在一行中，而在ECMAScript5中，字符串直接量可以拆分成数行，每行必须以反斜线（\）结束，反斜线和行结束符都不算是字符串直接量的内容。如果希望在字符串直接量中另起一行，可以使用转义字符\n（后续会有介绍）：
+```javascript
+
+"two\nlines"//这里定义了一个显示为两行的字符串
+"one\   //用三行代码定义了显示为单行的字符串，只在ECMAScript5中可用
+long\
+line"
+```
+需要注意的是，当使用单引号来定界字符串时，需要格外小心英文中的缩写和所有格写法，比如can't和O'Reilly's。因为撇号和单引号是同一个字符，所以必须使用反斜杠（\）来转义（转义符将在下一章讲解）所有的撇号。
+
+在客户端javascript程序设计中，javascript代码会夹杂HTML代码的字符串，HTML代码也会夹杂javascript代码。和javascript一样，HTML也使用单引号或者双引号来定界字符串，因此，当javascript代码和html代码混杂在一起的时候，最好在javascript和html代码中各自使用独立的引号风格。例如，在javascript表达式中使用单引号表示字符串“Thank you”，而在html事件处理程序属性中则使用双引号表示字符串：
+
+    <button onclick="alert('Thank you')">Click Me</button>
+
+**3.2.2转义字符**
 
 
 **3.3布尔值**
