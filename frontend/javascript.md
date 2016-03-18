@@ -406,10 +406,25 @@ javascript的未来版本或许会支持十进制数字类型以避免这些舍�
 
 **3.1.5日期和时间**
 
-javascript语言核心包括Date
+javascript语言核心包括Date()构造函数，用来创建表示日期和时间的对象。这些日期对象的方法为日期计算提供了简单的API。日期对象不像数字那样是基本数据类型。本节给出了使用日期对象的一个简单教程。在第三部分可以查阅更多细节：
+```javascript
+var then = new Date(2011, 0, 1);//2011年1月1日
+var later = new Date(2011, 0, 1, 17, 10, 30);//同一天，当地时间5:10:30pm
+var now = new Date();//当前日期和时间
+var elapsed = now - then;//日期减法 计算时间间隔的毫秒数
+later.getFullYear() //=>2011
+later.getMonth() //=>0 从0开始计数的月份
+later.getDate() //=>1 从1开始计数的天数
+later.getHours() //=>当地时间17：5pm
+later.getUTCHours() //使用UTC表示小时的时间，基于时区
+```
 
 **3.2文本**
 
+字符串（string）是一组由16位值组成的不可变的有序序列，每个字符通常来自于Unicode字符集。javascript通过字符串类型来表示文本。字符串的长度（length）是其所含16位值的个数。javascript字符串（和其数组）的索引从零开始：第一个字符的位置是0，第二个字符的位置是1，以此类推。空字符串（empty string）长度为0，javascript中并没有表示单个字符的“字符型”。要表示一个16位值，只需将其赋值给字符串变量即可，这个字符串长度为1。
+
+字符集，内码和javascript字符串：
+javascript采用UTF-16编码的Unicode字符集，javascript字符串是由一组无符号的16位值组成的序列。最常用的Unicode字符（zjhe'xi）
 
 
 **3.3布尔值**
