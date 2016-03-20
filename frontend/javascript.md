@@ -491,6 +491,41 @@ line"
 
 如果”\“字符位于没有在表3-1中列出的字符前，则忽略”\“（当然，javascript语言将来的版本可能定义新的转义符）。比如”\#“和”#“等价。最后，上文提到过，在ECMAScript5中，允许在一个多行字符串直接量里的每行结束处使用反斜线。
 
+**3.2.3字符串的使用**
+
+javascript的内置功能之一就是字符串连接。如果将加号（+）运算符用于数字，表示两数相加。但将它作用于字符串，则表示字符串连接，将第二个字符串拼接在第一个之后，例如：
+```javascript
+msg = "Hello, " + "world";//生成字符串"Hello, world"
+greeting = "Welcome to my blog," + " " + name;
+```
+要确定一个字符串长度——其所包含的16位值得个数——可以使用字符串的length属性。比如，要得到字符串s的长度：
+
+    s.length
+    
+除了length属性，字符串还提供许多可以调用的方法（可以在第三部分查到详细信息）：
+```javascript
+var s = "hello, world" //定义一个字符串
+s.charAt(0)//=>"h" 第一个字符
+s.charAt(s.length - 1)//=>"d" 最后一个字符
+s.substring(1,4)//=>"ell" 第2~4个字符
+s.slice(1,4)//=>"ell" 同上
+s.slice(-3)//=>"rld" 最后三个字符
+s.indexOf("l")//=>2 字符l首次出现的位置
+s.lastIndexOf("l")//=>10 字符l最后一次出现的位置
+s.indexOf("l",3)//=>3 在位置3及之后首次出现字符l的位置
+s.split(", ")//["hello", "world"]分割成子串
+s.replace("h","H")//"Hello, world" 全文字符替换
+s.toUpperCase()//"HELLO, WORLD" 
+```
+记住，在javascript中字符串是固定不变的，类似replace()和toUpperCase()的方法都返回新字符串，原字符串本身并没有发生改变。
+在ECMAScript5中，字符串可以当做只读数组，除了使用charAt()方法，也可以使用方括号来访问字符串中的单个字符（16位值）：
+```javascript
+s = "hello, world";
+s[0]//=>"h"
+s[s.length -1] //=>"d"
+```
+基于Mozilla的web浏览器（比如Firefox）很久之前就支持这种方式的字符串索引，多数现代浏览器（IE除外）也紧跟Mozilla脚步，在ECMAScript5成型之前就支持了这一特性。
+
 **3.3布尔值**
 
 布尔值指代真或假、开或关、是或否。这个类型只有两个值，保留字true和false。
