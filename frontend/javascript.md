@@ -526,6 +526,29 @@ s[s.length -1] //=>"d"
 ```
 基于Mozilla的web浏览器（比如Firefox）很久之前就支持这种方式的字符串索引，多数现代浏览器（IE除外）也紧跟Mozilla脚步，在ECMAScript5成型之前就支持了这一特性。
 
+**3.2.4模式匹配**
+
+javascript定义了RegExp()构造函数，用来创建表示文本匹配模式的对象。这些模式称为”正则表达式“（regular expression），javascript采用Perl中的正则表达式语法。String和RegExp对象均定义了利用正则表达式进行模式匹配和查找与替换的函数。、
+
+RegExp并不是javascript的基本类型。和Date一样，它只是一种具有实用API的特殊对象。正则表达式的语法很复杂，API也很丰富。在第10章有详尽的文档介绍。RegExp是一种强大和常用的文本处理工具，本节只是一个概述。
+
+尽管RegExp并不是语言中的基本数据类型，但是它们依然具有直接量写法，可以直接在javascript程序中使用。在两条斜线之间的文本构成了一个正则表达式直接量。第二条斜线之后也可以跟随一个或多个字母，用来修饰匹配模式的含义，例如：
+```javascript
+/^HTML/  //匹配以HTML开始的字符串
+/[1-9][0-9]*/ //匹配一个非零数字，后面是任意个数字
+/\bjavascript\b/  //匹配单词”javascript“，忽略大小写
+```
+RegExp对象定义了很多有用的方法，字符串同样具有可以接收RegExp参数的方法，例如：
+```javascript
+var text = "testing: 1, 2, 3";//文本示例
+var pattern = /\d+g/  //匹配所有包含一个或多个数字的实例
+pattern.test(text) //=>true 匹配成功
+text.search(pattern) //=>9 首次匹配成功的位置
+text.match(pattern) //=>["1", "2", "3"] 所有匹配组成的数组
+text.replace(pattern, "#");//=> "testing: #, #, #"
+text.split(/\D+/);//["","1","2","3"] 用非数字字符截取字符串
+```
+
 **3.3布尔值**
 
 布尔值指代真或假、开或关、是或否。这个类型只有两个值，保留字true和false。
