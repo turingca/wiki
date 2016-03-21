@@ -2561,6 +2561,19 @@ var big = a.reduceRight(function(accumulator,value){
     return Math.pow(value,accumulator);
 });
 ```
+注意，reduce()和reduceRight()都能接收一个可选的参数，它指定了化简函数调用时的this关键字的值。可选的初始值参数仍然需要占一个位置。如果想让化简函数作为一个特殊对象的方法调用，请参看Function.bind()方法。
+值得注意的是，上面描述的every()和some()方法是一种类型的数组化化简操作。但是不同的是，它们会尽早终止遍历而不总是访问每一个数组元素。
+为了简单起见，到目前位置所展示的例子都是数值的，但数学计算不是reduce()和reduceRight()的唯一意图。考虑一下例6-2中的union()函数。它计算两个对象的“并集”，并返回另一个新对象，新对象具有二者的属性。该函数期待两个对象并返回另一个对象，所以它的工作原理和一个化简函数一样，并且可以使用reduce()来把它一般化，计算任意数目的对象的“并集”。
+```javascript
+var objects = [{x:1}, {y:2}, {z:3}]
+var merged = objects.reduce(union);//=> {x:1, y:2, z:3}
+```
+回想一下，当两个对象拥有同名的属性时，union()函数使用第一个参数的属性值。这样，reduce()和reduceRight()在使用union()时给出了不同的结果
+```javascript
+var objects = [{x:1,a:1},{y:2,a:2},{z:3,a:3}];
+var leftunion = objects.reduce(union);//{x:1, y:2, z:3, a:1}
+var leftunion = objects.reduceRight(union);//{x:1, y:2, z:3, a:3}
+```
 
 **7.9.6indexOf()和lastIndexOf()**
 
