@@ -2577,14 +2577,207 @@ var leftunion = objects.reduceRight(union);//{x:1, y:2, z:3, a:3}
 
 **7.9.6indexOf()和lastIndexOf()**
 
+indexOF()和lastIndexOf()搜索整个数组中具有给定值的元素，返回找到的第一个元素的索引或者如果没有找到就返回-1。indexOf()从头至尾搜索，而lastIndexOf()则反向搜索。
+```javascript
+a = [0,1,2,1,0]
+a.indexOf(1) //=>1 a[1]是1
+a.lastIndexOf(1) //=>3 a[3]是1
+a.indexOf(3) //=>-1 没有值为3的元素
+```
+不同于本节描述的其他方法，indexOf()和lastIndexOf()方法不接收一个函数作为其参数。第一个参数是需要搜索的值，第二个参数是可选的：它指定数组中的一个索引，从那里开始搜索。如果省略该参数，indexOf()从头开始搜索，而lastIndexOf()从末尾开始搜索。第二个参数也可以是负数，它代表相对数组末尾的偏移量，对于splice()方法：例如，-1指定数组的最后一个元素。
+
+如下函数在一个数组中搜索指定的值并返回包含所有匹配的数组索引的一个数组。它展示了如何运用indexOf()的第二个参数来查找除了第一个以外匹配的值。
+```javascript
+//在数组中查找所有出现的x，并返回一个包含匹配索引的数组
+function findall(a,x) {
+    var results = [],//将会返回的数组
+    len = a.length,//待搜索数组的长度
+    pos = 0;//开始搜索的位置
+    while(pos<len){//循环搜索多个元素
+        pos = a.indexOf(x,pos);//搜索
+        if(pos === -1) break;//未找到，就完成搜索
+        results.push(pos);//否则，在数组中存储索引
+        pos = pos + i;//并从下一个位置开始搜索
+    }
+    return results;//返回包含索引的数组
+}
+```
+注意，字符串也有indexOf()和lastIndexOf()方法，它们和数组方法的功能类似。
+
 **7.10数组类型**
+
+我们在本章中到处都可以看见数组是具有特殊行为的对象。给定一个未知的对象，判定它是否为数组通常非常有用。在ECMASCript5中，可以使用Array.isArray()函数来做这件事：
+```javascript
+Array.isArray([])//=>true
+Array.isArray({})//=>false
+```
+但是，在ECMAScript5以前，要区分数组和非数组对象却令人惊讶地困难。typeof操作符在这里帮不上忙：对数组它返回“对象”（并且对于除了函数以外的所有对象都是如此）。instanceof操作符只能用于简单的情形：
+```javascript
+[] instanceof Array //=>true
+({}) instanceof Array //=>false
+```
+使用instanceof的问题是在web浏览器中有可能有多个窗口或窗体（frame）存在。每个窗口都有自己的javascript环境，有自己的全局对象。并且，每个全局对象有自己的一组构造函数。因此一个窗体中的对象将不可能是另外窗体中的构造函数的实例。窗体之间的混淆不常发生，但这个问题足已证明instanceof操作符不能视为一个可靠的数组检测方法。
+
+解决方案是检查对象的类属性（见6.8.2节）。对数组而言该属性的值总是“Array”，因此在ECMASCript3中isArray()函数的代码可以这样书写：
+```javascript
+var isArray = function.isArray || function(o) {
+    return typeof o === "Object" && Object.prototype.toString.call(o) === "[object Array]";
+};
+```
+实际上，此处类属性的检测就是ECMAScript5中Array.isArray()函数所做的事情。获得对象类属性的技术使用了6.8.2节和例6-4中展示的Object.prototype.toString()方法。
+
 **7.11类数组对象**
+
+我们已经看到，javascript数组的有一些特性是其他对象所没有的：
+
+* 当有新的元素添加到列表中时，自动更新length属性。
+* 设置length为一个较小值将截断数组
+* 从Array.prototype中继承一些有用的方法。
+* 其类属性为“Array”
+
+这些特性让javascript数组和常规的对象有明显的区别。但是它们不是定义数组的本质特性。一种常常完全合理的看法把拥有一个数值length属性和对应非负整数属性的对象看做一种类型的数组。
+
+实践中这些“类数组”对象实际上偶尔出现，虽然不能在它们之上直接调用数组方法或者期望length属性有什么特殊的行为，但是仍然可以用针对真正数组遍历的代码来遍历它们。结论就是很多数组算法针对类数组对象工作得很好，就像针对真正的数组一样。如果算法把数组看成只读的或者如果它们至少保持数组长度不变，也尤其是这种情况。
+
+以下代码为一个常规对象增加了一些属性使其变成类数组对象，然后遍历生成的伪数组的“元素”：
+```javascript
+var a = {};//从一个常规空对象开始
+//添加一些属性，称为“类数组”
+var i = 0;
+while(i<10) {
+    a[i] = i*i;
+    i++;
+}
+a.length = i;
+//现在，当做真正的数组遍历它
+var total = 0;
+for(var j = 0; j<a.length; j++){
+    total += a[j];
+}
+```
+8.3.2节描述的Arguments对象就是一个类数组对象。在客户端javascript中，一些DOM方法（如document.getElementsByTagName()）也返回类数组对象。下面有一个函数可以用来检测类数组对象：
+```javascript
+//判定o是否是一个类数组对象
+//字符串和函数有length属性，但是它们
+//可以用typeof检测将其排除。在客户端javascript中，DOM文本节点
+//也有length属性，需要用额外判断o.nodeType != 3 将其排除
+function isArrayLike(o) {
+    if( o &&                                //o非null、undefined等
+        typeof o === "object" &&            //o是对象
+        isFinite(o.length)&&                //o.length是有限数值
+        o.length >= 0 &&                    //o.length为非负值
+        o.length === Math.floor(o.length) &&//o.length是整数
+        o.length < 4294967296)              //o.lenght<2^32
+        return true;                        //o是类数组对象
+    else
+        return false;                       //否则它不是
+}
+```
+将在7.12节中看到在ECMAScript5中字符串的行为与数组类似（并且有些浏览器在ECMAScript5之前已经让字符串变成索引的了）。然而，类似上述的类数组对象的检测方法针对字符串常常返回false——它们通常最好当做字符串处理，而非数组。
+
+javascript数组方法是特意定义为通用的，因此它们不仅应用在真正的数组而且在类数组对象上都能正确工作。在ECMAScript5中，所有数组方法都是通用的。在ECMAScript3中，除了toString()和toLocaleString()以外的所有方法也是通用的。（concat()方法是一个特例：虽然可以用在类数组对象上，但它没有将那个对象扩充进返回的数组中。）既然类数组对象没有继承自Array.prototype，那就不能在它们上面直接调用数组方法。尽管如此，可以间接地使用function.call方法调用：
+```javascript
+var a = {"0":"a", "1":"b", "2":"c", lenght:3};//类数组对象
+Array.join(a,"+")
+Array.slice(a,0)
+Array.map(a,function(x){return x.toUpperCase();})
+```
+当用在类数组对象上时，数组方法的静态函数版本非常有用。但既然它们不是标准的，不能期望它们在所有的浏览器中都有定义。可以这样书写代码来保证使用它们之前是存在的：
+```javascript
+Array.join = Array.join || function (a,sep) {
+    return Array.prototype.join.call(a,sep);
+};
+Array.slice = Array.slice || function (a,from,to) {
+    return Array.prototype.slice.call(a,from,to);
+};
+Array.map = Array.map || function (a,f,thisArg) {
+    return Array.prototype.map.call(a,f,thisArg);
+};
+```
+
 **7.12作为数组的字符串**
 
+在ECMAscript5（在众多最近的浏览器实现——包括IE8——早于ECMAScript5）中，字符串的行为类似于只读的数组。除了用charAt()方法来访问单个的字符以外，还可以使用方括号：
+```javascript
+var s = test;
+s.charAt(0) //=>"t"
+s[1] //=>"e"
+```
+当然，针对字符串的typeof操作符仍然返回“string”，但是如果给Array.isArray()传递字符串，它将返回false。
+
+可索引的字符串的最大的好处就是简单，用方括号代替了charAt()调用，这样更加简洁、可读并且可能更高效。不仅如此，字符串的行为类似于数组的事实使得通用的数组方法可以应用到字符串上。例如：
+```javascript
+s = "javascript"
+Array.prototype.join.call(s,"") //=>"J a v a S c r i p t"
+Array.prototype.filter.call(s,  //过滤字符串中的字符
+    function(x) {
+    return x.match(/[^aeiou]/);//只匹配非元音字母
+    }).join("") //=> "JvScrpt"
+```
+请记住，字符串是不可变值，故当把它们作为数组看待时，它们是只读的。如push()、sort()、reverse()和splice()等数组方法会修改数组，它们在字符串上是无效的。不仅如此，使用数组方法来修改字符串会导致错误：出错的时候没有提示。
 
 函数
 ----
+
+函数是这样的一段javascript代码，它只定义一次，但可能被执行或调用任意次。你可能已经从诸如子例程（subroutine）或者过程（proceduew）这些名字里对函数的概念有所了解。javascript函数是参数化的：函数的定义会包括一个称为形参（patamer）的标识符列表，这些参数在函数体中像局部变量一样工作。函数调用会为形参提供实参的值。（参数有形参（parameter）和实参（argument）的区别，形参相当于函数中定义的变量，实参是在运行时的函数调用时传入的参数）函数使用它们实参的值来计算返回值，成为该函数调用表达式的值。除了实参之外，每次调用还会拥有另一个值——本次调用还会拥有另一个值——本次调用的上下文——这就是this关键字的值。
+
+如果函数挂载在一个对象上，作为对象的一个属性，就称它为对象的方法。当通过这个对象来调用函数时，该对象就是此次调用的上下文（context），也就是该函数的this的值。用于初始化一个新创建的对象的函数称为构造函数（constructor）。6.1节会对构造函数有进一步的讲解，第9章还会再谈到它。
+
+在javascript里，函数即对象，程序可以随意操控它们。比如，javascript可以把函数赋值给变量，或者作为参数传递给其他函数。因为函数就是对象，所以可以给它们设置属性，甚至调用它们的方法。
+
+javascript的函数可以嵌套在其他函数中定义的，这样它们就可以访问它们被定义时所处的作用域中的任何变量。这意味着javascript函数构成了一个闭包（closure），它给javascript带来了非常强劲的编程能力。
+
 **8.1函数定义**
+
+函数使用function关键字来定义，它可以用在函数定义表达式（见4.3节）或者函数声明语句（见5.3.2节）里。在两种形式中，函数定义都从function关键字开始，其后跟随这些组成部分：
+
+* 函数名称标识符。函数名称是函数声明语句必需的部分。它的用途就像变量的名字，新定义的函数对象会赋值给这个变量。对函数定义表达式来说，这个名字是可选的：如果存在，该名字只存在于函数体中，并指代表函数对象本身。
+* 一对圆括号，其中包含由0个或者多个用逗号隔开的标识符组成的列表。这些标识符是函数的参数名称，它们就像函数体中的局部变量一样。
+* 一对花括号，其中包含0条或多条javascript语句。这些语句构成了函数体：一旦调用函数，就会执行这些语句。
+
+例8-1分别展示了函数语句和表达式两种方式的函数定义。注意，以表达式来定义函数只适用于它作为一个大的表达式的一部分，比如在赋值和调用过程中定义函数：
+例8-1：定义javascript函数
+// Print the name and value of each property of o.  Return undefined.
+//输出o的每个属性的名称和值，返回undefined
+function printprops(o) {
+    for(var p in o) 
+        console.log(p + ": " + o[p] + "\n"); 
+}
+
+// Compute the distance between Cartesian points (x1,y1) and (x2,y2).
+//计算两个笛卡尔坐标(x1,y1)和(x2,y2)之间的距离
+function distance(x1, y1, x2, y2) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    return Math.sqrt(dx*dx + dy*dy);
+}
+
+// A recursive function (one that calls itself) that computes factorials
+// Recall that x! is the product of x and all positive integers less than it.
+//计算阶乘的递归函数（调用自身的函数）
+//x!的值是从x到x递减（步长为1）的值的类乘
+function factorial(x) {
+    if (x <= 1) return 1;
+    return x * factorial(x-1);
+}
+
+// This function expression defines a function that squares its argument.
+// Note that we assign it to a variable
+//这个函数表达式定义了一个函数用来求传入参数的平方
+//注意我们把它赋值给一个变量
+var square = function(x) { return x*x; }
+
+// Function expressions can include names, which is useful for recursion.
+//函数表达式可以包含名称，这在递归时很有用
+var f = function fact(x) { if (x <= 1) return 1; else return x*fact(x-1); };
+
+// Function expressions can also be used as arguments to other functions:
+//函数表达式也可以作为参数传给其他函数
+data.sort(function(a,b) { return a-b; });
+
+// Function expressions are sometimes defined and immediately invoked:
+//函数表达式有时定义后立即调用
+var tensquared = (function(x) {return x*x;}(10));
 
 
 
