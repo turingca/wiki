@@ -3432,8 +3432,207 @@ whenReady(function() {
 <span id="clock"></span>  <!-- The time is displayed here 时间显示在这里-->
 <textarea cols=60 rows=20></textarea> <!-- You can drop timestamps here 把时间戳放置在这里-->
 ```
+拖放目标比拖放源更棘手。任何文档元素都可以是拖放目标，这不需要像拖放源一样设置HTML属性，只需要简单地定义合适的事件监听程序。（但是使用新的HTML5 DnD API，就可以在拖放目标上定义dropzone属性来取代定义后面介绍的一部分事件处理程序。）有4个事件在拖放目标上触发。当拖放对象（dragged object）进入文档元素时，浏览器在这个元素上触发dragenter事件。拖放目标应该使用dataTransfer.types属性确定拖放对象的可用数据是否是它能理解的格式。（也可以检查dataTransfer.effectAllowed确保拖放源和拖放目标同意使用移动、复制和链接操作中的一个。）如果检查成功，拖放目标必须要让用户和浏览器都知道它对放置感兴趣。可以通过改变它的边框或背景颜色来向用户反馈。令人吃惊的是，拖放目标通过取消事件来告知浏览器它对放置感兴趣。
+
+如果元素不取消浏览器发送给它的dragenter事件，浏览器将不会把它作为这次拖放的拖放目标，并不会向它再发送任何事件。但如果拖放目标取消了dragenter事件，浏览器将发送dragover事件表示用户继续在目标上拖动对象。再一次令人吃惊的是，拖放目标必须监听且取消所有这些事情来表明它继续对放置感兴趣。如果拖放目标想指定它只允许移动、复制或链接操作，它应该使用dragover事件处理程序来设置dataTransfer.dropEffect。
+
+如果用户移动拖放对象离开通过取消事件表明有兴趣的拖放目标，那么在拖放目标上将触发dragleave事件。这个事件的处理程序应该恢复元素的边框或背景颜色或取消任何其他为响应dragenter事件而执行的可视化反馈。遗憾的是，dargenter和dragleave事件会冒泡，如果拖放目标内部有嵌套元素，想知道dragleave事件表示拖放对象从拖放目标离开到目标外的事件还是到目标内的事件是非常困难的。
+
+最后，如果用户把拖放对象放置到拖放目标上，在拖放目标上会触发drop事件。这个事件的处理程序应该使用dataTransfer.getData()获取传输的数据并做一些适当的处理。另外，如果用户在拖放目标放置一或多个文件，dataTransfer.files属性将是一个类数组的File对象。（见例18-11的说明。）使用新的HTML5 API，drop事件处理程序将能遍历dataTransfer.items[]的元素去检查文件和非文件数据。
+
+例17-5演示如何使<ul>元素成为拖放目标，同时如何使它们中的<li>元素成为拖放源。这个示例是一段不唐突的javascript代码（英文为Unobtrusive Javascript，在网页中编写javascript的一种通用方法），它查找class属性包含“dnd”的<ul>元素，在它找到的此类列表上注册DnD事件处理程序。这些事件处理程序使列表本身成为拖放目标，在这个列表上放置的任何文本会变成新的列表项并插入到列表尾部。这些事件处理程序也监听列表项的拖动，使得每个列表项的文本可用于传输。拖放源事件处理程序允许“复制”和“移动”操作，并在移动操作下放置对象时会删除原有列表项。（但是，请注意并不是所有的浏览器都支持移动操作。）
+
+例17-5：作为拖放目标和拖放源的列表
+```
+/*
+ * The DnD API is quite complicated, and browsers are not fully interoperable.
+ * This example gets the basics right, but each browser is a little different
+ * and each one seems to have its own unique bugs. This code does not attempt
+ * browser-specific workarounds.
+ * DnD API相当复杂，且浏览器也不完全兼容
+ * 这个例子基本正确，但每个浏览器会有一点不同，每个似乎都有自身独有的bug
+ * 这些代码不会尝试浏览器独有的解决方案
+ */
+whenReady(function() {  // Run this function when the document is ready，当文档准备就绪时运行这个函数
+
+    // Find all <ul class='dnd'> elements and call the dnd() function on them
+    // 查找所有的<ul class='dnd'>元素，并对其调用dnd()函数
+    var lists = document.getElementsByTagName("ul");
+    var regexp = /\bdnd\b/;
+    for(var i = 0; i < lists.length; i++)
+        if (regexp.test(lists[i].className)) dnd(lists[i]);
+
+    // Add drag-and-drop handlers to a list element
+    // 为列表元素添加拖放事件处理程序
+    function dnd(list) {
+        var original_class = list.className;  // Remember original CSS class，保存原始css类
+        var entered = 0;                      // Track enters and leaves，跟踪进入和离开
+
+        // This handler is invoked when a drag first enters the list. It checks
+        // 当拖放对象首次进入列表时调用这个处理程序
+        // that the drag contains data in a format it can process and, if so,
+        // 它会检查拖放对象包含的数据格式它是否能处理
+        // returns false to indicate interest in a drop. In that case, it also
+        // 如果能，它返回false来表示有兴趣放置
+        // highlights the drop target to let the user know of that interest.
+        // 在这种情况下，它会高亮拖放目标，让用户知道该兴趣
+        list.ondragenter = function(e) {
+            e = e || window.event;  // Standard or IE event，标准或IE事件
+            var from = e.relatedTarget; 
+            // dragenter and dragleave events bubble, which makes it tricky to，dragenter和dragleave事件冒泡
+            // know when to highlight or unhighlight the element in a case like，它使得在像<ul>元素有<li>子元素的情况下
+            // this where the <ul> element has <li> children. In browsers that，何时高亮显示或取消高亮显示元素变得棘手
+            // define relatedTarget we can track that.，在定义relatedTarget的浏览器中，我们能跟踪它
+            // Otherwise, we count enter/leave pairs，否则，我们需要通过统计进入和离开的次数
+
+            // If we entered from outside the list or if，如果从列表外面进入或第一次进入
+            // this is the first entrance then we need to do some stuff，那么需要做一些处理
+            entered++;
+            if ((from && !ischild(from, list)) || entered == 1) {
+
+                // All the DnD info is in this dataTransfer object，所有的DnD信息都在dataTransfer对象上
+                var dt = e.dataTransfer; 
+
+                // The dt.types object lists the types or formats that the data
+                // dt.types对象列出可用的拖放数据的类型或格式
+                // being dragged is available in. HTML5 says the type has a
+                // HTML5定义这个对象有contains()方法
+                // contains() method. In some browsers it is an array with an
+                // 在一些浏览器中，它是一个有indexOf()方法的数组
+                // indexOf method. In IE8 and before, it simply doesn't exist.
+                // 在IE8以及之前版本中，它根本不存在
+                var types = dt.types;    // What formats data is available in，可用数据格式是什么
+
+                // If we don't have any type data or if data is
+                // 如果没有任何类型的数据或可用数据是纯文本格式
+                // available in plain text format, then highlight the
+                // 那么高亮显示列表让用户知道我们正在监听拖放
+                // list to let the user know we're listening for drop
+                // 同时返回false让浏览器知晓
+                // and return false to let the browser know.
+                if (!types ||                                           // IE
+                    (types.contains && types.contains("text/plain")) || //HTML5
+                    (types.indexOf && types.indexOf("text/plain")!=-1)) //Webkit 
+                {
+                    list.className = original_class + " droppable";
+                    return false;
+                }
+                // If we don't recognize the data type, we don't want a drop，如果我们无法识别数据类型，我们不希望拖放
+                return;   // without canceling，没有取消
+            }
+            return false; // If not the first enter, we're still interested，如果不是第一次进入，我们继续保持兴趣
+        };
+
+        // This handler is invoked as the mouse moves over the list.
+        // We have to define this handler and return false or the drag
+        // will be canceled.
+        // 当鼠标指针悬停在列表上时，会调用这个处理程序
+        // 我们必须定义这个处理程序并返回false，否则这个拖放操作将取消
+        list.ondragover = function(e) { return false; };
+
+        // This handler is invoked when the drag moves out of the list
+        // or out of one of its children. If we are actually leaving the list
+        // (not just going from one list item to another), then unhighlight it.
+        // 当鼠标对象移出列表或从其子元素中移出时，会调用这个处理程序，如果我们真正离开这个列表（不是仅仅从一个列表项到另一个）
+        // 那么取消高亮显示它
+        list.ondragleave = function(e) {
+            e = e || window.event;
+            var to = e.relatedTarget;
+
+            // If we're leaving for something outside the list or if this leave，如果我们要到列表以外的元素或打破离开和进入次数的平衡
+            // balances out the enters, then unhighlight the list，那么取消高亮显示列表
+            entered--;
+            if ((to && !ischild(to,list)) || entered <= 0) {
+                list.className = original_class;
+                entered = 0;
+            }
+            return false;
+        };
+
+        // This handler is invoked when a drop actually happens，当实际放置时，会调用这个程序
+        // We take the dropped text and make it into a new <li> element，我们会接受放下的文本并将其放到一个新的<li>元素中
+        list.ondrop = function(e) {
+            e = e || window.event;       // Get the event，获得事件
+
+            // Get the data that was dropped in plain text format.，获得放置的纯文本数据
+            // "Text" is a nickname for "text/plain".  "Text"是"text/plain"的昵称
+            // IE does not support "text/plain", so we use "Text" here，IE不支持"text/plain"，所以在这里使用"Text"
+            var dt = e.dataTransfer;       // dataTransfer object，dataTransfer对象
+            var text = dt.getData("Text"); // Get dropped data as plain text，获取放置的纯文本数据
+
+            // If we got some text, turn it into a new item at list end.
+            // 如果得到一些文本，把它放入列表尾部的新项中
+            if (text) {
+                var item = document.createElement("li"); // Create new <li>，创建新<li>
+                item.draggable = true;                   // Make it draggable，使它可拖动
+                item.appendChild(document.createTextNode(text)); // Add text，添加文本
+                list.appendChild(item);                  // Add it to the list，把它添加到列表中
+
+                // Restore the list's original style and reset the entered count
+                // 恢复列表的原始样式且重置进入次数
+                list.className = original_class;
+                entered = 0;
+
+                return false;
+            }
+        };
+
+        // Make all items that were originally in the list draggable，使原始所有列表项都可拖动
+        var items = list.getElementsByTagName("li");
+        for(var i = 0; i < items.length; i++)
+            items[i].draggable = true;
+
+        // And register event handlers for dragging list items.为拖动列表项注册事件处理程序
+        // Note that we put these handlers on the list and let events，注意我们把处理程序放在列表上
+        // bubble up from the items，让事件从列表项向上冒泡
+
+        // This handler is invoked when a drag is initiated within the list.
+        // 当在列表中开始拖动对象，会调用这个处理程序
+        list.ondragstart = function(e) {
+            var e = e || window.event;
+            var target = e.target || e.srcElement;
+            // If it bubbled up from something other than a <li>, ignore it
+            // 如果它不是从<li>向上冒泡，那么忽略它
+            if (target.tagName !== "LI") return false;
+            // Get the all-important dataTransfer object，获得最重要的dataTransfer对象
+            var dt = e.dataTransfer;
+            // Tell it what data we have to drag and what format it is in，设置拖动的数据和数据类型
+            dt.setData("Text", target.innerText || target.textContent);
+            // Tell it we know how to allow copies or moves of the data，设置允许复制和移动这些数据
+            dt.effectAllowed = "copyMove";
+        };
+
+        // This handler is invoked after a successful drop occurs，当成功的放置后，将调用这个处理程序
+        list.ondragend = function(e) {
+            e = e || window.event;
+            var target = e.target || e.srcElement;
+
+            // If the drop was a move, then delete the list item，如果这个拖放操作是move，那么要删除列表项
+            // In IE8, this will be "none" unless you explicitly set it to 
+            // 在IE中，它将是“none”，除非在之前的ondrop处理程序中显式设置它为move
+            // move in the ondrop handler above.  But forcing it to "move" for
+            // 但为IE强制设置“move”会阻止其他浏览器给用户选择复制还是移动的机会
+            // IE prevents other browsers from giving the user a choice of a
+            // copy or move operation.
+            if (e.dataTransfer.dropEffect === "move")
+                target.parentNode.removeChild(target);
+        }
+
+        // This is the utility function we used in ondragenter and ondragleave.
+        // 这是在ondragenter和ondragleave使用的工具函数
+        // Return true if a is a child of b，如果a是b的子元素则返回true
+        function ischild(a,b) {
+            for(; a; a = a.parentNode) if (a === b) return true;
+            return false;
+        }
+    }
+});
+```
 
 **17.8文本事件**s
+
+
+
 **17.9键盘事件**
 
 脚本化http
