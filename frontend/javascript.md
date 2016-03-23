@@ -3384,7 +3384,7 @@ DnD总是基于事件且javascript api包含两个事件集，一个在拖放源
 实现简单的自定义拖放源只需要dragstart事件。例17-4就是这样的例子，它在<span>元素中用“hh:mm”格式显示当前时间，并每分钟更新一次时间。假设这是示例要做的一切，用户能选择时钟中显示的文本，然后拖动这个时间。但在这个例子中javascript代码通过设置时钟元素的darggable属性为true和定义ondragstrat事件处理程序函数来使得时钟成为自定义拖放源。事件处理程序使用dataTransfer.setData()指定一个完整的时间戳字符串（包括日期、秒和时区信息）作为待拖动的数据。它还调用dataTransfer.setDragIcon()指定待拖动的图片（一个时钟图标）。
 
 例17-4：一个自定义拖放源
-```javascript
+```
 <script src="whenReady.js"></script>
 <script>
 whenReady(function() {
