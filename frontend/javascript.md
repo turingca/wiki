@@ -3369,7 +3369,71 @@ window对象
 * 它们必须为拖放源提供一种方式指定待拖动的图标或图像。
 * 它们必须为拖放源和拖放目标的DnD交互过程提供基于事件的通知。
 
-**17.8文本事件**
+在Microsoft在IE的早期版本引入了DnD API。它并不是精心设计且良好归档的API，但其他浏览器都尝试复制它，且HTML5标准化了类似IE DnD API的东西并增加了是API更易于使用的新特性。在写本章时，这些新的易于使用的DnD API尚未实现尚未实现，所以本节包括了IE API来表示对HTML5标准祝福。
+
+IE DnD API难以使用以及当前浏览器的不同实现使得无法共同使用API一些较复杂的部分，但它允许web应用像普通的桌面应用一样参与应用间DnD。浏览器一直能够实现简单的DnD。如果在web浏览器中选择了文本，非常容易把文本拖到字处理器中。同时如果在字处理器中选择了选择一个URL，你能把它拖到浏览器中并使浏览器访问这个url。本节演示了如何创建自定义拖放源和自定义拖放目标，前者传输数据而不是其文本内容，后者以某种方式响应拖放数据而不是仅显示它。
+
+DnD总是基于事件且javascript api包含两个事件集，一个在拖放源上触发，另一个在拖放目标上触发。所有传递给DnD事件处理程序的事件对象都类似鼠标事件对象，另外它拥有dataTransfer属性。这个属性引用DataTransfer对象，该对象定义DnD API的方法和属性。
+
+拖放源事件相当简单，我们就从它们开始。任何有HTML draggable属性的文档元素都是拖放源。当用户开始用鼠标在拖放源上拖动时，浏览器并没有选择元素内容，相反，它在这个元素上触发dragstart事件。这个事件的处理程序就调用dataTransfer.setData()指定当前可用的拖放源数据（和数据类型）。（当新的HTML5 API实现时，可以用dataTransfer.items.add()代替。）这个事件处理程序也可以设置dataTransfer.effectAllowed来指定支持“移动”、“复制”和“链接”传输操作中的几种，同时它可以调用dataTransfer.setDragImage()或dataTransfer.addElement()（在那些支持这些方法的浏览器中）指定图片或文档元素用做拖动时的视觉表现。
+
+在拖动的过程中，浏览器在拖放源上触发拖动事件。如果想更新拖动图片或修改提供的数据，可以监听这些事件，但一般不需要注册“拖动”事件处理程序。    
+
+当放置数据发生时会触发dragend事件。如果拖放源支持“移动”操作，它就会检查dataTransfer.dropEffect去看看是否实际执行了移动操作。如果执行了，数据就被传输到其他地方，你应该从拖放源中删除它。
+
+实现简单的自定义拖放源只需要dragstart事件。例17-4就是这样的例子，它在<span>元素中用“hh:mm”格式显示当前时间，并每分钟更新一次时间。假设这是示例要做的一切，用户能选择时钟中显示的文本，然后拖动这个时间。但在这个例子中javascript代码通过设置时钟元素的darggable属性为true和定义ondragstrat事件处理程序函数来使得时钟成为自定义拖放源。事件处理程序使用dataTransfer.setData()指定一个完整的时间戳字符串（包括日期、秒和时区信息）作为待拖动的数据。它还调用dataTransfer.setDragIcon()指定待拖动的图片（一个时钟图标）。
+
+例17-4：一个自定义拖放源
+```javascript
+<script src="whenReady.js"></script>
+<script>
+whenReady(function() {
+    var clock = document.getElementById("clock");  // The clock element，时钟元素
+    var icon = new Image();                        // An image to drag，用于拖动的图片
+    icon.src = "clock-icon.png";                   // Image URL，图片URL
+    // Display the time once every minute，每分钟显示一次时间
+    function displayTime() {
+        var now = new Date();               // Get current time，获取当前时间
+        var hrs = now.getHours(), mins = now.getMinutes();
+        if (mins < 10) mins = "0" + mins;
+        clock.innerHTML = hrs + ":" + mins; // Display current time，显示当前时间
+        setTimeout(displayTime, 60000);     // Run again in 1 minute，一分钟后将再次运行
+    }
+    displayTime();
+    // Make the clock draggable，使时钟能够拖动
+    // We can also do this with an HTML attribute: <span draggable="true">...
+    //我们也能通过HTML属性实现这个目的：<span draggable="true">...
+    clock.draggable = true;
+    // Set up drag event handlers，设置拖动事件处理程序
+    clock.ondragstart = function(event) {
+        var event = event || window.event; // For IE compatability，用于IE兼容性
+        // The dataTransfer property is key to the drag-and-drop API
+        //dataTransfer属性是拖放API的关键
+        var dt = event.dataTransfer;
+        // Tell the browser what is being dragged，告诉浏览器正在拖动的是什么
+        // The Date() constructor used as a function returns a timestamp string
+        //把Date()构造函数用做一个返回时间戳字符串的函数
+        dt.setData("Text", Date() + "\n");
+        // Tell the browser to drag our icon to represent the timestamp, in
+        // browsers that support that. Without this line, the browser may
+        // use an image of the clock text as the value to drag.
+        //在支持的浏览器中，告诉它拖动图标来表现时间戳
+        if (dt.setDragImage) dt.setDragImage(icon, 0, 0);
+    };
+});
+</script>
+<style> 
+#clock { /* Make the clock look nice 使时钟好看一些*/
+    font: bold 24pt sans; background: #ddf; padding: 10px;
+    border: solid black 2px; border-radius: 10px;
+}
+</style>
+<h1>Drag timestamps from the clock从时钟中拖出时间戳</h1>
+<span id="clock"></span>  <!-- The time is displayed here 时间显示在这里-->
+<textarea cols=60 rows=20></textarea> <!-- You can drop timestamps here 把时间戳放置在这里-->
+```
+
+**17.8文本事件**s
 **17.9键盘事件**
 
 脚本化http
