@@ -2967,6 +2967,93 @@ function f(x) {
     console.log(x);//输出“null”
 }
 ```
+如果实参对象是一个普通数组的话，第二条console.log(x)语句的结果绝对不会是null，在这个例子中，arguments[0]和x指代同一个值，修改其中一个的值会影响到另一个。
+在ECMAScript5中移除了实参对象的这个特殊特性。在严格模式下还有一点（和非严格模式下相比的）不同，在非严格模式中，函数里的arguments仅仅是一个标识符，在严格模式中，它变成了一个保留字。严格模式中的函数无法使用arguments作为形参名或局部变量名，也不能给arguments赋值。
+
+callee和caller属性：
+除了数组元素，实参对象还定义了callee和caller属性。在ECMAScript5严格模式中，对这两个属性的读写操作都会产生一个类型错误。而在非严格模式下，ECMAScript标准规范规定callee属性指代当前正在执行的函数。caller是非标准的，但大多数浏览器都实现了这个属性，它指代调用当前正在执行的函数的函数。通过caller属性可以访问调用栈。callee属性在某些时候会非常有用，比如在匿名函数中通过callee来递归地调用自身。
+```javascript
+var factorial = function(x) {
+    if(x <= 1) return 1;
+    return x*arguments.callee(x-1);
+}
+```
+
+**8.3.3将对象属性用做实参**
+
+当一个函数包含超过三个形参时，对于程序员来说，要记住调用函数中实参的正确顺序实在让人头疼。每次调用这个函数时都要不厌其烦地查阅文档，为了不让程序员每次都翻阅手册这么麻烦，最好通过名/值对的形式传入参数，这样参数的顺序就无关紧要了。为了实现这种风格的方法调用，定义函数的时候，传入的实参都写入一个单独的对象之中，在调用的时候传入一个对象，对象中的名/值对是真正需要的实参数据。下面的代码就展示了这种风格的函数调用，这种写法允许在函数中设置省略参数的默认值：
+```javascript
+//将原始数组的length元素复制至目标数组
+//开始复制原始数组的from_start元素
+//并且将其复制至目标数组的to_start中
+//要记住实参的顺序并不容易
+function arraycopy(/*array*/from,/*index*/from_start,/*array*/to,/*index*/to_start,/*integer*/length)
+{
+    //逻辑代码
+}
+//这个版本的实现效率稍微有些低，但你不必再去记住实参的顺序
+//并且from_start和to_start都默认为0
+function easycopy(args) {
+    arraycopy(args.from,
+              args.from_start||0,//注意这里设置了默认值
+              args.to,
+              args.to_start||0,args.length);
+}
+//来看如何调用easycopy()
+var a = [1, 2, 3, 4], b = [];
+easycopy({ from: a, to:b, length: 4 });
+```
+
+**8.3.4实参类型**
+
+javascript方法的形参并未声明类型，在形参传入函数体之前也未做任何类型检查。可以采用语义化的单词来给函数实参命名，或者像刚才的示例代码中的arraycopy()方法一样给实参补充注释，以此使代码自文档化，对于可选的实参来说，可以在注释中补充一下“这个实参是可选的”。当一个方法可以接收任意数量的实参时，可以使用省略号：
+```javascript
+function max(/*number...*/){/*代码区*/}
+```
+3.8节已经提到，javascript在必要的时候会进行类型转换。因此如果函数期望接收一个字符串实参，而调用函数时出入其他类型的值，所传入的值会在函数体内将其用做字符串的地方转换为字符串类型。所有的原始类型都可以转换为字符串，所有的对象都包含toString()方法（尽管不一定有用），所以这种场景下是不会有任何错误的。
+
+然而事情不总是这样，回头看一下刚才提到的arraycopy()方法。这个方法期望它的第一个实参是一个数组。当传入一个非数组的值作为第一个实参时（通常会传入类数组对象），尽管看起来是没有问题的，实际上会出错。除非所写的函数是只用到一两次的“用完即丢”函数，你应当添加类似的实参类型检查逻辑，因为宁愿程序在传入非法值时报错，也不愿非法值导致程序在执行时报错，相比而言，逻辑执行时的报错消息不甚清晰且更难处理。下面这个例子中的函数就做了这种类型检查。注意这里使用了7.11节的isArrayLike()函数：
+```javascript
+//返回数组（或类数组对象）a的元素的累加和
+//数组a中必须为数字，null和undefined的元素都将忽略
+function sum(a) {
+    if(isArrayLike(a)) {
+        var total = 0;
+        for (var i = 0; i< a.length; i++){ //遍历所有元素
+            var element = a[i];
+            if(element == null) continue; //要跳过null和undefined
+            if(isFinite(element)) total += element;
+            else throw new Error("sum():elements must be finite numbers");
+        }
+        return total;
+    }
+    else throw new Error("sum():argument must be array-like");
+}
+```
+这里的sum()方法进行了非常严格的实参检查，当传入非法的值时会给出容易看懂的错误提示信息。但当涉及类数组对象和真正的数组（不考虑数组元素是否是null还是undefined），这种做法带来的灵活性其实并不大。
+
+javascript是一种非常灵活的弱类型语言，有时适合编写实参类型和实参个数的不确定性的函数。接下来的flexisum()方法就是这样（可能走向了一个极端）。比如，它可以接受任意数量的实参，并可以递归地处理实参是数组的情况，这样的话，它就可以用做不定实参函数或者实参是数组的函数。此外，这个方法尽可能的在抛出异常之前将非数字转换为数字：
+```javascript
+function flexisum(a) {
+    var total = 0;
+    for (var i=0; i < arguments.length; i++) {
+        var element = arguments[i],n;
+        if(element == null) continue;//忽略null和undefined实参
+        if(isArray(element)) //如果实参是数组
+            n = flexisum.apply(this,element);//递归地计算累加和
+        else if (typeof element === "function")//否则，如果是函数…
+            n = Number(element());//调用它并做类型转换
+        else
+            n = Number(element);//否则直接做类型转换
+        if (isNaN(n)) //如果无法转换为数字，则抛出异常
+            throw Error("flexisum(): can't convert" + element + "to number");
+        total += n;//否则，将n累加至total
+    }
+    return total;
+}
+```
+
+
 
 **8.4作为值的函数**
 
