@@ -3494,8 +3494,71 @@ function bind(f, o) {
 }
 ```
 ECMAScript5中的bind()方法不仅仅是将函数绑定至一个对象，它还附带一些其他应用，除了第一个实参之外，传入bind()的实参也会绑定至this，这个附带的应用是一种常见的函数式编程技术，有时也被称为“柯里化”（curring）。参照下面这个例子中的bind()方法实现：
+```javascript
+var sum = function(x,y) {return x+y};//返回两个实参的和值
+//创建一个类似sum的新函数，但this的值绑定到null
+//并且第一个参数绑定到1，这个新的函数期望只传入一个实参
+var succ = sum.bind(null, 1);   
+succ(2) //=>3 x绑定到1，并传入2作为实参y
+function f(y,z) { return this.x + y + z };//另外一个做累加计算的函数
+var g = f.bind({x:1}, 2);//绑定this和y
+g(3) //=> 6 this.x绑定了1，y绑定到了2，z绑定到了3
+```
+我们可以绑定this的值并在ECMAScript3中实现这个附带的应用。例8-5中的示例代码就模拟实现了标准的bind()方法。
 
+注意，我们将这个方法另存为Function.prototype.bind，以便所有的函数对象都继承它，这种技术在9.4节中有详细介绍：
+例8-5：ECMAScript3版本的Function.bind()方法
+```javascript
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function(o /*, args */) {
+        // Save the this and arguments values into variables so we can
+        // use them in the nested function below.
+        // 将this和arguments的值保存至变量中
+        // 以便在后面嵌套的函数中可以使用它们
+        var self = this, boundArgs = arguments;
 
+        // The return value of the bind() method is a function
+        // bind()方法的返回值是一个函数
+        return function() {
+            // Build up an argument list, starting with any args passed
+            // to bind after the first one, and follow those with all args
+            // passed to this function.
+            //创建一个实参列表，将传入bind()的第二个及后续的实参都传入这个函数
+            var args = [], i;
+            for(i = 1; i < boundArgs.length; i++) args.push(boundArgs[i]);
+            for(i = 0; i < arguments.length; i++) args.push(arguments[i]);
+            
+            // Now invoke self as a method of o, with those arguments
+            // 现在将self作为o的方法来调用，传入这些实参
+            return self.apply(o, args);
+        };
+    };
+}
+```
+我们注意到，bind()方法返回的函数是一个闭包，在这个闭包的外部函数中声明了self和boundArgs变量，这两个变量在闭包里用到。尽管定义闭包的内部函数已经从外部函数中返回，而且调用这个闭包逻辑的时刻要在外部函数返回之后（在闭包中照样可以正确访问这两个变量）。
+
+ECMAScript5定义的bind()方法也有一些特性是上述ECMAScript3代码无法模拟的。首先，真正的bind()方法返回一个函数对象，这个函数对象的length属性是绑定函数的形参个数减去实参的个数（length的值不能小于零）。再者，ECMAScript5的bind()方法可以顺带用做构造函数。如果bind()返回的函数用做构造函数，将忽略传入bind()的this，原始函数就会以构造函数的形式调用，它的实参也已经绑定。由bind()方法所返回的函数并不包含prototype属性（普通函数固有的prototype属性是不能删除的），并且将这些绑定的函数用做构造函数时所创建对象从原始的未绑定的构造函数中继承prototype。同样，在使用instanceof运算符时，绑定构造函数和未绑定构造函数并无两样。
+
+**8.7.5 toString()方法**
+和所有的javascript对象一样，函数也有toString()方法，ECMAScript规范规定这个方法返回一个字符串，这个字符串和函数声明语句的语法相关。实际上，大多数（非全部）的toString()方法的实现都返回函数的完整源码。内置函数往往返回一个类似“[native code]”的字符串作为函数体。
+
+**8.7.6Function()构造函数**
+
+不管是通过函数定义语句还是函数直接量表达式，函数的定义都要使用function关键字。但函数还可以通过Function()构造函数来定义，比如：
+
+    var f = new Function("x", "y", "return x*y;");
+
+这一行代码创建一个新的函数，这个函数和通过下面代码定义的函数几乎等价：
+
+    var f = function(x, y) { return x*y; }
+
+Function()构造函数可以传入任意数量的字符串实参，最后一个实参所表示的文本就是函数体，它可以包含任意的javascript语句，每两条语句之间用分号分隔。传入构造函数的其他所有的实参字符串是指定函数的形参名字的字符串。如果定义的函数不包含任何参数，只须给构造函数简单地传入一个字符串——函数体——即可。
+
+注意，Function()构造函数并不需要通过传入实参以指定函数名。就像函数直接量一样，Function()构造函数创建一个匿名函数。
+关于Function()构造函数有几点需要特别注意：
+* Function()构造函数允许javascript在运行时动态地创建并编译函数
+* 每次调用Function()函数都会解析函数体，并创建新的函数对象。如果是在一个循环或者多次调用的函数中执行这个构造函数，执行效率会受影响。相比之下，循环中的嵌套函数和函数定义表达式则不会每次执行时都重新编译。
+* 最后一点，也是关于Function()构造函数非常重要的一点，就是它所创建的函数并不是使用词法作用域，相反，函数体代码的编译总是会在顶层函数
 
 **8.8函数式编程**
 
