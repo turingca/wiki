@@ -3129,9 +3129,110 @@ var k = operate2("pow", 10, 2);
 
 自定义函数属性：
 javascript中的函数并不是原始值，而是一种特殊的对象，也就是说，函数可以拥有属性。当函数需要一个”静态“变量来在调用时保持某个值不变，最方便的方式就是给函数定义属性，而不是定义全局变量，显然定义全局变量会让命名空间变得更加杂乱无章。比如，假设你想写一个返回一个唯一整数的函数，不管在哪里调用函数都会返回这个整数。而函数不能两次返回同一个值，为了做到这一点，函数必须能够跟踪它每次返回的值，而且这些值的信息需要在不同的的函数调用过程中持久化。可以将这些信息存放到全局变量中，但这并不是必需的，因为这个信息仅仅是函数本身用到的。最好将这个信息保存到函数对象的一个属性中，下面这个例子就实现了这样一个函数，每次调用函数都会返回一个唯一的整数：
-
+```javascript
+//初始化函数对象的计数器属性
+//由于函数声明被提前了，因此这里是可以在函数声明
+//之前给它的成员赋值的
+uniqueInteger.counter = 0;
+//每次调用这个函数都会返回一个不同的整数
+//它使用一个属性来记住下一次将要返回的值
+function uniqueInteger() {
+    return uniqueInteger.counter++;//先返回计数器的值，然后计数器自增1
+}
+```
+来看另外一个例子，下面这个函数factorial()使用了自身的属性（将自身当做数组来对待）来缓存上一次的计算结果：
+```javascript
+//计算阶乘，并将结果缓存至函数的属性中
+function factorial(n) { 
+    if (isFinite(n)&&n>0&&n==Math.round(n)) {   //有限的正整数
+        if(!(n in factorial))                   //如果没有缓存结果
+            factorial[n] = n * factorial(n-1);  //计算结果并缓存之
+        return factorial[n];                    //返回缓存结果
+    }
+    else return NaN;//如果输入有误
+}
+factorial[i] = 1;//初始化缓存以保存这种基本情况
+```
 
 **8.5作为命名空间的函数**
+
+3.10.1节介绍了javascript中的函数作用域的概念：在函数中声明的变量在整个函数体内都是可见的（包括在嵌套的函数中），在函数的外部是不可见的。不在任何函数内的声明的变量是全局变量，在整个javascript程序中都是可见的。在javascript中是无法声明只在一个代码块内可见的变量，基于这个原因，我们常常简单地定义一个函数用做临时的命名空间，在这个命名空间内定义的变量都不会污染到全局命名空间。
+
+比如，假设你写了一段javascript模块代码，这段代码将要用在不同的javascript程序中（对于客户端javascript来讲通常是用在各种各样的网页中）。和大多数代码一样，假定这段代码定义了一个用以存储中间计算结果的变量。这样问题就来了，当模块代码放到不同的程序中运行时，你无法得知这个变量是否已经创建了，如果已经存在这个变量，那么将会和代码发生冲突。解决办法当然是将代码放入一个函数内，然后调用这个函数。这样全局变量就变成了函数内的局部变量：
+```javascript
+function mymodule() {
+    //模块代码
+    //这个模块所使用的所有变量都是局部变量
+    //而不是污染全局命名空间
+}
+mymodule();//不要忘了还要调用这个函数
+```
+这段代码仅仅定义了一个单独的全局变量：名叫"mymodule"的函数。这样还是太麻烦，可以直接定义一个匿名函数，并在单个表达式中调用它：
+```javascript
+(function() {   //mymodule()函数重写为匿名的函数表达式
+    //模块代码
+}());   //结束函数定义并立即调用它
+```
+这种定义匿名函数并立即在单个表达式中调用它的写法非常常见，已经成为一种惯用法了。注意上面的代码的圆括号的用法，function之前的左圆括号是必需的，因为如果不写这个左圆括号，javascript解释器会试图将关键字function解析为函数声明语句。使用圆括号javascript解释器才会正确地将其解析为函数定义表达式。使用圆括号是习惯用法，尽管有些时候没有必要也不应当省略。这里定义的函数会立即调用。
+
+例8-3展示了这种命名空间技术。它定义了一个返回extend()函数的匿名函数，正如在例6-2中所展示的那样，匿名函数中的代码检测了是否出现了一个众所周知的IE bug，如果出现了这个bug，就返回一个带补丁的函数版本。此外，这个匿名函数命名空间用来隐藏一组属性名。
+
+例8-3：特定场景下返回带补丁的extend()版本
+```javascript
+// Define an extend function that copies the properties of its second and 
+// subsequent arguments onto its first argument.
+// We work around an IE bug here: in many versions of IE, the for/in loop
+// won't enumerate an enumerable property of o if the prototype of o has 
+// a nonenumerable property by the same name. This means that properties
+// like toString are not handled correctly unless we explicitly check for them.
+// 定义一个扩展函数，用来将第二个以及后续参数复制至第一个参数
+// 这里我们处理了IE bug：在多数IE版本中
+// 如果o的属性拥有一个不可枚举的同名属性，则for/in循环
+// 不会枚举对象o的可枚举属性，也就是说，将不会正确地处理诸如toString的属性
+// 除非我们显式检测它
+var extend = (function() {  // Assign the return value of this function ，将这个函数的返回值赋值给extend
+    // First check for the presence of the bug before patching it.，在修复它之前，首先检查是否存在bug
+    for(var p in {toString:null}) {
+        // If we get here, then the for/in loop works correctly and we return
+        // 如果代码执行到这里，那么for/in循环会正确工作并返回
+        // a simple version of the extend() function
+        // 一个简单版本的extend()函数
+        return function extend(o) {
+            for(var i = 1; i < arguments.length; i++) {
+                var source = arguments[i];
+                for(var prop in source) o[prop] = source[prop];
+            }
+            return o;
+        };
+    }
+    // If we get here, it means that the for/in loop did not enumerate
+    // the toString property of the test object. So return a version
+    // of the extend() function that explicitly tests for the nonenumerable
+    // properties of Object.prototype.
+    // 如果代码执行到这里，说明for/in循环不会枚举测试对象的toString属性，因此返回另一个版本的extend()函数，这个函数显式测试
+    // Object.prototype中的不可枚举属性
+    return function patched_extend(o) {
+        for(var i = 1; i < arguments.length; i++) {
+            var source = arguments[i];
+            // Copy all the enumerable properties，复制所有的可枚举属性
+            for(var prop in source) o[prop] = source[prop];
+
+            // And now check the special-case properties，现在检查特殊属性
+            for(var j = 0; j < protoprops.length; j++) {
+                prop = protoprops[j];
+                if (source.hasOwnProperty(prop)) o[prop] = source[prop];
+            }
+        }
+        return o;
+    };
+
+    // This is the list of special-case properties we check for
+    // 这个列表列出了需要检查的特殊属性
+    var protoprops = ["toString", "valueOf", "constructor", "hasOwnProperty",
+                      "isPrototypeOf", "propertyIsEnumerable","toLocaleString"];
+}());
+```
+
 **8.6闭包**
 
 和其他大多数的现代编程语言一样，javascript也采用词法作用域（lexical scoping），也就是说，函数的执行依赖于变量作用域，这个作用域是在函数定义时决定的，而不是函数调用时决定。为了实现这种词法作用域，javascript函数对象的内部状态不仅包含函数的代码逻辑，还必须引用当前的作用域链（在继续阅读后续的章节之前，应当复习一下3.10节和3.10.3节中讲到的变量作用域和作用域链的概念）。函数对象可以通过作用域链相互关联起来，函数体内部的变量都可以保存在函数作用域内，这种特性在计算机科学文献中国称为“闭包”。这个术语非常古老，是指函数变量可以被隐藏于作用域链之内，因此看起来是函数将变量“包裹”了起来。
@@ -3303,6 +3404,18 @@ var outerArguments = arguments;//保存起来以便嵌套的函数能使用它
 在本章接下来讲到的例8-5中就利用了这种编程技巧来定义闭包，以便在闭包中可以访问外部函数的this和arguments值。
 
 **8.7函数属性、方法和构造函数**
+
+我们看到在javascript程序中，函数是值。对函数执行typeof运算会返回字符串“function”，但是函数是javascript中特殊的对象。因为函数也是对象，它们也可以拥有属性和方法，就像普通的对象可以拥有属性和方法一样。甚至可以用Function()构造函数来创建新的函数对象。接下来几节就会着重介绍函数属性和方法以及Function()构造函数。在第三部分也有关于这些内容的讲解。
+
+**8.7.1length属性**
+
+在函数体里，arguments.length表示传入函数的实参的个数。而函数本身的length属性则有着不同含义。函数的length属性是只读属性，它代表函数实参的数量，这里的参数指的是“形参”而非“实参”，也就是在函数定义时给出的实参个数，通常也是在函数调用时期望传入函数的实参个数。
+
+下面的代码定义了一个名叫check()的函数，从另外一个函数给它传入arguments数组，它比较arguments.length（实际传入的实参个数）和arguments.callee.length（期望传入的实参个数）来判断所传入的实参个数是否正确。如果个数不正确，则抛出异常。check()函数之后定义一个测试函数f()，用来展示check()的用法：
+```javascript
+//这个函数
+```
+
 **8.8函数式编程**
 
 类和模块
