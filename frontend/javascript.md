@@ -3059,7 +3059,77 @@ function flexisum(a) {
 
 函数可以定义，也可以调用，这是函数最重要的特性。函数定义和调用是javascript的词法特性，对于其他大多数编程语言来说亦是如此。然而在javascript中，函数不仅是一种语法，也是值，也就是说，可以将函数赋值给变量，存储在对象的属性或数组的元素中，作为参数传入另外一个函数等。
 
-为了便于
+为了便于理解javascript中的函数是如何用做数据的以及javascript语法，来看一下这样一个函数定义：
+```javascript
+function square(x) { return x*x; }
+```
+这个定义创建一个新的函数对象，并将其赋值给变量square。函数的名字实际上是看不见的，它（square）仅仅是变量的名字，这个变量指代函数对象。函数还可以赋值给其他的变量，并且仍可以正常工作：
+```javascript
+var s = square;//现在s和square指代同一个函数
+square(4);//=> 16
+s(4);//=> 16
+```
+除了可以将函数赋值给变量，同样可以将函数赋值给对象的属性。当函数作为对象的属性调用时，函数就称为方法：
+```javascript
+var o = {square: function(x) {return x*x}};//对象直接量
+var y = o.square(16);//y等于256
+```
+函数甚至不需要带名字，当把它们赋值给数组元素时：
+```javascript
+var a = [function(x) {return x*x;},20];//数组直接量
+a[0](a[1]);//=>400
+```
+最后一句代码看起来很奇怪，但的确是合法的函数调用表达式！
+例8-2展示了将函数用做值时的一些例子，这段代码可能会难读一些，但注释解释了代码的具体含义：
+例8-2：将函数用做值
+```javascript
+// We define some simple functions here，在这里定义了一些简单的函数
+function add(x,y) { return x + y; }
+function subtract(x,y) { return x - y; }
+function multiply(x,y) { return x * y; }
+function divide(x,y) { return x / y; }
+
+// Here's a function that takes one of the above functions，这里的函数以上面的某个函数作为参数
+// as an argument and invokes it on two operands，并给它传入两个操作数然后调用它
+function operate(operator, operand1, operand2) {
+    return operator(operand1, operand2);
+}
+
+// We could invoke this function like this to compute the value (2+3) + (4*5):
+// 这行代码所示的函数调用实际上计算了(2+3) + (4*5)的值
+var i = operate(add, operate(add, 2, 3), operate(multiply, 4, 5));
+
+// For the sake of the example, we implement the simple functions again, 
+// this time using function literals within an object literal;
+// 我们为这个例子重复实现一个简单的函数，这次实现使用函数直接量，这些函数直接量定义在一个对象直接量中
+var operators = {
+    add:      function(x,y) { return x+y; },
+    subtract: function(x,y) { return x-y; },
+    multiply: function(x,y) { return x*y; },
+    divide:   function(x,y) { return x/y; },
+    pow:      Math.pow  // Works for predefined functions too
+};
+
+// This function takes the name of an operator, looks up that operator
+// in the object, and then invokes it on the supplied operands. Note
+// the syntax used to invoke the operator function.
+// 这个函数接收一个名字作为运算符，在对象中查找这个运算符，然后将它作用于所提供的操作数，注意这里调用运算符函数的语法
+function operate2(operation, operand1, operand2) {
+    if (typeof operators[operation] === "function")
+        return operators[operation](operand1, operand2);
+    else throw "unknown operator";
+}
+
+// Compute the value ("hello" + " " + "world") like this： 这样来计算("hello"+""+"world")的值
+var j = operate2("add", "hello", operate2("add", " ", "world"));
+// Using the predefined Math.pow() function: 使用预定义的函数Math.pow()
+var k = operate2("pow", 10, 2);
+```
+这里是将函数用做值的另外一个例子，考虑一下Array.sort()方法。这个方法用来对数组元素进行排序。因为排序的规则有很多（基于数值大小、字母表顺序、日期大小、从小到大、从大到小等）,sort()方法可以接收一个函数作为参数，用来处理具体的排序操作。这个函数的作用非常简单，对于任意两个值都返回一个值，以指定它们在排序后的数组中的先后顺序。这个函数参数使得Array.sort()具有更完美的通用性和无限可扩展性，它可以对任何类型的数据进行任意排序。7.8.3节有示例代码。
+
+自定义函数属性：
+javascript中的函数并不是原始值，而是一种特殊的对象，也就是说，函数可以拥有属性。当函数需要一个”静态“变量来在调用时保持某个值不变，最方便的方式就是给函数定义属性，而不是定义全局变量，显然定义全局变量会让命名空间变得更加杂乱无章。比如，假设你想写一个返回一个唯一整数的函数，不管在哪里调用函数都会返回这个整数。而函数不能两次返回同一个值，为了做到这一点，函数必须能够跟踪它每次返回的值，而且这些值的信息需要在不同的的函数调用过程中持久化。可以将这些信息存放到全局变量中，但这并不是必需的，因为这个信息仅仅是函数本身用到的。最好将这个信息保存到函数对象的一个属性中，下面这个例子就实现了这样一个函数
+
 
 **8.5作为命名空间的函数**
 **8.6闭包**
