@@ -3054,7 +3054,6 @@ function flexisum(a) {
 ```
 
 
-
 **8.4作为值的函数**
 
 函数可以定义，也可以调用，这是函数最重要的特性。函数定义和调用是javascript的词法特性，对于其他大多数编程语言来说亦是如此。然而在javascript中，函数不仅是一种语法，也是值，也就是说，可以将函数赋值给变量，存储在对象的属性或数组的元素中，作为参数传入另外一个函数等。
@@ -3842,9 +3841,9 @@ factorial(5)  //=>120 对于4~1的值也有缓存
 ```
 
 
+第9章 类和模块
+---------------
 
-类和模块
---------
 第6章详细介绍了javascript对象，每个javascript对象都是一个属性集合，相互之间没有任何联系。
 在javascript中也可以定义对象的类，让每个对象都共享某些属性，这种“共享”的特性是非常有用的。
 类的成员或实例都包含一些属性，用以存放或定义它们的状态，其中有些属性定义了它们的行为（通常称为方法）。
@@ -3867,6 +3866,7 @@ javascript中类的一个重要特性是“动态可继承”（dynamically exte
 强/弱类型是指类型检查的严格程度，为所有变量指定数据类型称为“强类型”。
 
 **9.1类和原型**
+
 在javascript中，类的所有实例对象都从同一个原型对象上继承属性。因此，原型对象是类的核心。在例6-1中定义了inherit()函数，这个函数返回一个新创建的对象，后者继承自某个原型对象。如果定义一个原型对象，然后通过inherit()函数创建一个继承自它的对象，这样就定义了一个javascript类。通常，类的实例还需要进一步的初始化，通常是通过定义一个函数来创建并初始化这个新对象，参照例9-1。例9-1给一个表示“值得范围”的类定义了原型对象，还定义了一个[“工厂”函数](https://zh.wikipedia.org/zh/%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95)用以创建并初始化类的实例。
 例9-1：一个简单的javascript类
 ```javascript
@@ -3947,10 +3947,238 @@ console.log(r);           // 输出 (1...3)
 
 最后，需要注意在例9-1和例9-2中两种类定义方式的相同之处，两者的范围方法定义和调用方式是完全一样的。
 
-**9.2.1*
+**9.2.1构造函数和类的标识*
+
+上文提到，原型对象是类的唯一标识，当且仅当两个对象继承自同一个原型对象时，它们才是属于同一个类的实例。而初始化对象的状态的构造函数则不能作为类的标识，两个构造函数的prototype属性可能指向同一个原型对象。那么这两个构造函数创建的实例是属于同一个类的。
+
+尽管构造函数不像原型那样基础，但构造函数是类的“外在表现”。很明显的，构造函数的名字通常用做类名。比如，我们说Range()构造函数创建Range对象。然而，更根本地讲，当使用instanceof运算符来检测对象是否属于某个类时会用到构造函数。假设这里有一个对象r，我们想知道r是否是Range对象，我们这样写：
+
+    r instanceof Range //如果r继承自Range.prototype 则返回true
+    
+实际上instanceof运算符并不会检查r是否是由Range()构造函数初始化而来，而会检查r是否继承自Range.prototype。不过，instanceof的语法则强化了“构造函数是类的公有标识”的概念。在本章的后面还会碰到对instanceof运算符的介绍。
+
+**9.2.2 constructor属性**
+
+在例9-2中，将Range.prototype定义为一个新对象，这个对象包含类所需要的方法。其实没有必要新创建一个对象，用单个对象直接量的属性就可以方便地定义原型上的方法。任何javascript函数都可以用做构造函数，并且调用构造函数是需要用到一个prototype属性的。因此，每个javascript函数（ECMAScript5中的Function.bind()方法返回的函数除外）都自动拥有一个prototype属性。这个属性的值是一个对象，这个对象包含唯一一个不可枚举属性constructor。constructor属性的值是一个函数对象：
+```javascript
+var f = function() {}; //这是一个函数对象
+var p = F.prototype; //这是F相关联的原型对象
+var c = p.constructor; //这是与原型相关联的函数
+c === F  //=>true 对于任意函数F.prototype.constructor == F
+```
+可以看到构造函数的原型中存在预先定义好的constructor属性。这意味着对象通常继承的constructor均指代它们的构造函数。由于构造函数是类的“公共标识”，因此这个constructor属性为对象提供子类。
+```javascript
+var o = new F(); //创建类F的一个对象
+o.constructor === F //=>true constructor属性指代这个类
+```
+如图9-1所示，图9-1展示了构造函数和原型对象之间的关系，包括原型到构造函数的反向引用以及构造函数创建的实例。
+
+图9-1：构造函数及其原型和实例
+
+需要注意的是，图9-1用Range()构造函数作为示例，但实际上，例9-2中定义的Range类使用它自身的一个新对象重写预定义的Range.prototype对象。这个新定义的原型对象不含有constructor属性。因此Range类的实例也不含有constructor属性。我们可以通过补救措施来修正这个问题，显式给原型添加一个构造函数：
+```javascript
+Range.prototype = {
+    constructor: Range, //显式设置构造函数反向引用
+    includes: function(x) {return this.from <= x && x <= this.to;},
+    foreach: function(f) {
+        for( var x = Math.ceil(this.from); x <= this.to; x++) f(x);
+    },
+    toString: function() {return "(" + this.from + "..." + this.to + ")";}
+};
+```
+另一种常见的解决办法是使用预定义的原型对象，预定义的原型对象包含constructor属性，然后依次给原型对象添加方法：
+```javascript
+//扩展预定义的Range.prototype对象，而不重写之
+//这样就自动创建Range.prototype.constructor属性
+Range.prototype.includes = function (x) {return this.from <= x && x <= this.to;};
+Range.prototype.foreach = function (f) {
+    for (var x = Math.ceil(this.from); x <= this.to; x++) f(x);
+};
+Range.prototype.toString = function () {
+    return "(" + this.from + "..." + this.to + ")";
+};
+```
 
 **9.3javascript中java式的类继承**
+
+如果你有过java或其他类似强类型面向对象语言的开发经历的话，在你的脑海中，类成员的模样可能会是这个样子：
+
+    实例字段
+        它们是基于实例的属性或变量，用以保存独立对象的状态。
+    实例方法
+        它们是类的所有实例所共享的方法，由每个独立的实例调用。
+    类字段
+        这些属性或变量是属于类的，而不是属于类的某个实例的。
+    类方法
+        这些方法是属于类的，而不是属于类的某个实例的。
+        
+        
+javascript和java的一个不同之处在于，javascript中的函数都是以值的形式出现的，方法和字段之间并没有太大的区别。如果属性值是函数，那么这个属性就定义了一个方法；否则，它只是一个普通的属性或“字段”。尽管存在诸多差异，我们还是可以用javascript模拟出java中的这四种类成员类型。javascript中的类牵扯三种不同的对象（参照图9-1），三种对象的属性的行为和下面三种类成员非常相似：
+
+    构造函数对象
+        之前提到，构造函数（对象）为javascript的类定义了名字。任何添加到这个构造函数对象中的属性都是类字段和类方法（如果属性值是函数         的话就是类方法）。
+    原型对象
+        原型对象的属性被类的所有实例所继承，如果原型对象的属性值是函数的话，这个函数就作为类的实例的方法来调用。
+    实例对象
+        类的每个实例都是一个独立的对象，直接给这个实例定义的属性是不会为所有实例对象所共享的。定义在实例上的非函数属性，实际上是实例         的字段。
+
+
+在javascript中定义类的步骤可以缩减为一个分三步的算法。第一步，先定义一个构造函数，并设置初始化新对象的实例属性。第二步，给构造函数的prototype对象定义实例的方法。第三步，给构造函数定义类字段和类属性。我们可以将这三个步骤封装进一个简单的defineClass()函数中（这里用到了例6-2中的extend()函数和例8-3中的改进版）：
+```javascript
+//一个用以定义简单类的函数
+function defineClass(constructor, //用以设置实例的属性的函数
+                    method, //实例的方法，复制至原型中
+                    statics)    //类属性，复制至构造函数中
+{
+    if(methods) extend(constructor.prototype, methods);
+    if(statics) extend(constructor, statics);
+    return constructor;
+}
+//这是Range类的另一个实现
+var SimpleRange =
+    defineClass(function(f,t) {this.f = f; this.t = t;},
+                {
+                    includes: function(x) {return this.f <= x && x <= this.t;},
+                    toString: function() {return this.f + "..." + this.t;},
+                },
+                { upto: function(t) { return new SimpleRange(o,t);} });
+```
+例9-3中国定义类的代码更长一些。这里定义了一个表示复数的类，这段代码展示了如何使用javascript来模拟实现java式的类成员。例9-3中的代码没有用到上面的defineClass()函数，而是“手动”来实现：
+例9-3：Complex.js 表示复数的类
+```javascript
+/*
+ * Complex.js:
+ * This file defines a Complex class to represent complex numbers.
+ * Recall that a complex number is the sum of a real number and an
+ * imaginary number and that the imaginary number i is the square root of -1.
+ * 这个文件定义了Complex类，用来描述复数，回忆一下，复数是实数和虚数的和，并且虚数i是-1的平方根
+ */
+
+/*
+ * This constructor function defines the instance fields r and i on every
+ * instance it creates.  These fields hold the real and imaginary parts of
+ * the complex number: they are the state of the object.
+ * 这个构造函数为它所创建的每个实例定义了实例字段r和i
+ * 这两个字段分别保存复数的实部和虚部，它们是对象的状态
+ */
+function Complex(real, imaginary) {
+    if (isNaN(real) || isNaN(imaginary)) // Ensure that both args are numbers，确保两个实参都是数字
+        throw new TypeError();           // Throw an error if they are not，如果不都是数字则抛出错误
+    this.r = real;                       // The real part of the complex number，复数的实部
+    this.i = imaginary;                  // The imaginary part of the number，复数的虚部
+}
+
+/*
+ * The instance methods of a class are defined as function-valued properties
+ * of the prototype object.  The methods defined here are inherited by all
+ * instances and provide the shared behavior of the class. Note that JavaScript
+ * instance methods must use the this keyword to access the instance fields.
+ * 类的实例方法定义为原型对象的函数值属性，这里定义的方法可以被所有实例继承，并为它们提供共享的行为
+ * 需要注意的是，javascript的实例方法必须使用关键字this来存取实例的字段
+ */
+
+// Add a complex number to this one and return the sum in a new object.
+// 当前复数对象加上另一个复数，并返回一个新的计算和值后的复数对象
+Complex.prototype.add = function(that) {
+    return new Complex(this.r + that.r, this.i + that.i);
+};
+
+// Multiply this complex number by another and return the product.
+// 当前复数乘以另外一个复数，并返回一个新的计算乘积之后的复数对象
+Complex.prototype.mul = function(that) {
+    return new Complex(this.r * that.r - this.i * that.i,
+                       this.r * that.i + this.i * that.r);
+};
+
+// Return the real magnitude of a complex number. This is defined
+// as its distance from the origin (0,0) of the complex plane.
+//计算复数的模，复数的模定义为原点(0,0)到复平面的距离
+Complex.prototype.mag = function() {
+    return Math.sqrt(this.r*this.r + this.i*this.i);
+};
+
+// Return a complex number that is the negative of this one.
+// 复数的求负运算
+Complex.prototype.neg = function() { return new Complex(-this.r, -this.i); };
+
+// Convert a Complex object to a string in a useful way.
+// 将复数对象转换为一个字符串
+Complex.prototype.toString = function() {
+    return "{" + this.r + "," + this.i + "}";
+};
+
+// Test whether this Complex object has the same value as another.
+// 检测当前复数对象是否和另一个复数值相等
+Complex.prototype.equals = function(that) {
+    return that != null &&                      // must be defined and non-null，必须有定义且不能是null
+        that.constructor === Complex &&         // and an instance of Complex，并且必须是Complex的实例
+        this.r === that.r && this.i === that.i; // and have the same values，并且必须包含相同的值
+};
+
+/*
+ * Class fields (such as constants) and class methods are defined as 
+ * properties of the constructor. Note that class methods do not 
+ * generally use the this keyword: they operate only on their arguments.
+ * 类字段（比如常量）和类方法直接定义为构造函数的属性
+ * 需要注意的是，类的方法通常不使用关键字this，
+ * 它们只对其参数进行操作
+ */
+
+// Here are some class fields that hold useful predefined complex numbers.
+// 这里预定义了一些对复数运算有帮助的类字段
+// Their names are uppercase to indicate that they are constants.
+// 它们的命名全都是大写的，用以表明它们是常量
+// (In ECMAScript 5, we could actually make these properties read-only.)
+// （在ECMAScript5中，还能设置这些类字段的属性为只读）
+Complex.ZERO = new Complex(0,0);
+Complex.ONE = new Complex(1,0);
+Complex.I = new Complex(0,1);
+
+// This class method parses a string in the format returned by the toString
+// 这个类方法将由实例对象的toString方法返回的字符串格式解析为一个Complex对象
+// instance method and returns a Complex object or throws a TypeError.
+// 或者抛出一个类型错误异常
+Complex.parse = function(s) {
+    try {          // Assume that the parsing will succeed，假设解析成功
+        var m = Complex._format.exec(s);  // Regular expression magic，利用正则表达式进行匹配
+        return new Complex(parseFloat(m[1]), parseFloat(m[2]));
+    } catch (x) {  // And throw an exception if it fails，如果解析失败则抛出异常
+        throw new TypeError("Can't parse '" + s + "' as a complex number.");
+    }
+};
+
+// A "private" class field used in Complex.parse() above.
+// The underscore in its name indicates that it is intended for internal
+// use and should not be considered part of the public API of this class.
+// 定义类的“私有”字段，这个字段在Complex.parse()中用到了，下划线前缀表明它是类内部使用的，而不属于类的公有API的部分
+Complex._format = /^\{([^,]+),([^}]+)\}$/;
+```
+
+从例9-3中所定义的Complex类可以看出，我们用到了构造函数、实例字段、实例方法、类字段和类方法，看一下这段示例代码：
+```javascript
+var c = new Complex(2, 3); //使用构造函数创建新的对象
+var d = new Complex(c.i, c.r); //用到了c的实例属性
+c.add(d).toString(); //=>"{5,5}" 使用了实例的方法
+//这个稍微复杂的表达式用到了类方法和类字段
+Complex.parse(c.toString()). //将c转换为字符串
+    add(c.neg()).           //加上它的负数
+    equals(Complex.ZERO)    //结果应当永远是“零”
+```
+
+尽管javascript可以模拟出java式的类成员，但java中有很多重要的特性是无法在javascript类中模拟的。首先，对于java类的实例方法来说，实例字段可以用做局部变量，而不需要使用关键字this来引用它们。javascript是没办法模拟这个特性的，但可以使用with语句来近似地实现这个功能（但这种做法并不推荐）：
+```javascript
+Complex.prototype.toString = function() {
+    with(this) {
+        return "{" + r + "," + i + "}";
+    }
+};
+```
+在java中可以使用final声明字段为常量，并且可以将字段和方法声明为private，用以表示它们是私有成员且在类的外面是不可见的。在javascript中没有这些关键字。例9-3中使用了一些命名写法上的约定来给出一些暗示，比如哪些成员是不能修改的（以大写字母命名的命名），哪些成员在类外部是不可见的（以下划线为前缀的命名）。关于这两个主题的讨论在本章后续还会碰到：私有属性可以使用闭包里的局部变量来模拟（参照9.6.6节），常量属性可以在ECMAScript5中直接实现（参照9.8.2节）。
+
 **9.4类的扩充**
+
+
+
 **9.5类和类型**
 **9.6javascript中的面向对象技术**
 **9.7子类**
