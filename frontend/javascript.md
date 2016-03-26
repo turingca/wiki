@@ -4177,6 +4177,45 @@ Complex.prototype.toString = function() {
 
 **9.4类的扩充**
 
+javascript中基于原型的继承机制是动态的：对象从其原型继承属性，如果创建对象之后原型的属性发生改变，也会影响到继承这个原型的所有实例对象。这意味着我们可以通过给原型对象添加新方法来扩充javascript类。这里我们给例9-3中的Complex类添加方法来计算复数的共轭复数。（两个实部相等，虚部互为相反数的复数互为共轭复数）
+```javascript
+//返回当前复数的共轭复数
+Complex.prototype.conj = function() { return new Complex(this.r, -this.i); };
+```
+javascript内置类的原型对象也是一样如此“开放”，也就是说可以给数字、字符串、数组、函数等数据类型添加方法。在例8-5中我们曾给ECMAScript3中的函数类添加了bind()方法，这个方法原来是没有的：
+```javascript
+if (!Function.prototype.bind) {
+    Function.prototype.bind = function(o /*, args*/) {
+        //bind()方法的代码...
+    }
+}
+```
+这里有一些其他的例子：
+```javascript
+//多次调用这个函数f，传入一个迭代数
+//比如，要输出“hello”三次：
+//var n = 3；
+//n.times(function(n) { console.log(n + " hello"); });
+Number.prototype.times = function(f, context) {
+    var n = Number(this);
+    for(var i = 0; i < n; i++) f.call(context, i);
+};
+//如果不存在ES5的String.trim()方法的话，就定义它
+//这个方法用以去除字符串开头和结尾的空格
+String.prototype.trim = String.prototype.trim || function() {
+    if (!this) return this; //空字符串不做处理
+    return this.replace(/^\s+|\s+$/g, "");//使用正则表达式进行空格替换
+};
+//返回函数的名字，如果它有（非标准）name属性，则直接使用name属性
+//否则，将函数转换为字符串然后从中提取名字
+//如果是没有名字的函数，则返回一个空字符串
+function.prototype.getName = function() {
+    return this.name||this.toString().match(/function\s*([^()*]\(/)[1];
+};
+```
+可以给Object.prototype添加方法，从而使所有的对象都可以调用这些方法。但这种做法并不推荐，因为在ECMAScript5之前，无法将这些新增的方法设置为不可枚举的，如果给Object.prototype添加属性，这些属性是可以被for/in循环遍历到的。在9.8.1节中会给出ECMAScript5中的一个例子，其中使用Object.defineProperty()方法可以安全地扩充Object.prototype。
+
+然而并不是所有的宿主环境（比如web浏览器）都可以使用Object.defineProperty()，这跟ECMAScript的具体实现有关。比如，在很多web浏览器中，可以给HTMLElement.prototype添加方法，这样当前文档中表示HTML标记的所有对象就可以继承这些方法。但当前版本的IE则不支持这样做。这时客户端编程实用技术有着严重的限制。
 
 
 **9.5类和类型**
