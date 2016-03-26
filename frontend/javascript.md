@@ -4239,7 +4239,24 @@ instanceof运算符和isPrototypeOf()方法的缺点是，我们无法通过对�
 
 **9.5.2 constructor属性**
 
+另一种识别对象是否属于某个类的方法是使用constructor属性。因为构造函数是类的公共标识，所以最直接的方法就是使用constructor属性，比如：
+```javascript
+function typeAndValue(x) {
+    if ( x == null ) return "";//null和undefined没有构造函数
+    switch(x.constructor) {
+        case Number: return "Number:" + x; //处理原始类型
+        case String: return "String:'" + x + "'"; 
+        case Date: return "Date: " + x ; //处理内置类型
+        case RegExp: return "RegExp: " + x ;
+        case Complex: return "Complex: " + x ; //处理自定义类型
+    }
+}
+```
+需要注意的是，在代码中关键字case后的表达式都是函数，如果改用typeof运算符或获取到对象的class属性的话，它们应当改为字符串。
 
+使用constructor属性检测对象属于某个类的技术的不足之处和instanceof一样。在多个执行上下文的场景中它是无法正常工作的（比如在浏览器窗口的多个框架子页面中）。在这种情况下，每个框架页面各自拥有独立的构造函数集合，一个框架页面中的Array构造函数和另一个框架页面的Array构造函数不是同一个构造函数。
+
+同样，在javascript中也并非所有的对象都包含constructor属性。在每个新创建的函数原型上默认会有constructor属性，但我们常常会忽觉原型上的constructor属性。比如本章前面的实例代码中所定义的两个类（在例9-1和例9-2中），它们的实例都没有constructor属性。
 
 **9.5.3 构造函数的名称**
 **9.5.3 鸭式辩型**
