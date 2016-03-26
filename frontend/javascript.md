@@ -3591,6 +3591,90 @@ function isFunction(x) {
 
 **8.8函数式编程**
 
+和Lisp、Haskell不同，javascript并非函数式编程语言，但在javascript中可以像操控对象一样操控函数，也就是说可以在javascript中应用函数式编程技术。ECMAScript5中的数组方法（诸如map()和reduce()）就可以非常适合用于函数式编程风格。接下来的几节会着重介绍javascript中的函数式编程技术。对javascript函数的探讨会让人倍感兴奋，你会体会到javascript函数非常强大，而不仅仅是学习一种编程风格而已。
+
+**8.8.1 使用函数处理数组**
+
+假设有一个数组，数组元素都是数字，我们想要计算这些元素的平均值和标准差。若使用非函数式编程风格的话，代码会是这样：
+```javascript
+var data = [1,1,3,5,5]; //这里是待处理的数组
+//平均数是所有元素的累加和值除以元素个数
+var total = 0;
+for (var i = 0; i<data.length; i++ ){
+    total += data[i];
+}
+var mean = total/data.length; //平均数是3
+//计算标准差，首先计算每个数据减去平均数之后偏差的平方让后求和
+total = 0;
+for (var i = 0; i < data.length; i++) {
+    var deviation = data[i] - mean;
+    total += deviation*deviation;
+}
+var stddev = Math.sqrt(total/(data.length - 1)); //标准差的值是2        
+```
+可以使用数组方法map()和reduce()来实现同样的计算，这种实现极其简洁（参照7.9节来查看这些方法）：
+```javascript
+//首先定义两个简单的函数
+var sum = function(x,y) {return x+y};
+var square = function(x) {return x*x};
+//然后将这些函数和数组方法配合使用计算出的平均数和标准差
+var data = [1,1,3,5,5];
+var mean = data.reduce(sum)/data.length;
+var deviations = data.map(function(x){return x-mean});
+var stddev = Math.sqrt(deviations.map(square).reduce(sum)/(data.length - 1));
+```
+如果我们基于ECMAScript3来如何实现呢？因为ECMAScript3中并不包含这些数组方法，如果不存在内置方法的话我们可以自定义map()和reduce()函数：
+```javascript
+//对于每个数组元素调用函数f()，并返回一个结果数组
+//如果Array.prototype.map定义了的话，就使用这个方法
+var map = Array.prototype.map
+    ? function(a, f) { return a.map(f); } //如果已经存在map()方法，就直接使用它
+    : function(a, f) {                  //否则，自己实现一个 
+        var results = [];
+        for (var i = 0, len = a.length; i < len; i++ ) {
+            if (i in a) results[i] = f.call(null, a[i], i, a);
+        }
+        return results;
+    };
+//使用函数f()和可选的初始值将数组a减至一个值
+//如果Array.prototype.reduce存在的话，就使用这个方法
+var reduce = Array.prototype.reduce 
+    ? function(a, f, initial) { //如果reduce()方法存在的话
+    if (arguments.length > 2)
+        return a.reduce(f, initial); //如果传入一个初始值
+        else return a.reduce(f); //否则没有初始值
+    }
+    : function(a, f, initial) { //这个算法来自ES5规范
+        var i = 0, len = a.length, accumulator; 
+        //以特定的初始值开始，否则第一个值取自a
+        if (arguments.length > 2) accumulator = initial;
+        else { //找到数组中第一个已定义的索引
+            if (len == 0) throw TypeError();
+            while (i < len) {
+                if (i in a) {
+                    accumulator = a[i++];
+                    break;
+                }
+                else i++;
+            }
+            if (i == len) throw TypeError();
+        }
+        //对于数组中剩下的元素依次调用f()
+        while (i < len) {
+            if (i in a)
+                accumulator = f.call(undefined, accumulator, a[i], i, a);
+            i++;
+        }
+        return accumulator;
+    };
+```
+使用定义的map()和reduce()函数，计算平均值和标准差的代码看起来像这样：
+```javascript
+var data = [1,1,3,5,5];
+var sum = function(x, y) { return x+y; };
+var square = function(x) { return x*x; };
+var mean = function(x) { return x*x; };
+```
 
 
 
