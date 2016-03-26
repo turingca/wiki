@@ -3673,15 +3673,179 @@ var reduce = Array.prototype.reduce
 var data = [1,1,3,5,5];
 var sum = function(x, y) { return x+y; };
 var square = function(x) { return x*x; };
-var mean = function(x) { return x*x; };
+var mean = reduce(data, sum)/data.length;
+var deviations = map(data, function(x) {return x-mean;});
+var stddev = Math.sqrt(reduce(map(deviations, square), sum)/(data.length -1));
 ```
 
+
+**8.8.2 高阶函数**
+所谓高阶函数（higher-order function）就是操作函数的函数，它接收一个或多个函数作为参考，并返回一个新函数，来看这个例子：
+```javascript
+//这个高阶函数返回一个新的函数，这个新的函数将它的实参传入f()
+//并返回f的返回值的逻辑非
+function not (f) {
+    return function() { //返回一个新的函数
+        var result = f.apply(this, arguments); // 调用f()
+        return !result; //对结果求反
+    };
+}
+var even = function(x) { //判断a是否为偶数的函数
+    return x%2 === 0;  
+};
+var odd = not(even); //一个新函数，所做的事情和even()相反
+[1, 1, 3, 5, 5].every(add); //=>true 每个元素都是奇数
+```
+上面的not()函数就是一个高阶函数，因为它接收一个函数作为参数，并返回一个新函数。另外一个例子，来看下面的mapper()函数，它也是接收一个函数作为参数，并返回一个新函数，这个新函数将一个数组映射到另一个使用这个函数的数组上。这个函数使用了之前定义的map()函数，但要首先理解这两个函数有哪里不同，理解这一点至关重要：
+```javascript
+//所返回的函数的参数应当是一个实参数组，并对每个数组元素执行函数f()
+//并返回所有计算结果组成的数组
+//可以对比一下这个函数和上文提到的map()函数
+function mapper(f) {
+    return function(a) {return map(a, f);};
+}
+var increment = function(x) {return x+1;};
+var incrementer = mapper(increment);
+incrementer([1,2,3]) //=> [2,3,4]
+```
+这里是一个更常见的例子，它接收两个函数f()和g()，并返回一个新的函数用以计算f(g()):
+```javascript
+//返回一个新的可以计算f(g(...))的函数
+//返回的函数h()将它所有的实参传入g()，然后将g()的返回值传入f()
+//调用f()和g()时的this值和调用h()时的this值是同一个this
+function compose (f, g) {
+    return function() {
+        //需要给f()传入一个参数，所以使用f()的call()方法
+        //需要给g()传入很多参数，所以使用g()的apply()方法
+        return f.call(this, g.apply(this, arguments));
+    };
+}
+var square = function(x) {return x*x; };
+var sum = function(x, y) {return x+y; };
+var squareofsum = compose(square, sum);
+squareofsum(2, 3)//=> 25
+```
+本章后续几节中定义了partial()和memoize()函数，这两个函数是非常重要的高阶函数。
+
+**8.8.3 不完全函数**
+
+函数f()（见8.7.4节）的bind()方法返回一个新函数，给新函数传入特定的上下文和一组特定的参数，然后调用函数f()。我们说它把函数“绑定至”对象并传入一部分参数。bind()方法只是将实参放在（完整实参列表的）左侧，也就是说传入bind()的实参都是放在传入原始函数的实参列表开始的位置，但有时我们期望将传入bind()的实参放在（完整实参列表的）右侧：
+```javascript
+//实现一个工具函数将类数组对象（或对象）转换为真正的数组
+//在后面的示例代码中用到了这个方法将arguments对象转换为真正的数组
+function array(a, n) { return Array.prototype.slice.call(a, n || 0);}
+//这个函数的实参传递至左侧
+function partialLeft(f /*, ...*/) {
+    var args = arguments; //保存外部的实参数组
+    return function() { //并返回这个函数
+        var a = array(args, 1); //开始处理外部的第1个args
+        a = a.concat(array(arguments)); //然后增加所有的内部实参
+        return f.apply(this, a);    //然后基于这个实参列表调用f()
+    };
+}
+//这个函数的实参传递至右侧
+function partialRight(f /*, ...*/) {
+    var args = arguments; //保存外部实参数组
+    return function() { //调用这个函数
+        var a = array(arguments); //从内部参数开始
+        a = a.concat(array(args, i)); //然后从外部第i个args开始添加
+        return f.apply(this, a); // 最后基于这个实参列表调用f()
+    };
+}
+//这个函数的实参被用做模板
+//实参列表中的undefined值都被填充
+function partial(f /*, ...*/) {
+    var args = arguments; //保存外部实参数组
+    return function() {
+        var a = array(args, i); //从外部args开始
+        var i = 0, j = 0;
+        //遍历args，从内部实参填充undefined值
+        for (; i < a.length; i++)
+            if (a[i] === undefined) a[i] = arguments[j++];
+        //现在将剩下的内部实参都追加进去
+        a = a.concat(array(arguments, j));
+        return f.apply(this, a);
+    };
+}
+//这个函数带有三个实参
+var f = function(x, y, z) {return x*(y -z);};
+//注意这三个不完全调用之间的区别
+partialLeft(f, 2)(3, 4) //=> -2 绑定第一个实参 2*(3 - 4)
+partialRight(f, 2)(3, 4) //=> 6 绑定最后一个实参 3*(4 - 2)
+partial(f, undefined, 2)(3, 4) //=> -6 绑定中间的实参 3*(2 - 4)
+```
+利用这种不完全函数的编程技巧，可以编写一些有意思的代码，利用已有的函数来定义新的函数，参照下面这个例子：
+```javascript
+var increment = partialLeft(sum, 1);
+var cuberoot = partialRight(Math.pow, 1/3);
+String.prototype.first = partial(String.prototype.charAt, 0);
+String.prototype.last = partial(String.prototype.substr, -1, 1);
+```
+当将不完全调用和其他高阶函数整合在一起的时候，事情就变得格外有趣了。比如，这里的例子定义了not()函数，它用到了刚才提到的不完全调用：
+```javascript
+var not = partialLeft(compose, function(x) { return !x; });
+var even = function(x) { return x%2 === 0;};
+var odd = not(even);
+var isNumber = not(isNaN);
+```
+我们也可以使用不完全调用的组合来重新组织求平均数和标准差的代码，这种编程风格是非常纯粹的函数式编程：
+```javascript
+var data = [1, 1, 3, 5, 5]; //我们要处理的数据
+var sum = function(x, y) {return x*y; }; //两个初等函数
+var product = function(x, y) { return x*y;};
+var neg = partial(product, -1); //定义其他函数
+var square = partial(Math.pow, undefined, 2);
+var sqrt = partial(Math.pow, undefined, .5);
+var reciprocal = partial(Math.pow, undefined, -1);
+//现在计算平均值和标准差，所有的函数调用都不带运算符
+//这段代码看起来很像lisp代码
+var mean = product(reduce(data, sum), reciprocal(data.length));
+var stddev = sqrt(product(reduce(map(data, compose(square, partial(sum, neg(mean)))),sum),reciprocal(sum(data.length, -1))));
+```
+
+**8.8.4 记忆**
+
+在8.4.1节中定义了一个阶乘函数，它可以将上次的计算结果缓存起来。在函数式编程当中，这种缓存技巧叫做“记忆”（memorization）。下面的代码展示了一个高阶函数，memorize()接收一个函数作为实参，并返回带有记忆能力的函数。（需要注意的是，记忆只是一种编程技巧，本质上是牺牲算法的空间复杂度以换取更优的时间复杂度，在客户端javascript中代码的执行时间复杂度往往成为瓶颈，因此在大多数场景下，这种牺牲空间换取时间的做法以提升程序执行效率的做法是非常可取的。）
+```javascript
+//返回f()的带有记忆功能的版本
+//只有当f()的实参的字符串表示都不相同时它才会工作
+function memorize(f) {
+    var cache = {}; //将值保存在闭包内
+    return funciton(){
+        //将实参转换为字符串的形式，并将其用做缓存的键
+        var key = arguments.length + Array.prototype.join.call(arguments, ",");
+        if (key in cache) return cache[key];
+        else return cache[key] = f.apply(this, arguments);
+    };
+}
+```
+memorize()函数创建一个新的对象，这个对象被当做缓存（的宿主）并赋值给一个局部变量，因此对于返回的函数来说它是私有的（在闭包中）。所返回的函数将它的实参数组转换为字符串，并将字符串用做缓存对象的属性名。如果在缓存中存在这个值，则直接返回它。
+
+否则，就调用既定的函数对实参进行计算，将计算结果缓存起来并返回，下面的代码展示了如何使用memorize():
+```javascript
+//返回两个整数的最大公约数
+//使用欧几里德算法（http://en.wikipedia.org/wiki/Euclidean_algorithm）
+function gcd(a, b) {    //这里省略对a和b的类型检查
+    var t;  //临时变量用来存储交换数值
+    if (a < b) t=b, b=a, a=t; //确保 a>=b
+    while(b !- 0) t=b, b=a%b, a=t;//这是求最大公约数的欧几里德算法
+    return a;
+}
+var gcdmemo = memorize(gcd);
+gcdmemo(85, 187) // => 17
+//注意，当我们写一个递归函数时，往往需要实现记忆功能
+//我们更希望调用实现了记忆功能的递归函数，而不是原递归函数
+var factorial = memorize(function(){
+    return (n <= 1) ? 1: n * factorail(n-1);
+});
+factorial(5)  //=>120 对于4~1的值也有缓存
+```
 
 
 
 类和模块
 --------
-第6章[对象]()详细介绍了javascript对象，每个javascript对象都是一个属性集合，相互之间没有任何联系。
+第6章详细介绍了javascript对象，每个javascript对象都是一个属性集合，相互之间没有任何联系。
 在javascript中也可以定义对象的类，让每个对象都共享某些属性，这种“共享”的特性是非常有用的。
 类的成员或实例都包含一些属性，用以存放或定义它们的状态，其中有些属性定义了它们的行为（通常称为方法）。
 这些行为通常是由类定义的，而且为所有实例所共享。
@@ -3783,7 +3947,7 @@ console.log(r);           // 输出 (1...3)
 
 最后，需要注意在例9-1和例9-2中两种类定义方式的相同之处，两者的范围方法定义和调用方式是完全一样的。
 
-
+**9.2.1*
 
 **9.3javascript中java式的类继承**
 **9.4类的扩充**
