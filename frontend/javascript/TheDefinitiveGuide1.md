@@ -4631,9 +4631,43 @@ toLocaleString()和toString()极为类似：toLocaleString()是以本地敏感�
 
 第四个方法是toJSON()，这个方法是由JSON.stringify()自动调用的。JSON格式用于序列化良好的数据结构，而且可以处理javascript原始值、数组和纯对象。它和类无关，当对一个对象执行序列化操作时，它会忽略对象的原型和构造函数。比如将Range对象或Complex对象作为参数传入JSON.stringify()，将会返回诸如{"from:1", "to":3}或{"r":1, "i":-1}这种字符串。
 如果将这些字符串传入JSON.parse()，则会得到一个和Range对象和Complex对象具有相同属性的纯对象，但这个对象不会包含从Range和Complex继承来的方法。
-这种序列化操作非常适用于诸如Range和Complex这种类，但对于其他一些类则必须自定义toJSON()方法来定制个性化的序列化格式。如果一个对象有toJSON()方法，JSON.stringify()并不会对传入的对象做序列化操作，而会调用toJSON()
+这种序列化操作非常适用于诸如Range和Complex这种类，但对于其他一些类则必须自定义toJSON()方法来定制个性化的序列化格式。如果一个对象有toJSON()方法，JSON.stringify()并不会对传入的对象做序列化操作，而会调用toJSON()来执行序列化操作（序列化的值可能是原始值也可能是对象）。比如，Date对象的toJSON()方法可以返回一个表示日期的字符串。例9-7中的枚举类型也是如此：它们的toJSON()方法和toString()方法完全一样。如果要模拟一个集合，最接近JSON的表示方法就是数组，因此在下面的例子中将定义toJSON()方法用以将集合对象转换为值数组。
+例9-6中的Set类并没有定义上述方法中的任何一个。javascript中没有哪个原始值可以表示集合，因此也没必要定义valueOf()方法，但该类应当包含toString()、toLocaleString()和toJSON()方法。可以用如下代码来实现。注意extend()函数（例6-2）的用法，这里使用extend()来向Set.prototype来添加方法：
+```javascript
+//将这些方法添加至Set类的原型对象中
+extend(Set.prototype,{
+    //将集合转换为字符串
+    toString: function () {
+        var s = "{",
+        i = 0;
+        this.foreach(function (v) {s +=((i++>0)? ", " : "") + v;});
+        return s + "}";
+    },
+    //类似toString，但是对于所有的值都将调用toLocaleString()
+    toLocaleString: function () {
+        var s = "{", i=0;
+        this.foreach(function (v){
+            if (i++>0) s += ", ";
+            if (v == null) s += v; //null和undefined
+            else s += v.toLocaleString(); //其他情况
+        });
+    },
+    //将集合转换为值数组
+    toArray: function () {
+        var a = [];
+        this.foreach(function (v) {a.push(v);});
+    }
+});
+//对于要从JSON转换为字符串的集合都被当做数组来对待
+Set.prototype.toJSON = Set.prototype.toArray;
+```
 
 **9.6.4 比较方法**
+
+javascript的相等运算符比较对象时，比较的是引用而不是值。也就是说，给定两个对象引用，如果要看它们是否指向同一个对象，不是检查这两个对象是否具有相同的属性名和相同的属性值，而是直接比较这两个单独的对象是否相等，或者比较它们的顺序（就像“<”和“>”运算符进行的比较一样）。如果定义一个类，并且希望比较类的实例，应该定义合适的方法来执行比较操作。
+
+java编程语言有很多用于对象比较的方法，将java中的这些方法借用到javascript中是一个不错的主意。为了能让自定义类的实例具备比较的功能，定义一个名叫quals()实例方法。
+
 **9.6.5 方法借用**
 **9.6.6 私有状态**
 **9.6.7 构造函数的重载和工厂方法**
