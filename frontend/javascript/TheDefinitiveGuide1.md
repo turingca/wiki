@@ -4262,15 +4262,377 @@ function typeAndValue(x) {
 
 使用instanceof运算符和constructor属性来检测对象所属的类有一个主要的问题，在多个执行上下文中存在构造函数的多个副本的时候，这两种方法的检测结果会出错。多个执行上下文中的函数看起来是一模一样的，但它们是相互独立的对象，因此彼此也不相等。
 
-一种可能的解决方案是使用构造函数的名字而不是构造函数本身作为类标识符。
+一种可能的解决方案是使用构造函数的名字而不是构造函数本身作为类标识符。一个窗口里的Array构造函数和另一个窗口的Array构造函数是不相等的，但是它们的名字是一样的。在一些javascript的实现中为函数对象提供了一个非标准的属性name，用来表示函数的名称。对于那些没有name属性的javascript实现来说，可以将函数转换为字符串，然后从中提取出函数名（在9.4节中的示例代码给Function类添加了getName()方法，就是使用这种方式来得到函数名）。
 
-**9.5.3 鸭式辩型**
+例9-4定义的type()函数以字符串的形式返回对象的类型。它用typeof运算符来处理原始值和函数，对于对象来说，它要么返回class属性的值要么返回构造函数的名字。type()函数用到了例6-4中的classof()函数和9.4节中的Function.getName()方法。为了简单起见，这里包含了函数和方法的代码。
+例9-4 可以判断值的类型的type()函数
+```javascript
+/**
+ * Return the type of o as a string:
+ *   -If o is null, return "null", if o is NaN, return "nan".
+ *   -If typeof returns a value other than "object" return that value.
+ *    (Note that some implementations identify regexps as functions.)
+ *   -If the class of o is anything other than "Object", return that.
+ *   -If o has a constructor and that constructor has a name, return it.
+ *   -Otherwise, just return "Object".
+ * 以字符串形式返回o的类型：
+ *    如果o是null，返回“null”，如果o是NaN，返回“nan”
+ *    如果typeof返回的值不是“object”，则返回这个值
+ *    （注意，有一些javascript的实现将正则表达式识别为函数）
+ *    如果o的类不是“object”，则返回这个值
+ *    如果o包含构造函数并且这个构造函数具有名称，则返回这个名称
+ *    否则，一律返回“object”
+ **/
+function type(o) {
+    var t, c, n;  // type, class, name
+
+    // Special case for the null value，处理null值得特殊情形
+    if (o === null) return "null";
+
+    // Another special case: NaN is the only value not equal to itself，另外一种特殊情形，NaN和它自身不相等
+    if (o !== o) return "nan";
+
+    // Use typeof for any value other than "object"，如果typeof的值不是”object“，则使用这个值
+    // This identifies any primitive value and also functions，这可以识别出原始值的类型和函数
+    if ((t = typeof o) !== "object") return t;
+
+    // Return the class of the object unless it is "Object"，返回对象的类名，除非值为”object“
+    // This will identify most native objects，这种方式可以识别出大多数的内置对象
+    if ((c = classof(o)) !== "Object") return c;
+
+    // Return the object's constructor name, if it has one，如果对象构造函数的名字存在的话，则返回它
+    if (o.constructor && typeof o.constructor === "function" &&
+        (n = o.constructor.getName())) return n;
+
+    // We can't determine a more specific type, so return "Object"，其他的类型都无法判别，一律返回”object“
+    return "Object";
+}
+
+// Return the class of an object，返回对象的类
+function classof(o) {
+    return Object.prototype.toString.call(o).slice(8,-1);
+};
+    
+// Return the name of a function (may be "") or null for nonfunctions
+// 返回函数的名字（可能是空字符串），不是函数的话返回null
+Function.prototype.getName = function() {
+    if ("name" in this) return this.name;
+    return this.name = this.toString().match(/function\s*([^(]*)\(/)[1];
+};
+```
+这种使用构造函数名字来识别对象的类的做法和使用constructor属性一样有一个问题：并不是所有的对象都具有constructor属性。此外，并不是所有的函数都有名字。如果使用不带名字的函数定义表达式定义一个构造函数，getName()方法则会返回空字符串：
+```javascript
+//这个构造函数没有名字
+var Complex = function(x,y) {this.r = x; this.i = y;}
+//这个构造函数有名字
+var Range = function Range(f,t) { this.from = f; this.to = t;}
+```
+
+**9.5.4 鸭式辩型**
+
+上式所描述的检测对象的类的各种技术多少都会有些问题，至少在客户端javascript中是如此。解决方法就是规避掉这些问题：不要关注”对象的类是什么“，而是关注”对象能做什么“。这种思考问题的方式在Python和Ruby中非常普遍，称为”鸭式辩型“（这个表述是由作家James Whitcomb Riley提出的）。
+
+    像鸭子一样走路、游泳并且嘎嘎叫的鸟就是鸭子
+    
+对于javascript程序员来说，这句话可以理解为”如果一个对象可以像鸭子一样走路、游泳并且嘎嘎叫，就认为这个对象是鸭子，哪怕它并不是从鸭子类的原型对象继承来的“。
+我们拿例9-2中的Range类来举例好了。起初定义这个类用以描述数字的范围。但要注意，Range()构造函数并没有对实参进行类型检查以确保实参是数字类型。但却将参数使用”>“运算符进行比较运算，因为这里假定它们是可比较的。同样，includes()方法使用"<="运算符进行比较，但没有对范围的结束点进行类似的假设。因为类并没有强制使用特定的类型，它的includes()方法可以作用于任何结束点，只要结束点可以用关系运算符执行比较运算。
+```javascript
+var lowercase = new Range("a", "z");
+var thisYear = new Range(new Date(2009, 0, 1), new Date(2010, 0, 1));
+```
+Range类的foreach()方法中也没有显式地检测表示范围的结束点的类型，但Math.ceil()和”++“运算符表明它只能对数字结束点进行操作。
+另外一个例子，回想一下在7.11节中所讨论的类数组对象。在很多场景下，我们并不知道一个对象是否真的是Array的实例，当然是可以通过判断是否包含非负的length属性来得知是否是Array的实例。我们说”包含一个值是非负整数的length“是数组的一个特征——“会走路”，任何具有“会走路”这个特征的对象都可以当做数组来对待（在很多情形中）。
+
+然而必须要了解的是，真正数组的length属性有一些独有的行为：当添加新的元素时，数组的长度会自动更新，并且当给length属性设置一个更小的整数时，数组会自动截断。我们说这些特征是“会游泳”和“嘎嘎叫”。如果所实现的代码需要“会游泳”且能“嘎嘎叫”，则不能使用只“会走路”的类似数组的对象。
+
+上文所讲到的鸭式辩型的例子提到了进行对象的“<”运算符的职责以及length属性的特殊行为。但当我们提到鸭式辩型时，往往是说检测对象是否实现了一个或多个方法。一个强类型的triathlon()函数所需要的参数必须是TriAthlete对象。而一种“鸭式辩型”式的做法是，只要对象包含walk()、swim()和bike()这三个方法就可以作为参数传入。同理，可以重新设计Range类，使用结束点对象的compareTo()和succ()（successor）方法来代替“<”和“++”运算符。
+
+鸭式辩型的实现方法让人感觉太“放任自流”：仅仅是假设输入对象实现了必要的方法，根本没有执行进一步的检查。如果输入对象没有遵循“假设”，那么当代码试图调用那些不存在的方法时就会报错。另一种实现方法是对输入对象进行检查。但不是检查它们的类，而是用适合的名字来检查它们所实现的方法。这样可以将非法输入尽可能早地拦截在外，并可给出带有更多提示信息的报错。
+
+例9-5中按照鸭式辩型的理念定义了quacks()函数（函数名叫“implements”会更加合适，但implement是保留字）。quacks()用以检查一个对象（第一个实参）是否实现了剩下的参数所表示的方法。对于除第一个参数外的每个参数，如果是字符串的话则直接检查是否存在以它命名的方法；如果是对象的话则检查第一个对象中的方法是否在这个对象中也具有同名的方法；如果参数是函数，则假定它是构造函数，函数将检查第一个对象实现的方法是否在构造函数的原型对象中也具有同名的方法。
+
+例9-5 利用鸭式辩型实现的函数
+```javascript
+// Return true if o implements the methods specified by the remaining args.
+// 如果o实现了除第一个参数之外的参数所表示的方法，则返回true
+function quacks(o /*, ... */) {
+    for(var i = 1; i < arguments.length; i++) {  // for each argument after o，遍历o之后的所有参数
+        var arg = arguments[i];
+        switch(typeof arg) { // If arg is a:如果参数是
+        case 'string':       // string: check for a method with that name直接用名字做检查
+            if (typeof o[arg] !== "function") return false;
+            continue;
+        case 'function':     // function: use the prototype object instead，检查函数的原型对象上的方法
+            // If the argument is a function, we use its prototype object，如果实参是函数，则使用它的原型
+            arg = arg.prototype;// fall through to the next case，进入下一个case
+        case 'object':       // object: check for matching methods，检查匹配的方法
+            for(var m in arg) { // For each property of the object，遍历对象的每个属性
+                if (typeof arg[m] !== "function") continue; // skip non-methods，跳过不是方法的属性
+                if (typeof o[m] !== "function") return false;
+            }
+        }
+    }
+    // If we're still here, then o implements everything，如果程序能执行到这里，说明o实现了所有的方法
+    return true;
+}
+```
+关于这个quacks()函数还有一些地方是需要尤为注意的。首先，这里只是通过特定的名称来检测对象是否含有一个或多个值为函数的属性。我们无法得知这些已经存在的属性的细节信息，比如，函数是干什么用的？它们需要多少参数？参数类型是什么？然而这是鸭式辩型的本质所在，如果使用鸭式辩型而不是强制的类型检测的方式定义API，那么创建的API应当更具有灵活性才可以，这样才能确保你提供给用户的API更加安全可靠。关于quacks()函数还有另一问题需要注意，就是它不能应用于内置类。比如，不能通过quacks(o,Array)来检测o是否实现了Array中所有同名的方法。原因是内置类的方法都是不可枚举的，quacks()中的for/in循环无法遍历到它们（注意，在ECMAScript5中有一个补救方法，就是使用Object.getOwnPropertyNames()）。
 
 **9.6javascript中的面向对象技术**
 
+到目前为止，我们讨论了javascript中类的基础知识：原型对象的重要性、它和构造函数之间的联系、instanceof运算符如何工作等。本节将目光转向一些实际的例子（尽管这不是基础知识），包括如何利用javascript中的类进行编程。我们从两个重要的例子开始，这两个例子中实现的类非常有意思，接下来的讨论都将基于此作展开。
+
 **9.6.1 一个例子：集合类**
+
+集合（set）是一种数据结构，用以表示非重复值的无序集合。集合的基础方法包括添加值、检测值是否在集合中，这种集合需要一种通用的实现，以保证操作效率。javascript的对象是属性名以及与之对应的值的基本集合。因此将对象只用做字符串的集合是大材小用。例子9-6用javascript实现了一个更加通用的Set类，它实现了从javascript值到唯一字符串的映射，然后将字符串用做属性名。对象和函数都不具备如此简明可靠的唯一字符串表示。因此集合类必须给集合中的每一个对象或函数定义一个唯一的属性标志。
+
+例9-6：Set.js 值的任意集合
+```javascript
+function Set() {          // This is the constructor，这是一个构造函数
+    this.values = {};     // The properties of this object hold the set，集合数据保存在对象的属性里
+    this.n = 0;           // How many values are in the set，集合中值的个数
+    this.add.apply(this, arguments);  // All arguments are values to add，把所有参数都添加进这个集合
+}
+
+// Add each of the arguments to the set，将每个参数都添加至集合中
+Set.prototype.add = function() {
+    for(var i = 0; i < arguments.length; i++) {  // For each argument，遍历每个参数
+        var val = arguments[i];                  // The value to add to the set，待添加到集合中的值
+        var str = Set._v2s(val);                 // Transform it to a string，把它转换为字符串
+        if (!this.values.hasOwnProperty(str)) {  // If not already in the set，如果不在集合中
+            this.values[str] = val;              // Map string to value，将字符串和值对应起来
+            this.n++;                            // Increase set size，集合中值的计数加一
+        }
+    }
+    return this;                                 // Support chained method calls，支持链式方法调用
+};
+
+// Remove each of the arguments from the set，从集合删除元素，这些元素由参数指定
+Set.prototype.remove = function() {
+    for(var i = 0; i < arguments.length; i++) {  // For each argument，遍历每个参数
+        var str = Set._v2s(arguments[i]);        // Map to a string，将字符串和值对应起来
+        if (this.values.hasOwnProperty(str)) {   // If it is in the set，如果它在集合中
+            delete this.values[str];             // Delete it，删除它
+            this.n--;                            // Decrease set size，集合中指的计数减一
+        }
+    }
+    return this;                                 // For method chaining，支持链式方法调用
+};
+
+// Return true if the set contains value; false otherwise.
+// 如果集合包含这个值，则返回true，否则，返回false
+Set.prototype.contains = function(value) {
+    return this.values.hasOwnProperty(Set._v2s(value));
+};
+
+// Return the size of the set，返回集合的大小
+Set.prototype.size = function() { return this.n; };
+
+// Call function f on the specified context for each element of the set.
+// 遍历集合中的所有元素，在指定的上下文中调用f
+Set.prototype.foreach = function(f, context) {
+    for(var s in this.values)                 // For each string in the set，遍历集合中的所有字符串
+        if (this.values.hasOwnProperty(s))    // Ignore inherited properties，忽略继承的属性
+            f.call(context, this.values[s]);  // Call f on the value，调用f，传入value
+};
+
+// This internal function maps any JavaScript value to a unique string.
+// 这是一个内部函数，用以将任意javascript值和唯一的字符串对应起来
+Set._v2s = function(val) {
+    switch(val) {
+        case undefined:     return 'u';          // Special primitive，特殊的原始值
+        case null:          return 'n';          // values get single-letter，值只有一个字母
+        case true:          return 't';          // codes，代码
+        case false:         return 'f';
+        default: switch(typeof val) {
+            case 'number':  return '#' + val;    // Numbers get # prefix，数字带有#前缀
+            case 'string':  return '"' + val;    // Strings get " prefix，字符串都带有"前缀
+            default: return '@' + objectId(val); // Objs and funcs get @
+        }
+    }
+
+    // For any object, return a string. This function will return a different
+    // string for different objects, and will always return the same string
+    // if called multiple times for the same object. To do this it creates a
+    // property on o. In ES5 the property would be nonenumerable and read-only.
+    // 对任意对象来说，都会返回一个字符串
+    // 针对不同的对象，这个函数会返回不同的字符串
+    // 对于同一个对象的多次调用，总是返回相同的字符串
+    // 为了做到这一点，它给o创建了一个属性，在ES5中，这个属性是不可枚举且是只读的
+    function objectId(o) {
+        var prop = "|**objectid**|";   // Private property name for storing ids，私有属性，用以存放id
+        if (!o.hasOwnProperty(prop))   // If the object has no id，如果对象没有id
+            o[prop] = Set._v2s.next++; // Assign it the next available，将下一个值赋给它
+        return o[prop];                // Return the id，返回这个id
+    }
+};
+Set._v2s.next = 100;    // Start assigning object ids at this value，设置初始id的值
+```
+
 **9.6.2 一个例子：枚举类型**
+
+枚举类型（enumerable type）是一种类型，它是值的有限集合，如果值定义为这个类型则该值是可列出（或“可枚举”）的。在C及其派生语言中，枚举类型是通过关键字enum声明的。Enum是ECMAScript5中的保留字（还未使用），很有可能在将来javascript就会内置支持枚举类型。到那时，例9-7展示了如何在javascript中定义枚举类型的数据。需要注意的是，这里用到了例6-1中的inherit()函数。
+
+例9-7包含一个单独函数enumeration()。但它不是构造函数，它并没有定义一个名叫“enumeration”的类。相反，它是一个工厂方法，每次调用它都会创建并返回一个新的类，比如：
+```javascript
+//使用4个值创建新的Coin类，Coin.Penny，Coin.Nickel等
+var Coin = enumeration({Penny:1, Nickel:5, Dime:10, Quarter:25});
+var c = Coin.Dime; //这是新类的实例
+c instanceof Coin //=>true instanceof正常工作
+c.constructor == Coin//=>true 构造函数的属性正常工作
+Coin.Quarter + 3*Coin.Nickel //=>40 将值转换为数字
+Coin.Dime == 10 //=>true 更多转换为数字的例子
+Coin.Dime > Coin.Nickel //=>true 关系运算符正常工作
+String(Coin.Dime)+ ":" + Coin.Dime //=>"Dime:10" 强制转换为字符串
+```
+这个例子清楚地展示了javascript类的灵活性，javascript的类要比C++和java语言中的静态类要更加灵活。
+
+例9-7 javascript中的枚举类型
+```javascript
+// This function creates a new enumerated type.  The argument object specifies
+// the names and values of each instance of the class. The return value
+// is a constructor function that identifies the new class.  Note, however
+// that the constructor throws an exception: you can't use it to create new
+// instances of the type.  The returned constructor has properties that 
+// map the name of a value to the value itself, and also a values array,
+// a foreach() iterator function
+// 这个函数创建一个新的枚举类型，实参对象表示类的每个实例的名字和值
+// 返回值是一个构造函数，它标识这个新类
+// 注意，这个构造函数也会抛出异常，不能使用它来创建该类型的新实例
+// 返回的构造函数包含名/值对的映射表
+// 包括由值组成的数组，以及一个foreach()迭代器函数
+function enumeration(namesToValues) {
+    // This is the dummy constructor function that will be the return value.
+    // 这个虚拟的构造函数是返回值
+    var enumeration = function() { throw "Can't Instantiate Enumerations"; };
+
+    // Enumerated values inherit from this object.
+    // 枚举值继承自这个对象
+    var proto = enumeration.prototype = {
+        constructor: enumeration,                   // Identify type，标识类型
+        toString: function() { return this.name; }, // Return name，返回名字
+        valueOf: function() { return this.value; }, // Return value，返回值
+        toJSON: function() { return this.name; }    // For serialization，转换为JSON
+    };
+
+    enumeration.values = [];  // An array of the enumerated value objects，用以存放枚举对象的数组
+
+    // Now create the instances of this new type.
+    // 现在创建新类型的实例
+    for(name in namesToValues) {         // For each value ，遍历每个值
+        var e = inherit(proto);          // Create an object to represent it，创建一个代表它的对象
+        e.name = name;                   // Give it a name，给它一个名字
+        e.value = namesToValues[name];   // And a value，给它一个值
+        enumeration[name] = e;           // Make it a property of constructor，将它设置为构造函数的属性
+        enumeration.values.push(e);      // And store in the values array，将它存储到值数组中
+    }
+    // A class method for iterating the instances of the class
+    // 一个类方法，用来对类的实例进行迭代
+    enumeration.foreach = function(f,c) {
+        for(var i = 0; i < this.values.length; i++) f.call(c,this.values[i]);
+    };
+
+    // Return the constructor that identifies the new type
+    // 返回标识这个新类型的构造函数
+    return enumeration;
+}
+```
+如果用这个枚举类型来实现一个“hello world”小程序的话，就可以使用枚举类型来表示一副扑克牌。
+例9-8使用enumeration()函数实现了这个表示一副扑克牌的类。
+例9-8 使用枚举类型来表示一副扑克牌
+```javascript
+// Define a class to represent a playing card
+// 定义一个表示“玩牌”的类
+function Card(suit, rank) {
+    this.suit = suit;         // Each card has a suit，每张牌都有花色
+    this.rank = rank;         // and a rank，以及点数
+}
+
+// These enumerated types define the suit and rank values
+// 使用枚举类型定义花色和点数
+Card.Suit = enumeration({Clubs: 1, Diamonds: 2, Hearts:3, Spades:4});
+Card.Rank = enumeration({Two: 2, Three: 3, Four: 4, Five: 5, Six: 6,
+                         Seven: 7, Eight: 8, Nine: 9, Ten: 10,
+                         Jack: 11, Queen: 12, King: 13, Ace: 14});
+
+// Define a textual representation for a card
+// 定义用以描述牌面的文本
+Card.prototype.toString = function() {
+    return this.rank.toString() + " of " + this.suit.toString();
+};
+// Compare the value of two cards as you would in poker
+// 比较扑克牌中两张牌的大小
+Card.prototype.compareTo = function(that) {
+    if (this.rank < that.rank) return -1;
+    if (this.rank > that.rank) return 1;
+    return 0;
+};
+
+// A function for ordering cards as you would in poker
+// 以扑克牌的玩法规则对牌进行排序的函数
+Card.orderByRank = function(a,b) { return a.compareTo(b); };
+
+// A function for ordering cards as you would in bridge 
+// 以桥牌的玩法规则对扑牌进行排序的函数
+Card.orderBySuit = function(a,b) {
+    if (a.suit < b.suit) return -1;
+    if (a.suit > b.suit) return 1;
+    if (a.rank < b.rank) return -1;
+    if (a.rank > b.rank) return  1;
+    return 0;
+};
+
+// Define a class to represent a standard deck of cards
+// 定义用以表示一副标准扑克牌的类
+function Deck() {
+    var cards = this.cards = [];     // A deck is just an array of cards，一副牌就是由牌组成的数组
+    Card.Suit.foreach(function(s) {  // Initialize the array，初始化这个数组
+                          Card.Rank.foreach(function(r) {
+                                                cards.push(new Card(s,r));
+                                            });
+                      });
+}
+ 
+// Shuffle method: shuffles cards in place and returns the deck
+// 洗牌的方法：重新洗牌并返回洗好的牌
+Deck.prototype.shuffle = function() { 
+    // For each element in the array, swap with a randomly chosen lower element
+    // 遍历数组中的每个元素，随机找出牌面最小的元素，并与之（当前遍历的元素）交换
+    var deck = this.cards, len = deck.length;
+    for(var i = len-1; i > 0; i--) {
+        var r = Math.floor(Math.random()*(i+1)), temp;     // Random number，随机数
+        temp = deck[i], deck[i] = deck[r], deck[r] = temp; // Swap，交换
+    }
+    return this;
+};
+
+// Deal method: returns an array of cards，发牌的方法：返回牌的数组
+Deck.prototype.deal = function(n) {  
+    if (this.cards.length < n) throw "Out of cards";
+    return this.cards.splice(this.cards.length-n, n);
+};
+
+// Create a new deck of cards, shuffle it, and deal a bridge hand
+// 创建一副新扑克牌，洗牌并发牌
+var deck = (new Deck()).shuffle();
+var hand = deck.deal(13).sort(Card.orderBySuit);
+```
+
 **9.6.3 一个例子：标准转换方法**
+
+3.8.3和6.10节讨论了对象类型转换所用到的重要方法，有一些方法是在需要做类型转换时由javascript解释器自动调用的。不需要为定义的每个类都实现这些方法，但这些方法的确非常重要，如果没有为自定义的类实现这些方法，也应当是有意为之，而不应当因为疏忽而漏掉它们。
+
+最重要的方法首当toString()。这个方法的作用是返回一个可以表示这个对象的字符串。在希望使用字符串的地方用到对象的话（比如将对象用做属性名或使用“+”运算符来进行字符串连接运算），javascript会自动调用这个方法。如果没有实现这个方法，类会默认从Object.prototype中继承toString()方法，这个方法的运算结果是“[Object Object]”，这个字符串用处不大。
+toString()方法应当返回一个可读的字符串，这样最终用户才能将这个输出值利用起来，然而有时候并不一定非要如此，不管怎样，可以返回可读字符串的toString()方法也会让程序调试变得更加轻松。例9-2和例9-3中的Range类和Complex类都定义了toString()方法，例9-7中的枚举类型也定义了toString()。下面我们会给例9-6中的set类也定义toString()方法。
+
+toLocaleString()和toString()极为类似：toLocaleString()是以本地敏感性（locale-sensitive）的方式来将对象转换为字符串。默认情况下，对象所继承的toLocaleString()方法只是简单地调用toString()方法。有一些内置类型包含有用的toLocaleString()方法用以实际上返回本地化相关的字符串。如果需要为对象到字符串的转换定义toString()方法，那么同样需要定义toLocaleString()方法用以处理本地化的对象到字符串的转换。下面的Set类的定义中会有相关的代码。
+
+第三个方法是valueOf()，它用来将对象转换为原始值。比如，当数学运算符（除了“+”运算符）和关系运算符作用于数字文本表示的对象时，会自动调用valueOf()方法。大多数对象都没有合适的原始值来表示它们，也没有定义这个方法。但在例9-7中的枚举类型的实现则说明valueOf()方法是非常重要的。
+
+第四个方法是toJSON()，这个方法是由JSON.stringify()自动调用的。JSON格式用于序列化良好的数据结构，而且可以处理javascript原始值、数组和纯对象。它和类无关，当对一个对象执行序列化操作时，它会忽略对象的原型和构造函数。比如将Range对象或Complex对象作为参数传入JSON.stringify()，将会返回诸如{"from:1", "to":3}或{"r":1, "i":-1}这种字符串。
+如果将这些字符串传入JSON.parse()，则会得到一个和Range对象和Complex对象具有相同属性的纯对象，但这个对象不会包含从Range和Complex继承来的方法。
+这种序列化操作非常适用于诸如Range和Complex这种类，但对于其他一些类则必须自定义toJSON()方法来定制个性化的序列化格式。如果一个对象有toJSON()方法，JSON.stringify()并不会对传入的对象做序列化操作，而会调用toJSON()
+
 **9.6.4 比较方法**
 **9.6.5 方法借用**
 **9.6.6 私有状态**
