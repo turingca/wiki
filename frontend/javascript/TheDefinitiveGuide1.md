@@ -4704,8 +4704,66 @@ Set.prototype.equals = function (that) {
     }
 };
 ```
+按照我们需要的方式比较对象是否相等常常是很有用的。对于某些类来说，往往需要比较一个实例“大于”或者“小于”另外一个示例。比如，你可能会基于Range对象的下边界来定义实例的大小关系。枚举类型可以根据名字的字母表顺序来定义实例的大小，也可以根据它包含的数值（假设它包含的都是数字）来定义大小。另一方面，Set对象其实是无法排序的。
+
+如果将对象用于javascript的关系比较运算符，比如“<”和“<=”，javascript会首先调用对象的valueOf()方法，如果这个方法返回一个原始值，则直接比较原始值。例9-7中由enumeration()方法所返回的枚举类型包含valueOf()方法，因此可以使用关系运算符对它们做有意义的比较。但大多数类并没有valueOf()方法，为了按照显式定义的规则来比较这些类型的对象，可以定义一个名叫copareTo()方法（同样，这里遵循Java中的命名约定）。
+
+compareTo()方法应当只能接收一个参数，这个方法将这个参数和调用它的对象进行比较。如果this对象小于参数对象，compareTo()迎丹返回比0小的值。如果this对象大于参数对象，应当返回比0大的值。如果两个对象相等，应当返回0。这些关于返回值的约定非常重要，这样我们可以用下面的表达式替换掉关系比较和相等性运算符：
+
+|待替换|替换为|
+|------|------|
+|a<b|a.compareTo(b)<0|
+|a<=b|a.compareTo(b)<=0|
+|a>b|a.compareTo(b)>0|
+|a>=b|a.compareTo(b)>=0|
+|a==b|a.compareTo(b)==0|
+|a!=b|a.compareTo(b)!=0|
+
+例9-8中的Card类定义了该类的compareTo()方法，可以给Range类添加一个类似的方法，用以比较它们的下边界：
+```javascript
+Range.prototype.compareTo = function(that) {
+    return this.from = that.from;
+};
+```
+需要注意的是，这个方法中的减法操作根据两个Range对象的关系正确地返回了小于0、等于0和大于0的值。例9-8中的Card.Rank枚举值包含valueOf()方法，其实也可以给Card类实现类似的compareTo()方法。
+
+上文所提到的equals()方法对其参数执行了类型检查，如果参数类型不合法则返回false。compareTo()方法并没有返回一个表示“这两个值不能比较”的值，由于compareTo()没有对参数做任何类型检查，因此如果给compareTo()方法传入错误类型的参数，往往会抛出异常。
+
+注意，如果两个范围对象的下边界相等，为Range类定义的compareTo()方法会返回0.这意味着就compareTo()而言，任何两个起始点相同的Range对象都相等。这个相等概念的定义和equals()方法定义的相等概念是相背的，equals()要求两个端点均相等才算相等。这种相等概念上的差异性会造成很多bug，最好将Range类的equals()和compareTo()方法中处理相等的逻辑保持一致，但当出入不可比较的值时仍然会报错：
+```javascript
+//根据下边界来对Range对象排序，如果下边界相等则比较上边界
+//如果传入非Range值，则抛出异常
+//当且仅当this.equals(that)时，才返回0
+Range.prototype.compareTo = function(that) {
+    if (!(that instanceof Range))
+        throw new Error("Can't compare a Range with " + that);
+    var diff = this.from - that.from; //比较下边界
+    if (diff == 0) diff = this.to - that.to; //如果相等，比较上边界
+    return diff;
+};
+```
+给类定义了compareTo()方法，这样就可以对类的实例组成的数组进行排序了。Array.sort()方法可以接收一个可选的参数，这个参数是一个函数，用来比较两个值的大小，这个函数返回值的约定和compareTo()方法保持一致。假定有了上文提到的compareTo()方法，就可以很方便地对Range对象组成的数组进行排序了：
+
+    range.sort(function(a,b) {return a.compareTo(b); });
+    
+排序运算非常重要，如果已经为类定义了实例方法compareTo()，还应当参照这个方法定义一个可传入两个参数的比较函数。使用compareTo()方法可以非常轻松地定义这个函数，比如：
+
+    Range.byLowerBound = function(a,b) { return a.compareTo(b); };
+
+使用这个方法可以让数组排序的操作变得非常简单：
+
+    ranges.sort(Range.byLowerBound);
+    
+有些类可以有很多方法进行排序。比如Card类，可以定义两个方法分别按照花色排序和按照点数排序。
 
 **9.6.5 方法借用**
+
+javascript中的方法没有什么特别：无非是一些简单的函数，赋值给了对象的属性，可以通过对象来调用它。一个函数可以赋值给两个属性，然后作为两个方法来调用它。比如，我们在Set类中就这样做了，将toArray()方法创建了一个副本，并让它可以和toJSON()方法一样完成同样的功能。
+
+多个类中的方法可以共用一个单独的函数。比如，Array类通常定义了一些内置方法，如果定义了一个类，它的实例是类数组的对象，则可以从Array.prototype中将函数复制至所定义的类的原型对象中。如果以经典的面向语言的视角来看javascript的话，把一个类的方法用到其他的类中的做法也称做“多重继承”（multiple inheritance）。然而，javascript并不是经典的面向对象语言，我更倾向于将这种方法重用更正式地称为“方法借用”（borrowing）。
+
+
+
 **9.6.6 私有状态**
 **9.6.7 构造函数的重载和工厂方法**
 
