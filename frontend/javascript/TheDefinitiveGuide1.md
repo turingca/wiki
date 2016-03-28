@@ -4683,10 +4683,26 @@ Range.prototype.equals = function(that) {
 给Set类定义equals()方法稍微有些复杂。不能简单地比较两个集合的values属性，还要进行更深层次的比较：
 ```javascript
 Set.prototype.equals = function (that) {
-//一些次要情况的快捷处理
-if (this === that) return true;
-//如果that对象不是一个集合，它和this不相等
-}
+    //一些次要情况的快捷处理
+    if (this === that) return true;
+    //如果that对象不是一个集合，它和this不相等
+    //我们用到了instanceof，使得这个方法可以用于Set的任何子类
+    //我们希望采用鸭式辩型的方法，可以降低检查的严格程度
+    //或者可以通过 this.constructor == that.constructor 来加强检查的严格程度
+    //注意，null和undefined两个值是无法用于instanceof运算的
+    if (!(that instanceof Set)) return false;
+    //如果两个集合的大小不一样，则它们不相等
+    if (this.size() != that.size()) return false;
+    //现在检查两个集合中的元素是否完全一样
+    //如果两个集合不相等，则通过抛出异常来终止foreach循环
+    try {
+        this.foreach(function (v) { if (!that.contains(v)) throw false; });
+        return true; //所有的元素都匹配：两个集合相等
+    } catch(x) {
+        if (x === false) return false; //如果集合中有元素在另外一个集合中不存在
+        throw x; //重新抛出异常
+    }
+};
 ```
 
 **9.6.5 方法借用**
