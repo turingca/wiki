@@ -820,6 +820,7 @@ n + " objects"//“NaN objects” NaN转换为字符串“NaN”
 表3-2简要说明了在javascript中如何进行类型转换。
 
 表3-2：javascript类型转换
+
 |原始值|字符串|数字|布尔值|对象|
 |:-----:|:--------:|:-------:|:-----:|:------:|
 |undefined|"undefined"|NaN|false|throws TypeError|
