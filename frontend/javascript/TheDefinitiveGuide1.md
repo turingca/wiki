@@ -5000,6 +5000,78 @@ SingletonSet.prototype.euqals = function(that) {
 最后一节的SingletonSet类定义了全新的集合实现，而且将它继承自其父类的核心方法全部替换。然而定义子类时，我们往往希望对父类的行为进行修改或扩充，而不是完全替换掉它们。为了做到这一点，构造函数和子类的方法需要调用或链接到父类构造函数和父类方法。
 
 例9-13对此做了展示。它定义了Set的子类NonNullSet，它不允许null和undefined作为它的成员。为了使用这种方式对成员做限制，NonNullSet需要在其add()方法中对null和undefined值做检测。但它需要完全重新实现一个add()方法，因此它调用了父类中的这个方法。注意，NonNullSet()构造函数同样不需要重新实现，它只须将它的参数传入父类构造函数（作为函数来调用它，而不是通过构造函数来调用），通过父类的构造函数来初始化新创建的对象。
+例9-13 在子类中调用父类的构造函数和方法
+```javascript
+/*
+ * NonNullSet is a subclass of Set that does not allow null and undefined
+ * as members of the set.
+ * NonNullSet 是set的子类，它的成员不能是null和undefined
+ */
+function NonNullSet() {
+    // Just chain to our superclass，仅链接到父类
+    // Invoke the superclass constructor as an ordinary function to initialize
+    // the object that has been created by this constructor invocation.
+    //作为普通函数调用父类的构造函数来初始化通过该构造函数调用创建的对象
+    Set.apply(this, arguments);
+}
+
+// Make NonNullSet a subclass of Set:
+//将NonNullSet设置为Set的子类
+NonNullSet.prototype = inherit(Set.prototype);
+NonNullSet.prototype.constructor = NonNullSet;
+
+// To exclude null and undefined, we only have to override the add() method
+// 为了将null和undefined排除在外，只须重写add()方法
+NonNullSet.prototype.add = function() {
+    // Check for null or undefined arguments
+    // 检查参数是不是null或undefined
+    for(var i = 0; i < arguments.length; i++)
+        if (arguments[i] == null)
+            throw new Error("Can't add null or undefined to a NonNullSet");
+
+    // Chain to the superclass to perform the actual insertion
+    // 调用父类的add()方法以执行实际插入操作
+    return Set.prototype.add.apply(this, arguments);
+};
+```
+让我们将这个非null集合的概念推而广之，称为“过滤后的集合”，这个集合中的成员必须首先传入一个过滤函数再执行添加操作。为此，定义一个类工厂函数（类似例9-7中的enumeration()函数），传入一个过滤函数，返回一个新的Set子类。实际上，可以对此做进一步的通用化的处理，定义一个可以接收两个参数的类工厂：子类和用于add()方法的过滤函数。这个工厂方法称为filteredsetSubclass()，并通过这样的代码来使用它：
+```javascript
+//定义一个只能保存字符串的“集合”类
+var StringSet = filteredSetSubclass(set, function(x) {return typeof x === "string";});
+//这个集合类的成员不能是null、undefined或函数
+var MySet = filteredSetSubclass(NonNullSet, function(x) {return typeof x !== "function";});
+```
+例9-14是这个类工厂函数的实现代码。注意 ，这个例子中的方法链和构造函数链和NonNullset中的实现是一样的。
+
+例9-14 类工厂和方法链
+```javascript
+/*
+ * This function returns a subclass of specified Set class and overrides 
+ * the add() method of that class to apply the specified filter.
+ * 这个函数返回具体Set类的子类
+ * 并重写该类的add()方法用以对添加的元素做特殊的过滤
+ */
+function filteredSetSubclass(superclass, filter) {
+    var constructor = function() {          // The subclass constructor，子类构造函数
+        superclass.apply(this, arguments);  // Chains to the superclass，调用父类构造函数
+    };
+    var proto = constructor.prototype = inherit(superclass.prototype);
+    proto.constructor = constructor;
+    proto.add = function() {
+        // Apply the filter to all arguments before adding any
+        // 在添加任何成员之前首先使用过滤器将所有参数进行过滤
+        for(var i = 0; i < arguments.length; i++) {
+            var v = arguments[i];
+            if (!filter(v)) throw("value " + v + " rejected by filter");
+        }
+        // Chain to our superclass add implementation
+        // 调用父类的add()方法
+        superclass.prototype.add.apply(this, arguments);
+    };
+    return constructor;
+}
+```
+例9-14中一个比较有趣的事情是，用一个函数将创建子类的代码包装起来，这样就可以在构造函数和方法链中使用父类的参数，而不是通过写死某个父类的名字来使用它的参数。也就是说如果想修改父类，只须修改一处代码即可，而不必对每个用到父类类名的地方都做修改。
 
 **9.7.3 组合vs子类**
 **9.7.4 类的层次结构和抽象类**
