@@ -4667,7 +4667,27 @@ Set.prototype.toJSON = Set.prototype.toArray;
 
 javascript的相等运算符比较对象时，比较的是引用而不是值。也就是说，给定两个对象引用，如果要看它们是否指向同一个对象，不是检查这两个对象是否具有相同的属性名和相同的属性值，而是直接比较这两个单独的对象是否相等，或者比较它们的顺序（就像“<”和“>”运算符进行的比较一样）。如果定义一个类，并且希望比较类的实例，应该定义合适的方法来执行比较操作。
 
-java编程语言有很多用于对象比较的方法，将java中的这些方法借用到javascript中是一个不错的主意。为了能让自定义类的实例具备比较的功能，定义一个名叫quals()实例方法。
+java编程语言有很多用于对象比较的方法，将java中的这些方法借用到javascript中是一个不错的主意。为了能让自定义类的实例具备比较的功能，定义一个名叫equals()实例方法。这个方法只能接收一个参数，如果这个实参和调用此方法的对象相等的话则返回true。当然，这里所说的“相等”的含义是根据类的上下文来决定的。对于简单的类，可以通过简单地比较它们的constructor属性来确保两个对象是相同类型，然后比较两个对象的实例属性以保证它们的值相等。例9-3中的Complex类就实现了这样的equals()方法，我们可以轻易地为Range类也实现类似的方法：
+```javascript
+//Range类重写它的constructor属性，现在将它添加进去
+Range.prototype.constructor = Range;
+//一个Range对象和其他不是Range的对象均不相等
+//当且仅当两个范围的端点相等，它们才相等
+Range.prototype.equals = function(that) {
+    if (that == null) return false; //处理null和undefined
+    if (that.constructor !== Range) return false; //处理非Range对象
+    //当且仅当两个端点相等，才返回true
+    return this.from == that.from && this.to == this.to;
+}
+```
+给Set类定义equals()方法稍微有些复杂。不能简单地比较两个集合的values属性，还要进行更深层次的比较：
+```javascript
+Set.prototype.equals = function (that) {
+//一些次要情况的快捷处理
+if (this === that) return true;
+//如果that对象不是一个集合，它和this不相等
+}
+```
 
 **9.6.5 方法借用**
 **9.6.6 私有状态**
