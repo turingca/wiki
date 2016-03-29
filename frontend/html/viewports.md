@@ -1,5 +1,4 @@
-【A tale of two viewports 】
-【两个viewports的故事】
+【A tale of two viewports 两个viewports的故事】
 
 http://www.w3cplus.com/css/viewports.html  参照译文1，w3cplus转载  
 
@@ -17,8 +16,7 @@ http://www.quirksmode.org/mobile/viewports2.html 原文2
 
 这篇文章（第一部分）主要关于桌面浏览器的，其唯一的目的就是为移动浏览器中相似的讨论做个铺垫。大部分开发者凭直觉已经明白了大部分桌面浏览器中的概念。在移动端我们将会接触到相同的概念，但是会更加复杂，所以对大家已经知道的术语做个提前的讨论将会对你理解移动浏览器产生巨大的帮助（友好的预热）。
 
-【Concept: device pixels and CSS pixels】
-【概念：设备像素和CSS像素】
+【Concept: device pixels and CSS pixels 概念：设备像素和CSS像素】
 
     The first concept you need to understand is CSS pixels, and the difference with device pixels.
 
@@ -50,19 +48,19 @@ http://www.quirksmode.org/mobile/viewports2.html 原文2
 
 ![](img/viewports/csspixels_100.gif)
 
-Now let’s zoom out. The CSS pixels start to shrink, meaning that one device pixel now overlaps several CSS pixels.
+    Now let’s zoom out. The CSS pixels start to shrink, meaning that one device pixel now overlaps several CSS pixels.
 
 现在让我们缩小。CSS像素开始收缩，这意味着现在一个设备像素覆盖了多个CSS像素。
 
 ![](img/viewports/csspixels_out.gif)
 
-If you zoom in, the opposite happens. The CSS pixels start to grow, and now one CSS pixels overlaps several device pixels.
+    If you zoom in, the opposite happens. The CSS pixels start to grow, and now one CSS pixels overlaps several device pixels.
 
 如果你进行放大，相反的行为会发生。CSS像素开始变大，现在一个CSS像素覆盖了多个设备像素。
 
 ![](img/viewports/csspixels_in.gif)
 
-The point here is that you are only interested in CSS pixels. It’s those pixels that dictate how your style sheet is rendered.
+    The point here is that you are only interested in CSS pixels. It’s those pixels that dictate how your style sheet is rendered.
 
 这儿的要点是你只对CSS像素感兴趣。这些就是那些控制你的样式表如何被渲染的像素。
 
@@ -86,13 +84,17 @@ The point here is that you are only interested in CSS pixels. It’s those pixel
 
 100%缩放的概念在接下来的解释中会非常有用，但是在你的日常工作中你不用过分的担心它。在桌面环境上你将会在100%缩放比例的情况下测试你的站点，但即使用户放大或者缩小，CSS像素的魔力将会保证你的布局保持相同的比率。
 
-【屏幕尺寸 Screen size】
+【Screen size 屏幕尺寸】
 
 screen.width/height
+* Meaning:Total size of the user’s screen.
+* Measured in:Device pixels
+* Browser errors:IE8 measures it in CSS pixels, in both IE7 and IE8 mode.
 
-* 含义：用户的屏幕的完整大小。
-* 度量：设备的pixels。
-* 兼容性问题：IE8里，不管使用IE7模式还是IE8模式，都以CSS的pixels来度量
+screen.width/height
+* 含义：用户屏幕的整体大小。。
+* 度量单位：设备像素。
+* 兼容性问题：IE8以CSS像素对其进行度量，IE7和IE8模式下都有这个问题。
 
 我们先了解一些特殊的尺寸：screen.width 和 screen.height。
 这两个属性包含了用户屏幕的完整宽度高度。这些尺寸使用设备的pixels来定义，他们的值不会因为缩放而改变：他们是显示器的特征，而不是浏览器。如图1-4所示。
