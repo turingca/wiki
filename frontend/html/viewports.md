@@ -79,10 +79,7 @@ http://www.quirksmode.org/mobile/viewports2.html 原文2
 
     在缩放比例100%的情况下一个CSS像素完全等于一个设备像素。
 
-
-
-
-    The concept of 100% zoom is very useful in the explanations that are going to follow, but you shouldn’t overly worry about it in your daily work. On desktop you will generally test your sites in 100% zoom, but even if the user zooms in or out the magic of CSS pixels will make sure that your layout retains the same ratios.
+The concept of 100% zoom is very useful in the explanations that are going to follow, but you shouldn’t overly worry about it in your daily work. On desktop you will generally test your sites in 100% zoom, but even if the user zooms in or out the magic of CSS pixels will make sure that your layout retains the same ratios.
 
 100%缩放的概念在接下来的解释中会非常有用，但是在你的日常工作中你不用过分的担心它。在桌面环境上你将会在100%缩放比例的情况下测试你的站点，但即使用户放大或者缩小，CSS像素的魔力将会保证你的布局保持相同的比率。
 
@@ -98,7 +95,6 @@ screen.width/height
 * 度量单位：设备像素。
 * 兼容性问题：IE8以CSS像素对其进行度量，IE7和IE8模式下都有这个问题。
 
-    
 
     Let’s take a look at some practical measurements. We’ll start with screen.width and screen.height. They contain the total width and height of the user’s screen. These dimensions are measured in device pixels because they never change: they’re a feature of the monitor, and not of the browser.
 
@@ -117,31 +113,53 @@ Fun! 但是这些信息跟对我们有什么用呢？
 【Window size 窗口尺寸】
 
 window.innerWidth/Height
+* Meaning:Total size of the browser window, including scrollbars.
+* Measured in:CSS pixels
+* Browser errors:Not supported by IE.
+    * Opera measures it in device pixels.
 
-* 含义：包含滚动条尺寸的浏览器完整尺寸
-* 度量：CSS的pixels
-* 兼容性问题：IE不支持，Opera用设备pixels来度量
+window.innerWidth/Height
 
-相反的，你想要知道的浏览器的内部尺寸。它定义了当前用户有多大区域，可供你的CSS布局占用。你可以通过window.innerWidth 和 window.innerHeight来获取。如图1-5
-[]()
-显然，窗口的内部宽度使用CSS的pixels.你需要知道多少你自己定义的元素能塞入浏览器窗口，而这些数量会随着用户放大浏览器而减少（如图1-6）。所以当用户放大显示时，你能获取的浏览器窗口可用空间会减少，window.innerWidth/Height就是缩小的比例。
+* 含义：浏览器窗口的整体大小，包括滚动条。
+* 度量单位：CSS像素。
+* 兼容性问题：IE7不支持。Opera以设备像素进行度量。
 
-    Opera浏览器在这个问题上是一朵奇葩，当用户放大浏览器显示时不少。所以当用户放大显示时，你能获取的浏览器窗口可用空间会减少。window.innerWidth/Height 却并不会减小。在桌面浏览器上，这个特性很烦人，但在移动设备浏览器上简直是致命的，后面我们会讨论
+
+    Instead, what you want to know is the inner dimensions of the browser window. That tells you exactly how much space the user currently has available for your CSS layout. You can find these dimensions in window.innerWidth and window.innerHeight.
+
+相反，你想知道的是浏览器窗口的内部尺寸。它告诉了你用户到底有多少空间可以用来做CSS布局。你可以通过window.innerWidth和window.innerHeight来获取这些尺寸。
+
+![](img/viewports/desktop_inner.jpg)
+
+    Obviously, the inner width of the window is measured in CSS pixels. You need to know how much of your layout you can squeeze into the browser window, and that amount decreases as the user zooms in. So if the user zooms in you get less available space in the window, and window.innerWidth/Height reflect that by decreasing.
     
-[]()
+很显然，窗口的内部宽度是以CSS像素进行度量的。你需要知道你的布局空间中有多少可以挤进浏览器窗口，当用户放大的时候这个数值会减少。所以如果用户进行放大操作，那么在窗口中你能获取的空间将会变少，window.innerWidth/Height的值也变小了。
+
+    (The exception here is Opera, where window.innerWidth/Height do not decrease when the user zooms in: they’re measured in device pixels. This is annoying on desktop, but fatal on mobile, as we’ll see later.)
+
+（这儿的例外是Opera，当用户放大的时候window.innerWidth/Height并没有减少：它们是以设备像素进行度量的。这个问题在桌面上是比较烦人的，但是就像我们将要看到的，这在移动设备上却是非常严重的。）
+
+![](img/viewports/desktop_inner_zoomed.jpg)
+
+    Note that the measured widths and heights include the scrollbars. They, too, are considered part of the inner window. (This is mostly for historical reasons.)
 
 注意，窗口内部宽度和高度的尺寸，包含了滚动条的尺寸。（这主要是来至于历史原因）
 
-【滚动移位 Scrolling offset】
+【Scrolling offset 滚动距离】
 
 window.pageX/YOffset
+* Meaning:Scrolling offset of the page.
+* Measured in:CSS pixels
+* Browser errors:None
 
-* 含义：页面的移位
-* 度量：CSS的pixels
+window.pageX/YOffset
+* 含义：页面滚动的距离。
+* 度量单位：CSS像素。
 * 兼容性问题：pageXOffset 和 pageYOffset 在 IE 8 及之前版本的IE不支持, 使用”document.body.scrollLeft” and “document.body.scrollTop” 来取代
 
-window.pageXOffset 和 window.pageYOffset，定义了页面(document)的相对于窗口原点的水平、垂直位移。因此你能够定位用户滚动了多少的滚动条距离。如图1-7
-[]()
+window.pageXOffset和window.pageYOffset，包含了文档水平和垂直方向的滚动距离。所以你可以知道用户已经滚动了多少距离。
+
+![](img/viewports/desktop_page.jpg)
 
 该属性也以CSS的pixels来度量.同上面的问题，你想要知道在用户放大窗口的情况下，用户向上滚动了多少的滚动条。
 
