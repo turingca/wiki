@@ -45,13 +45,13 @@ A few images will clarify the concept. Here are four pixels on 100% zoom level. 
 
 一些配图可以解释清楚这个概念。这儿有四个100%缩放比的元素。这儿没有什么值得看的；CSS像素与设备像素完全重叠。
 
-![](/img/viewports/csspixels_100.gif)
+![](img/viewports/csspixels_100.gif)
 
 当我们缩小浏览器时，CSS的pixels开始收缩，导致1单位的设备的pixels上重叠了多个CSS的pixels，如图1-2
-![](/img/viewports/csspixels_out.gif)
+![](img/viewports/csspixels_out.gif)
 同理，放大浏览器时，相反的事情发生了，CSS的pixels开始扩大，导致1单位的CSS的pixels上重叠了多个设备的pixels，如图1-3
 
-![](/img/viewports/csspixels_in.gif)
+![](img/viewports/csspixels_in.gif)
 
 总体而言，你只需要关注CSS的pixels，这些pixels指定你的样式被如何渲染。
 
