@@ -80,6 +80,8 @@ http://www.quirksmode.org/mobile/viewports2.html 原文2
     在缩放比例100%的情况下一个CSS像素完全等于一个设备像素。
 
 
+
+
     The concept of 100% zoom is very useful in the explanations that are going to follow, but you shouldn’t overly worry about it in your daily work. On desktop you will generally test your sites in 100% zoom, but even if the user zooms in or out the magic of CSS pixels will make sure that your layout retains the same ratios.
 
 100%缩放的概念在接下来的解释中会非常有用，但是在你的日常工作中你不用过分的担心它。在桌面环境上你将会在100%缩放比例的情况下测试你的站点，但即使用户放大或者缩小，CSS像素的魔力将会保证你的布局保持相同的比率。
@@ -96,13 +98,23 @@ screen.width/height
 * 度量单位：设备像素。
 * 兼容性问题：IE8以CSS像素对其进行度量，IE7和IE8模式下都有这个问题。
 
-我们先了解一些特殊的尺寸：screen.width 和 screen.height。
-这两个属性包含了用户屏幕的完整宽度高度。这些尺寸使用设备的pixels来定义，他们的值不会因为缩放而改变：他们是显示器的特征，而不是浏览器。如图1-4所示。
-[]()
-很有趣吧？但是我们拿来何用呢？
-简单的说，木有用！用户的显示器宽度对我们而言不重要 – 除非你想要用他们做网络统计数据.
+    
 
-【浏览器尺寸 Window size】
+    Let’s take a look at some practical measurements. We’ll start with screen.width and screen.height. They contain the total width and height of the user’s screen. These dimensions are measured in device pixels because they never change: they’re a feature of the monitor, and not of the browser.
+
+让我们看一些实用的度量。我们将会以screen.width和screen.height做为开始。它们包括用户屏幕的整个宽度和高度。它们的尺寸是以设备像素来进行度量的，因为它们永远不会变：它们是显示器的属性，而不是浏览器的。
+
+![](img/viewports/desktop_screen.jpg)
+
+    Fun! But what do we do with this information?
+
+Fun! 但是这些信息跟对我们有什么用呢？
+
+    Basically, nothing. The user’s monitor size is unimportant to us — well, unless you want to measure it for use in a web statistics database.
+
+基本上没用。用户的显示器尺寸对于我们来说不重要－好吧，除非你想度量它来丰富你的web统计数据库。
+
+【Window size 窗口尺寸】
 
 window.innerWidth/Height
 
