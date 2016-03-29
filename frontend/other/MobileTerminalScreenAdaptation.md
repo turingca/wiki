@@ -1,6 +1,43 @@
 
 【手机淘宝】
-[使用Flexible实现手淘H5页面的终端适配](http://www.w3cplus.com/mobile/lib-flexible-for-html5-layout.html)
+【使用Flexible实现手淘H5页面的终端适配】
+[原文地址](http://www.w3cplus.com/mobile/lib-flexible-for-html5-layout.html)
 曾几何时为了兼容IE低版本浏览器而头痛，以为到Mobile时代可以跟这些麻烦说拜拜。可没想到到了移动时代，为了处理各终端的适配而乱了手脚。对于混迹各社区的偶，时常发现大家拿手机淘宝的H5页面做讨论——手淘的H5页面是如何实现多终端的适配？
 
 那么趁此Amfe阿里无线前端团队双11技术连载之际，用一个实战案例来告诉大家，手淘的H5页面是如何实现多终端适配的，希望这篇文章对大家在Mobile的世界中能过得更轻松。
+
+痛点：虽然H5的页面与PC的Web页面相比简单了不少，但让我们头痛的事情是要想尽办法让页面能适配众多不同的终端设备。
+[查看终端设备参数](https://design.google.com/devices/)这是多么痛苦的一件事情。
+
+http://www.paintcodeapp.com/news/ultimate-guide-to-iphone-resolutions
+
+手淘设计师和前端开发的适配协作基本思路是：
+* 选择一种尺寸作为设计和开发基准
+* 定义一套适配规则，自动适配剩下的两种尺寸(其实不仅这两种，你懂的)
+* 特殊适配效果给出设计效果
+
+手淘设计师常选择iPhone6作为基准设计尺寸，交付给前端的设计尺寸是按750px *1334px为准(高度会随着内容多少而改变)。
+前端开发人员通过一套适配规则自动适配到其他的尺寸。
+
+拿到设计师给的设计图之后，剩下的事情是前端开发人员的事了。而手淘经过多年的摸索和实战，总结了一套移动端适配的方案——[flexible方案](https://github.com/amfe/lib-flexible)。
+
+
+这种方案具体在实际开发中如何使用，暂时先卖个关子，在继续详细的开发实施之前，我们要先了解一些基本概念。
+
+一些基本概念
+
+在进行具体实战之前，首先得了解下面这些基本概念(术语)：
+
+视窗 viewport
+
+简单的理解，viewport是严格等于浏览器的窗口。在桌面浏览器中，viewport就是浏览器窗口的宽度高度。但在移动端设备上就有点复杂。
+
+移动端的viewport太窄，为了能更好为CSS布局服务，所以提供了两个viewport:虚拟的viewportvisualviewport和布局的viewportlayoutviewport。
+
+George Cummins在Stack Overflow上对这两个基本概念做了详细的解释。
+
+而事实上viewport是一个很复杂的知识点，上面的简单描述可能无法帮助你更好的理解viewport，而你又想对此做更深的了解，可以阅读PPK写的相关教程。
+
+物理像素(physical pixel)
+
+物理像素又被称为设备像素，他是显示设备中一个最微小的物理部件。每个像素可以根据操作系统设置自己的颜色和亮度。正是这些设备像素的微小距离欺骗了我们肉眼看到的图像效果。
