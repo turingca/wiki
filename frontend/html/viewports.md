@@ -2,8 +2,11 @@
 【两个viewports的故事】
 
 http://www.w3cplus.com/css/viewports.html  参照译文1，w3cplus转载  
-http://weizhifeng.net/viewports.html 参照译文2，官方原文中文版 
-http://www.quirksmode.org/mobile/viewports.html  原文1  
+
+http://weizhifeng.net/viewports.html 参照译文2，官方原文中文版  
+
+http://www.quirksmode.org/mobile/viewports.html  原文1
+
 http://www.quirksmode.org/mobile/viewports2.html 原文2  
 
 In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
@@ -47,17 +50,28 @@ A few images will clarify the concept. Here are four pixels on 100% zoom level. 
 
 ![](img/viewports/csspixels_100.gif)
 
-当我们缩小浏览器时，CSS的pixels开始收缩，导致1单位的设备的pixels上重叠了多个CSS的pixels，如图1-2
+Now let’s zoom out. The CSS pixels start to shrink, meaning that one device pixel now overlaps several CSS pixels.
+
+现在让我们缩小。CSS像素开始收缩，这意味着现在一个设备像素覆盖了多个CSS像素。
+
 ![](img/viewports/csspixels_out.gif)
-同理，放大浏览器时，相反的事情发生了，CSS的pixels开始扩大，导致1单位的CSS的pixels上重叠了多个设备的pixels，如图1-3
+
+If you zoom in, the opposite happens. The CSS pixels start to grow, and now one CSS pixels overlaps several device pixels.
+
+如果你进行放大，相反的行为会发生。CSS像素开始变大，现在一个CSS像素覆盖了多个设备像素。
 
 ![](img/viewports/csspixels_in.gif)
 
-总体而言，你只需要关注CSS的pixels，这些pixels指定你的样式被如何渲染。
+The point here is that you are only interested in CSS pixels. It’s those pixels that dictate how your style sheet is rendered.
 
-设备的pixels几乎对你毫无用处。但对用户而言却不是这样。用户会缩放页面，直到他能舒服的阅读内容。但是你不需关心这些缩放级别。浏览器会自动的保证你的CSS的pixels会被伸展还是收缩。
+这儿的要点是你只对CSS像素感兴趣。这些就是那些控制你的样式表如何被渲染的像素。
 
-【100% 缩放】
+Device pixels are almost entirely useless to you. Not to the user; the user will zoom the page in or out until he can comfortably read it. However, that zooming level doesn’t matter to you. The browser will automatically make sure that your CSS layout is stretched up or squeezed in.
+
+设备像素对你（译者：指的是开发者）来说基本上没用。但是对于用户不一样；用户将会放大或者缩小页面直到他能舒服的阅读为止。无论怎样，缩放比例对你不会产生影响。浏览器将会自动的使你的CSS布局被拉伸或者被压缩。
+
+
+【100% zoom 100% 缩放】
 本例设定缩放级别为100%。现在我们更严谨的定义，如下：
 
     在缩放级别为100%时，1单位的CSS的pixel是严格相等于1单位的设备pixel
