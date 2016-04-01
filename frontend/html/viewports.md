@@ -157,55 +157,77 @@ window.pageX/YOffset
 * 度量单位：CSS像素。
 * 兼容性问题：pageXOffset 和 pageYOffset 在 IE 8 及之前版本的IE不支持, 使用”document.body.scrollLeft” and “document.body.scrollTop” 来取代
 
+    
+
+    window.pageXOffset and window.pageYOffset, contain the horizontal and vertical scrolling offsets of the document. Thus you can find out how much the user has scrolled.
+
 window.pageXOffset和window.pageYOffset，包含了文档水平和垂直方向的滚动距离。所以你可以知道用户已经滚动了多少距离。
 
 ![](img/viewports/desktop_page.jpg)
 
-该属性也以CSS的pixels来度量.同上面的问题，你想要知道在用户放大窗口的情况下，用户向上滚动了多少的滚动条。
+    These properties are measured in CSS pixels, too. You want to know how much of the document has already been scrolled up, whatever zoom state it’s in.
 
-原理上来说，在用户放大浏览器时，向上滚动了页面，window.pageX/YOffset会改变。但当用户放大页面时，浏览器会尝试着保存用户当前可见的页面的元素依然在可见位置。虽然该特性表现得不如预期，但它意味着：在理论上 该情况下 window.pageX/YOffset并没有改变，被用户滚出屏幕的CSS的pixels几乎保存不变。如图1-8。
+这些属性也是以CSS像素进行度量的。你想知道的是文档已经被滚动了多长距离，不管它是放大还是缩小的状态。
 
-【概念：视窗 viewport】
+    In theory, if the user scrolls up and then zooms in, window.pageX/YOffset will change. However, the browsers try to keep web pages consistent by keeping the same element at the top of the visible page when the user zooms. That doesn’t always work perfectly, but it means that in practice window.pageX/YOffset doesn’t really change: the number of CSS pixels that have been scrolled out of the window remains (roughly) the same.
 
-在我们继续讨论更多的JavaScript的特性properties之前，先介绍另外一个概念:viewport。
+理论上，如果用户向上滚动，然后放大，window.pageX/YOffset将会发生变化。但是，浏览器为了想保持web页面的连贯，会在用户缩放的时候保持相同的元素位于可见页面的顶部。这个机制并不能一直很完美的执行，但是它意味着在实际情况下window.pageX/YOffset并没有真正的更改：被滚动出窗口的CSS像素的数量仍然（大概）是相同的。
 
-viewport的功能在于控制你网站的最高块状（block）容器：<html>元素。
+![](img/viewports/desktop_page_zoomed.jpg)
 
-听起来有点玄乎，举个例子~假设你定义了一个可变尺寸的布局（liquid layout），且你定义一个侧边栏的宽度为width: 10%。当你改变浏览器窗口大小时，该侧边栏会自动扩张和收缩。这是什么原理呢？
+【Concept: the viewport 概念：viewport】
 
-Technically, what happens is that the sidebar gets 10% of the width of its parent. Let’s say that’s the <body> (and that you haven’t given it a width). So the question becomes which width the <body> has.
+    Before we continue with more JavaScript properties we have to introduce another concept: the viewport.
 
-技术上讲，原理是侧边栏的宽度为它父元素宽度的10%，我们设它的父元素是body，且你未指定宽度。那么问题就变为了<body>的宽度到底是多少？
+在我们继续介绍更多的JavaScript属性之前，我们必须介绍另一个概念：viewport。
 
-Normally, all block-level elements take 100% of the width of their parent (there are exceptions, but let’s ignore them for now). So the <body> is as wide as its parent, the <html> element.
+    The function of the viewport is to constrain the <html> element, which is the uppermost containing block of your site.
 
-通常，一个块级元素占有起父元素的100%的宽度（这里有异常情况，暂时忽略）。所以<body>的宽度就是其父元素<html>的宽度。
+viewport的功能是用来约束你网站中最顶级包含块元素（containing block）<html>的。
 
-And how wide is the <html> element? Why, it’s as wide as the browser window. That’s why your sidebar with width: 10% will span 10% of the entire browser window. All web developers intuitively know and use this fact.
+    That may sound a bit vague, so here’s a practical example. Suppose you have a liquid layout and one of your sidebars has width: 10%. Now the sidebar neatly grows and shrinks as you resize the browser window. But exactly how does that work?
 
-那么<html>元素到底有多宽？因为它的宽度恰好为浏览器的宽度。所以你的侧边栏宽度width:10%会占用10%的浏览器宽度。所以的web开发人员都直观的知道和使用该特性了。
+这听起来有一点模糊，所以看一个实际的例子。假设你有一个流式布局，并且你众多边栏中的一个具有width:10%属性。现在这个边栏会随着浏览器窗口大小的调整而恰好的放大和收缩。但是这到底是如何工作的呢？
 
-What you may not know is how this works in theory. In theory, the width of the <html> element is restricted by the width of the viewport. The <html> element takes 100% of the width of that viewport.
+    Technically, what happens is that the sidebar gets 10% of the width of its parent. Let’s say that’s the <body> (and that you haven’t given it a width). So the question becomes which width the <body> has.
 
-但是你也许不知道原理。在原理上，<html>的宽度受viewport所限制，<html>元素为viewport宽度的100%。
+从技术上来说，发生的事情是边栏获取了它父元素宽度的10%。比方说是<body>元素（并且你还没有给它设置过宽度）。所以问题就变成了<body>的宽度是哪个？
 
-The viewport, in turn, is exactly equal to the browser window: it’s been defined as such. The viewport is not an HTML construct, so you cannot influence it by CSS. It just has the width and height of the browser window — on desktop. On mobile it’s quite a bit more complicated.
+    Normally, all block-level elements take 100% of the width of their parent (there are exceptions, but let’s ignore them for now). So the <body> is as wide as its parent, the <html> element.
 
-反过来，viewport是严格的等于浏览器的窗口：定义就是如此。viewport不是一个HTML的概念，所以你不能通过CSS修改它。它就是为浏览器窗口的宽度高度 – 在桌面浏览器上如此，移动设备浏览器上有点复杂。
+普通情况下，所有块级元素使用它们父元素宽度的100%（这儿有一些例外，但是让我们现在先忽略它）。所以<body>元素和它的父元素<html>一样宽。
 
-【影响 Consequences】
+    And how wide is the <html> element? Why, it’s as wide as the browser window. That’s why your sidebar with width: 10% will span 10% of the entire browser window. All web developers intuitively know and use this fact.
+    
+那么<html>元素的宽度是多少？它的宽度和浏览器窗口宽度一样。这就是为什么你的那个拥有width:10%属性的侧边栏会占据整个浏览器窗口的10%。所有web开发者都很直观的知道并且在使用它。
 
-This state of affairs has some curious consequences. You can see one of them right here on this site. Scroll all the way up to the top, and zoom in two or three steps so that the content of this site spills out of the browser window.
+    What you may not know is how this works in theory. In theory, the width of the <html> element is restricted by the width of the viewport. The <html> element takes 100% of the width of that viewport.
 
-Now scroll to the right, and you’ll see that the blue bar at the top of the site doesn’t line up properly any more.
+你可能不知道的是这个行为在理论上是如何工作的。理论上，<html>元素的宽度是被viewport的宽度所限制的。<html>元素使用viewport宽度的100%。
 
-缩放事件有一些奇怪的影响，你可以在本站上实验。页面滚动到最上面，放大浏览器2-3倍，网站的宽度会超过浏览器窗口。再将页面滚动到最右边，你会发现网站最上面的蓝色栏目不再对齐了。如图2-1
+    The viewport, in turn, is exactly equal to the browser window: it’s been defined as such. The viewport is not an HTML construct, so you cannot influence it by CSS. It just has the width and height of the browser window — on desktop. On mobile it’s quite a bit more complicated.
 
-This behaviour is a consequence of how the viewport is defined. I gave the blue bar at the top a width: 100%. 100% of what? Of the <html> element, which is as wide as the viewport, which is as wide as the browser window.
+viewport，接着，实际上等于浏览器窗口：它就是那么定义的。viewport不是一个HTML结构，所以你不能用CSS来改变它。它在桌面环境下只是拥有浏览器窗口的宽度和高度。在移动环境下它会有一些复杂。
 
-这个效果反应了viewport是如何被定义的。我定义了最上面蓝色栏目的宽度为width: 100%。什么的100%？当然是html的宽度，同样是viewport的宽度，同样是浏览器窗口的宽度。
+【Consequences 后果】
 
-Point is: while this works fine at 100% zoom, now that we’ve zoomed in the viewport has become smaller than the total width of my site. In itself that doesn’t matter, the content now spills out of the <html> element, but that element has overflow: visible, which means that the spilled-out content will be shown in any case.
+    This state of affairs has some curious consequences. You can see one of them right here on this site. Scroll all the way up to the top, and zoom in two or three steps so that the content of this site spills out of the browser window.
+    
+这个状况会有产生一些异样的后果。你可以在这个站点看到这些后果中的一个。滚动到顶部，然后放大两次或者三次，之后这个站点的内容就从浏览器窗口溢出了。
+
+    Now scroll to the right, and you’ll see that the blue bar at the top of the site doesn’t line up properly any more.
+
+现在滚动到右边，然后你将会看见站点顶部的蓝色边栏不再覆盖一整行了。
+
+![](img/viewports/desktop_htmlbehaviour.jpg)
+
+    This behaviour is a consequence of how the viewport is defined. I gave the blue bar at the top a width: 100%. 100% of what? Of the <html> element, which is as wide as the viewport, which is as wide as the browser window.
+
+这个行为是由于viewport的定义方式而产生的一个后果。我之前给顶部的蓝色边栏设置了width:100%。什么的100%？<html>元素的100%，它的宽度和viewport是一样的，viewport的宽度是和浏览器窗口一样的。
+
+    Point is: while this works fine at 100% zoom, now that we’ve zoomed in the viewport has become smaller than the total width of my site. In itself that doesn’t matter, the content now spills out of the <html> element, but that element has overflow: visible, which means that the spilled-out content will be shown in any case.
+    
+问题是：在100%缩放的情况下这个工作的很好，现在我们进行了放大操作，viewport变得比我的站点的总体宽度要小。这对于viewport它本身来说没什么影响，内容现在从<html>元素中溢出了，但是那个元素拥有overflow: visible，这意味着溢出的内容在任何情况下都将会被显示出来。
 
 重点：缩放比例100%的情况下很正常，现在我们放大浏览器，viewport变得比网站的总宽度更小。对viewport无影响，但页面的内容溢出了<html>元素，但它却有属性overflow: visible。意味着溢出的部分依然会被显示。
 
