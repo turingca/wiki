@@ -5147,9 +5147,199 @@ var FilteredSet = Set.extend(
 
 **9.7.4 类的层次结构和抽象类**
 
-在上一
+在上一节中给出了“组合优于继承”的原则，但为了将这条原则阐述清楚，创建了Set的子类。这样做的原因是最终得到的类是Set的实例，它会从Set继承有用的辅助方法，比如toString()和equals()。尽管这是一个很实际的原因，但不用创建类似Set类这种具体类的子类也可以很好的用组合来实现“范围”。例9-12中的SingletonSet类可以有另外一种类似的实现，这个类还是继承自Set，因此它可以继承很多辅助方法，但它的实现和其父类的实现完全不一样。SingletonSet并不是Set类的专用版本，而是完全不同的另一种Set。在类层次结构中的SingletonSet和Set应当是兄弟的关系，而非父子关系。
+
+不管是在经典的面向对象编程语言中还是在javascript中，通行的解决方法是“从实现中抽离出接口”。假定定义了一个AbstractSet类，其中定义了一些辅助方法比如toString(),但并没有实现诸如foreach()的核心方法。这样，实现的Set、SingletonSet和FilteredSet都是这个抽象类的子类，FilteredSet和SingletonSet都不必再实现为某个不相关的类的子类了。
+
+例9-16在这个思路上更近一步，定义了一个层次结构的抽象的集合类。AbstractSet只定义了一个抽象方法：contains()。任何类只要“声称”自己是一个表示范围的类，就必须至少定义这个contains()方法。然后，定义AbstractSet的子类AbstractEnumerableSet。这个类增加了抽象的size()和foreach()方法，而且定义了一些有用的非抽象方法（toString()、toArray()、equals()等），AbstractEnumerableSet并没有定义add()和remove()方法，它只代表只读集合。SingletonSet可以实现为非抽象子类。最后，定义了AbstractEnumerableSet的子类AbstractWritableSet。这个final抽象集合定义了抽象方法add()和remove()，并实现了诸如union()和intersection()等非具体方法，这两个方法调用了add()和remove()。AbstractWritableSet是Set和FilteredSet类相应的父类。但这个例子中并没有实现它，而是实现了一个新的名叫ArraySet的非抽象类。
+例9-16中的代码很长，但还是应当完整地阅读一遍。注意这里用到了Function.prototype.extend()作为创建子类的快捷方式。
+例9-16：抽象类和非抽象Set类的层次结构
+```javascript
+// A convenient function that can be used for any abstract method
+// 这个函数可以用做任何抽象方法，非常方便
+function abstractmethod() { throw new Error("abstract method"); }
+
+/*
+ * The AbstractSet class defines a single abstract method, contains().
+ * AbstractSet类定义了一个抽象方法：contains()
+ */
+function AbstractSet() { throw new Error("Can't instantiate abstract classes");}
+AbstractSet.prototype.contains = abstractmethod;
+
+/*
+ * NotSet is a concrete subclass of AbstractSet.
+ * The members of this set are all values that are not members of some
+ * other set. Because it is defined in terms of another set it is not
+ * writable, and because it has infinite members, it is not enumerable.
+ * All we can do with it is test for membership.
+ * Note that we're using the Function.prototype.extend() method we defined
+ * earlier to define this subclass.
+ * NotSet是AbstractSet的一个非抽象子类
+ * 所有不在其他集合中的成员都在这个集合中
+ * 因为它是在其他集合是不可写的条件下定义的
+ * 同时由于它的的成员是无限个，因此它是不可枚举的
+ * 我们只能用它来检测元素成员的归属情况
+ * 注意，我们使用了Function.prototype.extend()方法来定义这个子类
+ */
+var NotSet = AbstractSet.extend(
+    function NotSet(set) { this.set = set; },
+    {
+        contains: function(x) { return !this.set.contains(x); },
+        toString: function(x) { return "~" + this.set.toString(); },
+        equals: function(that) {
+            return that instanceof NotSet && this.set.equals(that.set);
+        }
+    }
+);
+
+
+/*
+ * AbstractEnumerableSet is an abstract subclass of AbstractSet.
+ * It defines the abstract methods size() and foreach(), and then implements
+ * concrete isEmpty(), toArray(), to[Locale]String(), and equals() methods
+ * on top of those. Subclasses that implement contains(), size(), and foreach() 
+ * get these five concrete methods for free.
+ * AbstractEnumerableSet是AbstractSet的一个抽象子类
+ * 它定义了抽象方法size()和foreach()
+ * 然后实现了非抽象方法isEmpty()、toArray()、to[Locale]String()和equals()方法
+ * 子类实现了contains()、size()和foreach()，这三个方法可以很轻易地调用这5个非抽象方法
+ */
+var AbstractEnumerableSet = AbstractSet.extend(
+    function() { throw new Error("Can't instantiate abstract classes"); }, 
+    {
+        size: abstractmethod,
+        foreach: abstractmethod,
+        isEmpty: function() { return this.size() == 0; },
+        toString: function() {
+            var s = "{", i = 0;
+            this.foreach(function(v) {
+                             if (i++ > 0) s += ", ";
+                             s += v;
+                         });
+            return s + "}";
+        },
+        toLocaleString : function() {
+            var s = "{", i = 0;
+            this.foreach(function(v) {
+                             if (i++ > 0) s += ", ";
+                             if (v == null) s += v; // null & undefined
+                             else s += v.toLocaleString(); // all others，其他的情况
+                         });
+            return s + "}";
+        },
+        toArray: function() {
+            var a = [];
+            this.foreach(function(v) { a.push(v); });
+            return a;
+        },
+        equals: function(that) {
+            if (!(that instanceof AbstractEnumerableSet)) return false;
+            // If they don't have the same size, they're not equal
+            // 如果他们的大小不同，则它们不相等
+            if (this.size() != that.size()) return false;
+            // Now check whether every element in this is also in that.
+            // 检查每一个元素是否也在that中
+            try {
+                this.foreach(function(v) {if (!that.contains(v)) throw false;});
+                return true;  // All elements matched: sets are equal，所有的元素都匹配：集合相等
+            } catch (x) {
+                if (x === false) return false; // Sets are not equal，集合不相等
+                throw x; // Some other exception occurred: rethrow it，发生了其他的异常：重新抛出异常
+            }
+        }
+    });
+
+/*
+ * SingletonSet is a concrete subclass of AbstractEnumerableSet.
+ * A singleton set is a read-only set with a single member.
+ * SingletonSet是AbstractEnumerableSet的非抽象子类
+ * singleton集合是只读的，它只包含一个成员
+ */
+var SingletonSet = AbstractEnumerableSet.extend(
+    function SingletonSet(member) { this.member = member; },
+    {
+        contains: function(x) {  return x === this.member; },
+        size: function() { return 1; },
+        foreach: function(f,ctx) { f.call(ctx, this.member); }
+    }
+);
+
+
+/*
+ * AbstractWritableSet is an abstract subclass of AbstractEnumerableSet.
+ * It defines the abstract methods add() and remove(), and then implements
+ * concrete union(), intersection(), and difference() methods on top of them.
+ * AbstractWritableSet是AbstractEnumerableSet的抽象子类
+ * 它定义了抽象方法add()和remove()
+ * 然后实现了非抽象方法union()、intersection()和difference()
+ */
+var AbstractWritableSet = AbstractEnumerableSet.extend(
+    function() { throw new Error("Can't instantiate abstract classes"); }, 
+    {
+        add: abstractmethod,
+        remove: abstractmethod,
+        union: function(that) {
+            var self = this;
+            that.foreach(function(v) { self.add(v); });
+            return this;
+        },
+        intersection: function(that) {
+            var self = this;
+            this.foreach(function(v) { if (!that.contains(v)) self.remove(v);});
+            return this;
+        },
+        difference: function(that) {
+            var self = this;
+            that.foreach(function(v) { self.remove(v); });
+            return this;
+        }
+    });
+
+/*
+ * An ArraySet is a concrete subclass of AbstractWritableSet.
+ * It represents the set elements as an array of values, and uses a linear
+ * search of the array for its contains() method. Because the contains()
+ * method is O(n) rather than O(1), it should only be used for relatively
+ * small sets. Note that this implementation relies on the ES5 Array methods
+ * indexOf() and forEach().
+ * ArraySet是AbstractWritableSet的非抽象子类
+ * 它以数组的形式表示集合中的元素
+ * 对于它的contains()方法使用了数组的线性查找
+ * 因为contains()方法的算法复杂度是O(n)而不是O(1)
+ * 它非常适用于相对小型的集合，注意，这里的实现用到了ES5的数组方法indexOf()和forEach()
+ */
+var ArraySet = AbstractWritableSet.extend(
+    function ArraySet() {
+        this.values = [];
+        this.add.apply(this, arguments);
+    },
+    {
+        contains: function(v) { return this.values.indexOf(v) != -1; },
+        size: function() { return this.values.length; },
+        foreach: function(f,c) { this.values.forEach(f, c); },
+        add: function() { 
+            for(var i = 0; i < arguments.length; i++) {
+                var arg = arguments[i];
+                if (!this.contains(arg)) this.values.push(arg);
+            }
+            return this;
+        },
+        remove: function() {
+            for(var i = 0; i < arguments.length; i++) {
+                var p = this.values.indexOf(arguments[i]);
+                if (p == -1) continue;
+                this.values.splice(p, 1);
+            }
+            return this;
+        }
+    }
+);
+```
+
 
 **9.8ECMAScript5中的类**
+
+
 
 **9.8.1让属性不可枚举**
 **9.8.2定义不可变的类**
