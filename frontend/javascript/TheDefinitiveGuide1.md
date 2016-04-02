@@ -5339,10 +5339,147 @@ var ArraySet = AbstractWritableSet.extend(
 
 **9.8ECMAScript5中的类**
 
-
+ECMAScript5给属性特性增加了方法支持（getter、setter、可枚举性、可写性和可配置性），而且增加了对象可扩展性的限制。这些方法在6.6节、6.7节和6.8.3节都有详细的讨论，然而这些方法非常适合用于类的定义。下面几节讲述了如何使用ECMAScript5的特性来使类更加健壮。
 
 **9.8.1让属性不可枚举**
+
+例9-6中的Set类使用了一个小技巧，将对象存储为“集合”的成员：它给添加至这个“集合”的任何对象定义了“对象id”属性。之后如果在for/in循环中对这个对象做遍历，这个新添加的属性也会遍历到。ECMAScript5可以通过设置属性为“不可枚举”（nonenumerable）来让属性不会遍历到。例9-17展示了如何通过Object.defineProperty()来做这一点，同时也展示了如何定义一个getter函数以及检测对象是否可扩展的（extensible）。
+
+例9-17：定义不可枚举的属性
+```javascript
+// Wrap our code in a function so we can define variables in the function scope
+// 将代码包装在一个匿名函数中，这样定义的变量就在这个函数作用域内
+(function() { 
+     // Define objectId as a nonenumerable property inherited by all objects.
+     // 定义一个不可枚举的属性objectId，它可以被所有对象继承
+     // When this property is read, the getter function is invoked.
+     // 当读取这个属性时调用getter函数
+     // It has no setter, so it is read-only.
+     // 它没有定义setter，因此它是只读的
+     // It is nonconfigurable, so it can't be deleted.
+     // 它是不可配置的，因此它是不能删除的
+     Object.defineProperty(Object.prototype, "objectId", {
+                               get: idGetter,       // Method to get value，取值器
+                               enumerable: false,   // Nonenumerable，不可枚举
+                               configurable: false  // Can't delete it，不可删除的
+                           });
+
+     // This is the getter function called when objectId is read
+     // 当读取objectId的时候直接调用这个getter函数
+     function idGetter() {             // A getter function to return the id，getter函数返回该id
+         if (!(idprop in this)) {      // If object doesn't already have an id，如果对象中不存在id
+             if (!Object.isExtensible(this)) // And if we can add a property，并且可以增加属性
+                 throw Error("Can't define id for nonextensible objects");
+             Object.defineProperty(this, idprop, {         // Give it one now.，给它一个值
+                                       value: nextid++,    // This is the value，就是这个值
+                                       writable: false,    // Read-only，只读的
+                                       enumerable: false,  // Nonenumerable，不可枚举的
+                                       configurable: false // Nondeletable，不可删除的
+                                   });
+         }
+         return this[idprop];          // Now return the existing or new value，返回已有的或新的值
+     };
+
+     // These variables are used by idGetter() and are private to this function
+     // idGetter()用到了这些变量，这些都属于私有变量的
+     var idprop = "|**objectId**|";    // Assume this property isn't in use，假设这个属性没有用到
+     var nextid = 1;                   // Start assigning ids at this #，给它设置初始值
+
+}()); // Invoke the wrapper function to run the code right away，立即执行这个包装函数
+```
+
 **9.8.2定义不可变的类**
+
+除了可以设置属性为不可枚举的，ECMAScript5还可以设置属性为只读的，当我们希望类的实例都是不可变的，这个特性非常有帮助。例9-18使用Object.defineProperties()和Object.create()定义不可变的Range类。它同样使用Object.defineProperties()来为类创建原型对象，并将（原型对象的）实例方法设置为不可枚举的，就像内置类的方法一样。不仅如此，它还将这些实例方法设置为“只读”和“不可删除”，这样就可以防止类做任何修改（monkey-patching）。最后，例9-18展示了一个有趣的技巧，其中实现的构造函数也可以用做工厂函数，这样不论调用函数之前是否带有new关键字，都可以正确地创建实例。
+例9-18 创建一个不可变得类，它的属性和方法都是只读的
+```javascript
+// This function works with or without 'new': a constructor and factory function
+// 这个方法可以使用new调用，也可以省略new，它可以用做构造函数也可以用做工厂函数
+function Range(from,to) {
+    // These are descriptors for the read-only from and to properties.
+    // 这些是对from和to只读属性的描述符
+    var props = {
+        from: {value:from, enumerable:true, writable:false, configurable:false},
+        to: {value:to, enumerable:true, writable:false, configurable:false}
+    };
+    
+    if (this instanceof Range)                // If invoked as a constructor，如果作为构造函数来调用
+        Object.defineProperties(this, props); // Define the properties，定义属性
+    else                                      // Otherwise, as a factory ，否则，作为工厂方法来调用
+        return Object.create(Range.prototype, // Create and return a new，创建并返回这个新的Range对象，
+                             props);          // Range object with props，属性由props指定
+}
+
+// If we add properties to the Range.prototype object in the same way,
+// 如果用同样的方法给Rang.prototype对象添加属性
+// then we can set attributes on those properties.  Since we don't specify
+// 那么我们需要给这些属性设置它们的特性
+// enumerable, writable, or configurable, they all default to false.
+// 因为我们无法识别它们的可枚举性、可写性或可配置性，这些属性特性默认都是false
+Object.defineProperties(Range.prototype, {
+    includes: {
+        value: function(x) { return this.from <= x && x <= this.to; }
+    },
+    foreach: {
+        value: function(f) {
+            for(var x = Math.ceil(this.from); x <= this.to; x++) f(x);
+        }
+    },
+    toString: {
+        value: function() { return "(" + this.from + "..." + this.to + ")"; }
+    }
+});
+```
+例9-18用到了Object.defineProperties()和Object.create()来定义不可变的和不可枚举的属性。这两个方法非常强大，但属性描述符对象让代码的可读性变得更差。另一种改进的做法是将修改这个已定义属性的特性的操作定义为一个工具函数，例9-19展示了两个这样的工具函数：
+例9-19 属性描述符工具函数
+```javascript
+// Make the named (or all) properties of o nonwritable and nonconfigurable.
+// 将o的指定名字（或所有）的属性设置为不可写的和不可配置的
+function freezeProps(o) {
+    var props = (arguments.length == 1)              // If 1 arg，如果只有一个参数
+        ? Object.getOwnPropertyNames(o)              //  use all props，使用所有的属性
+        : Array.prototype.splice.call(arguments, 1); //  else named props，否则传入了指定名字的属性
+    props.forEach(function(n) { // Make each one read-only and permanent，将它们都设置为只读的和不可变的
+        // Ignore nonconfigurable properties，忽略不可配置的属性
+        if (!Object.getOwnPropertyDescriptor(o,n).configurable) return;
+        Object.defineProperty(o, n, { writable: false, configurable: false });
+    });
+    return o;  // So we can keep using it，所以我们可以继续使用它   
+}
+
+// Make the named (or all) properties of o nonenumerable, if configurable.
+// 将o的指定名字（或所有）属性设置为不可枚举的和可配置的
+function hideProps(o) {
+    var props = (arguments.length == 1)              // If 1 arg，如果只有一个参数
+        ? Object.getOwnPropertyNames(o)              //  use all props，使用所有的属性
+        : Array.prototype.splice.call(arguments, 1); //  else named props，否则传入了指定名字的属性
+    props.forEach(function(n) { // Hide each one from the for/in loop，将它们设置为不可枚举的
+        // Ignore nonconfigurable properties，忽略不可配置的属性
+        if (!Object.getOwnPropertyDescriptor(o,n).configurable) return;
+        Object.defineProperty(o, n, { enumerable: false });
+    });
+    return o;
+}
+```
+Object.defineProperty()和Object.defineProperties()可以用来创建新属性，也可以修改已有属性的特性。当用它们创建新属性时，默认的属性特性的值都是false。但当用它们修改已经存在的属性时，默认的属性特性依然保持不变。比如，在上面的hideProps()函数中，只指定了enumerable特性，因为我们只想修改enumerable特性。
+
+使用这些工具函数，就可以充分利用ECMAScriptd5的特性来实现一个不可变的类，而且不用动态地修改这个类。例9-20中不可变的Range类就用到了刚才定义的工具函数。
+例9-20 一个简单的不可变类
+```javascript
+function Range(from, to) {    // Constructor for an immutable Range class，不可变的类Range的构造函数
+    this.from = from;
+    this.to = to;
+    freezeProps(this);        // Make the properties immutable，将属性设置为不可变的
+}
+
+Range.prototype = hideProps({ // Define prototype with nonenumerable properties，使用不可枚举的属性来定义原型
+    constructor: Range,
+    includes: function(x) { return this.from <= x && x <= this.to; },
+    foreach: function(f) {for(var x=Math.ceil(this.from);x<=this.to;x++) f(x);},
+    toString: function() { return "(" + this.from + "..." + this.to + ")"; }
+});
+```
+
 **9.8.3封装对象状态**
 **9.8.4防止类的扩展**
 **9.8.5子类和ECMAScript5**
