@@ -5071,10 +5071,83 @@ function filteredSetSubclass(superclass, filter) {
     return constructor;
 }
 ```
-例9-14中一个比较有趣的事情是，用一个函数将创建子类的代码包装起来，这样就可以在构造函数和方法链中使用父类的参数，而不是通过写死某个父类的名字来使用它的参数。也就是说如果想修改父类，只须修改一处代码即可，而不必对每个用到父类类名的地方都做修改。
+例9-14中一个比较有趣的事情是，用一个函数将创建子类的代码包装起来，这样就可以在构造函数和方法链中使用父类的参数，而不是通过写死某个父类的名字来使用它的参数。也就是说如果想修改父类，只须修改一处代码即可，而不必对每个用到父类类名的地方都做修改。已经有充足的理由证明这种技术的可行性，即使不是定义类工厂的场景中，这种技术也是值得提倡使用的。比如，可以这样使用包装函数和例9-11的Function.prototype.extend()方法来重写NonNullSet：
+```javascript
+var NonNullSet = (function(){ //定义并立即调用这个函数
+    var superclass = Set;       //仅指定父类
+    return superclass.extend(
+        function() {superclass.apply(this, arguments);},  //构造函数
+        {
+            add: function() {
+                //检查参数是否是null或undefined
+                for (var i = 0; i < arguments.length; i++)
+                    if (arguments[i] == null)
+                        throw new Error("can't add null or undefined");
+                //调用父类的add()方法以执行实际插入操作
+                return superclass.prototype.add.apply(this, arguments);
+            }
+        });
+}());
+```
+最后，值得强调的是，类似这种创建类工厂的能力是javascript语言动态特性的一个体现，类工厂是一种非常强大和有用的特性，这在java和c++语言中是没有的。
 
 **9.7.3 组合vs子类**
+
+在前一节中，定义的集合可以根据特定的标准对集合成员做限制，而且使用了子类的技术来实现这种功能，所创建的自定义子类使用了特定的过滤函数来对集合中的成员做限制。父类和过滤函数的每个组合都需要创建一个新的类。
+
+然而还有另一种更好的方法来完成这种需求，即面向对象编程中一条广为人知的设计原则：“组合优于继承”。这样，可以利用组合的原理定义一个新的集合实现，它“包装”了另外一个集合对象，在将受限制的成员过滤掉之后会用到这个（包装的）集合对象。例9-15展示了其工作原理：
+例9-15：使用组合代替继承的集合的实现
+```javascript
+/*
+ * A FilteredSet wraps a specified set object and applies a specified filter
+ * to values passed to its add() method.  All of the other core set methods 
+ * simply forward to the wrapped set instance.
+ * 实现一个FilteredSet，它包装某个指定的“集合”对象，并对传入add()方法的值应用了某种指定的过滤器
+ * “范围”类中其他所有的核心方法延续到包装后的实例中
+ */
+var FilteredSet = Set.extend(
+    function FilteredSet(set, filter) {  // The constructor
+        this.set = set;
+        this.filter = filter;
+    }, 
+    {  // The instance methods，实例方法
+        add: function() {
+            // If we have a filter, apply it，如果已有过滤器，直接使用它
+            if (this.filter) {
+                for(var i = 0; i < arguments.length; i++) {
+                    var v = arguments[i];
+                    if (!this.filter(v))
+                        throw new Error("FilteredSet: value " + v +
+                                        " rejected by filter");
+                }
+            }
+
+            // Now forward the add() method to this.set.add()，调用set中的add()方法
+            this.set.add.apply(this.set, arguments);
+            return this;
+        },
+        // The rest of the methods just forward to this.set and do nothing else.，剩下的方法都保持不变
+        remove: function() {
+            this.set.remove.apply(this.set, arguments);
+            return this;
+        },
+        contains: function(v) { return this.set.contains(v); },
+        size: function() { return this.set.size(); },
+        foreach: function(f,c) { this.set.foreach(f,c); }
+    });
+```
+在这个例子中使用组合的一个好处是，只须创建一个单独的FilteredSet子类即可。可以利用这个类的实例来创建任意带有成员限制的集合实例。比如，不用上文中定义的NonNullSet类，可以这样做：
+
+    var s = new FilteredSet(new Set(), function(x) { return x !== null; });
+    
+甚至还可以对已经过滤后的集合进行过滤：
+
+    var t = new FilteredSet(s, { function(x) {return !(x instanceof Set); }});
+
+
 **9.7.4 类的层次结构和抽象类**
+
+在上一
 
 **9.8ECMAScript5中的类**
 
