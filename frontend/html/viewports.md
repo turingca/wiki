@@ -681,10 +681,235 @@ screen.width and screen.height
 
 ![](img/viewports/mobile_screen.jpg)
 
+【The zoom level 缩放比例 zoom level】
+
+    Reading out the zoom level directly is not possible, but you can get it by dividing screen.width by window.innerWidth. Of course that only works if both properties are perfectly supported.
+
+直接读出缩放比例是不可能的，但是你可以通过以screen.width除以window.innerWidth来获取它的值。当然这只有在两个属性都被完美支持的情况下才有用。
+
+    Fortunately the zoom level is not important. What you need to know is how many CSS pixels currently fit on the screen. And you can get that information from window.innerWidth — if it’s supported correctly.
+
+幸运的是缩放比例并不太重要。你需要知道的是当前屏幕上有多少个CSS像素。你可以通过window.innerWidth来获取这个信息，如果它被正确支持的话。
 
 
+【Scrolling offset 滚动距离Scrolling offset】
+
+    What you also need to know is the current position of the visual viewport relative to the layout viewport. This is the scrolling offset, and, just as on desktop, it’s stored in window.pageX/YOffset.
+    
+你还需知道的是visual viewport当前相对于layout viewport的位置。这是滚动距离，并且就像在桌面一样，它被存储在window.pageX/YOffset之中。
+
+window.pageX/YOffset
+* Meaning:Scrolling offset; which is the same as the visual viewport’s offset relative to the layout viewport.
+* Measured in:CSS pixels
+* Full support:iPhone, Android, Symbian, Iris, MicroB, Skyfire, Obigo.
+* Problems:Opera, Bolt, Firefox, and NetFront always return 0.
+    * Samsung WebKit reports correct values only if a <meta viewport> is applied to the page.
+* Not supported:IE, BlackBerry. IE stores the values in document. documentElement. scrollLeft / Top
+
+window.pageX/YOffset
+* 意义：滚动距离；与visual viewport相对于layout viewport的距离一样。
+* 度量单位：CSS像素
+* 完全支持iPhone，Android，Symbian，Iris，MicroB，Skyfire，Obigo。
+* 问题：Opera，Bolt，Firefox和NetFront一直返回0。
+    * Samsung WebKit只有当<meta viewport>被应用到页面上时候才返回正确的值。
+* 不支持IE，BlackBerry。IE把值存在document.documentElement.scrollLeft/Top之中。
+
+![](img/viewports/mobile_page.jpg)
+
+【<html> element \<html> 元素】
+
+    Just as on desktop, document.documentElement.offsetWidth/Height gives the total size of the <html> element in CSS pixels.
+
+就像在桌面上一样，document.documentElement.offsetWidth/Height提供了以CSS像素为单位的<html>元素的整个尺寸。
+
+document. documentElement. offsetWidth / Height
+* Meaning:Total size of the <html> element.
+* Measured in:CSS pixels
+* Full support:Opera, iPhone, Android, Symbian, Samsung, Iris, Bolt, Firefox, MicroB, Skyfire, BlackBerry, Obigo.
+* Problems:NetFront’s values are only correct at 100% zoom.
+    * IE uses this propery pair to store the dimensions of the visual viewport. In IE, see document. body. clientWidth/Height for the correct values.
+
+document.documentElement.offsetWidth/Height
+* 意义：<html>元素的整体尺寸。
+* 度量单位：CSS像素。
+* 完全支持Opera，iPhone，Android，Symbian，Samsung，Iris，Bolt，Firefox，MicroB，Skyfire，BlackBerry，Obigo。
+* 问题：NetFront的值只在100%缩放比例的情况下才正确。
+    * IE使用这个属性对来存储visual viewport的尺寸。在IE中，去document.body.clientWidth/Height中获取正确的值。
+
+![](img/viewports/mobile_offset.jpg)
+
+【Media queries 媒体查询Media queries】
+
+    Media queries work the same as on desktop. width/height uses the layout viewport as its reference and is measured in CSS pixels, device-width/height uses the device screen and is measured in device pixels.
+    
+媒体查询和其在桌面环境上的工作方式一样。width/height使用layout　viewport做为参照物，并且以CSS像素进行度量，device-width/height使用设备屏幕，并且以设备像素进行度量。
+
+    In other words, width/height mirrors the values of document. documentElement. clientWidth/Height, while device-width/height mirrors the values of screen.width/height. (They actually do so in all browsers, even if the mirrored values are incorrect.)
+
+换句话说，width/height是document.documentElement.clientWidth/Height值的镜像，同时device-width/height是screen.width/height值的镜像。（它们在所有浏览器中实际上就是这么做的，即使这个镜像的值不正确。）
+
+Media queries
+* Meaning:Measure <html> element width (CSS pixels) or device width (device pixels).
+* Full support:Opera, iPhone, Android, Symbian, Samsung, Iris, Bolt, Firefox, MicroB.
+* Not supported:Skyfire, IE, BlackBerry, NetFront, Obigo.
+* Note:What I test here is whether the browsers take their data from the correct property pairs. Whether these property pairs give correct information is not part of this particular test.
+
+媒体查询
+* 意义：度量<html>元素的宽度（CSS像素）或者设备宽度（设备像素）。
+* 完全支持Opera，iPhone，Android，Symbian，Samsung，Iris，Bolt，Firefox，MicroB。
+* 不支持Skyfire，IE，BlackBerry，NetFront，Obigo。
+* 注意我在这里测试的是浏览器是否能从正确的「属性对」获取它们的数据。这些属性对是否提供正确的信息不是这个测试的一部分。
+
+![](img/viewports/mobile_mediaqueries.jpg)
+
+    Now which measurement is more useful to us web developers? Point is, I don’t know.
+
+现在哪个度量的尺寸对web开发者更有用？我的观点是，不知道。
+
+    I started out thinking that the device-width was the most important one, since it gives us some information about the device that we might be able to use. For instance, you could vary the width of your layout to accomodate the width of the device. However, you could also do that by using a <meta viewport>; it’s not absolutely necessary to use the device-width media query.
+
+我开始认为device-width是最重要的那一个，因为它给我们提供了关于我们可能会使用的设备的一些信息。比如，你可以根据设备的宽度来更改你的布局的宽度。不过，你也可以使用<meta viewport>来做这件事情；使用device-width媒体查询并不是绝对必要的。
+
+    So is width the more important media query after all? Maybe; it gives some clue as to what the browser vendor thinks is a good width for a website on this device. But that’s rather vague, and the width media query doesn’t really give any other information.
+
+那么width究竟是不是更重要的媒体查询呢？可能是；它提供了某些线索，这些线索是关于浏览器厂商认为在这个设备上网站应该有的正确宽度。但是这有些模糊不清，并且width媒体查询实际上不提供任何其他信息。
+
+    So I’m undecided. For the moment I think that media queries are important to figure out whether you’re on a desktop, a tablet, or a mobile device, but not so very useful for distinguishing between the various tablet or mobile devices.
+
+所以我不做选择。目前我认为媒体查询在分辨你是否在使用桌面电脑，平板，或者移动设备方面很重要，但是对于区分各种平板或者移动设备并没有什么用。
+
+    Or something.
+
+或者还有其他用处。
+
+【Event coordinates 事件坐标】
+
+    Event coordinates work more or less as on desktop. Unfortunately, of the twelve tested browsers only two, Symbian WebKit and Iris, get all three exactly right. All other browsers have more or less serious problems.
+
+这里的事件坐标与其在桌面环境上的工作方式差不多。不幸的是，在十二个测试过的浏览器中只有Symbian WebKit和Iris这两个浏览器能获取到三个完全正确的值。其他所有浏览器都或多或少有些严重的问题。
+
+    pageX/Y is still relative to the page in CSS pixels, and this is by far the most useful of the three property pairs, just as it is on desktop.
+    
+pageX/Y仍然是相对于页面，以CSS像素为单位，并且它是目前为止三个属性对中最有用的，就像它在桌面环境上的那样。
+
+Event coordinates
+* Meaning:See main text.
+* Measured in:See main text.
+* Full support:Symbian, Iris
+* Problems:Opera Mobile gives pageX/Y in all three property pairs, but something goes wrong when you scroll a lot.
+    * On iPhone, Firefox, and BlackBerry clientX/Y is equal to pageX/Y
+    * On Android and MicroB screenX/Y is equal to clientX/Y (in CSS pixels, in other words)
+    * On Firefox screenX/Y is wrong.
+    * IE, BlackBerry, and Obigo don’t support pageX/Y.
+    * In NetFront all three are screenX/Y.
+    * In Obigo clientX/Y is screenX/Y.
+    * Samsung WebKit always reports pageX/Y.
+* Not tested in:Opera Mini, Bolt, Skyfire
+
+Event coordinates
+* 意义：见正文
+* 度量单位：见正文
+* 完全支持Symbian，Iris
+* 问题：Opera Mobile在三个属性对中提供的都是pageX/Y的值，但是当你滚动一段距离后就出问题了。
+    * 在iPhone，Firefox和BlackBerry上clientX/Y等于pageX/Y。
+    * 在Android和MicroB上screenX/Y等于clientX/Y（换句话说，也就是以CSS像素为单位）。
+    * 在Firefox上screenX/Y是错的。
+    * IE，BlackBerry和Obigo不支持pageX/Y。
+    * 在NetFront上三个属性对的值都等于screenX/Y。
+    * 在Obigo上clientX/Y等于screenX/Y。
+    * Samsung WebKit一直返回pageX/Y。
+* 没有在Opera Mini，Bolt，Skyfire上测试过。
+
+![](img/viewports/mobile_pageXY.jpg)
+
+    clientX/Y is relative to the visual viewport in CSS pixels. This makes sense, although I’m not entirely certain what it’s good for.
+    
+ clientX/Y是相对于visual viewport来计算，以CSS像素为单位的。这有道理的，即使我还不能完全指出这么做的好处。  
+
+    screenX/Y is relative to the screen in device pixels. Of course, this is the same reference that clientX/Y uses, and device pixels are useless. So we do not need to worry about screenX/Y; it’s every bit as useless as on desktop.
+    
+screenX/Y是相对于屏幕来计算，以设备像素为单位。当然，这和clientX/Y用的参照系是一样的，并且设备像素在这没有用处。所以我们不需要担心screenX/Y；跟在桌面环境上一样没有用处。
+
+![](img/viewports/mobile_clientXY.jpg)
+
+【Meta viewport viewport meta标签】    
+
+Meta viewport
+* Meaning:Set the layout viewport’s width.
+* Measured in:CSS pixels
+* Full support:Opera Mobile, iPhone, Android, Iris, IE, BlackBerry, Obigo
+* Not supported:Opera Mini, Symbian, Bolt, Firefox, MicroB, NetFront
+* Problems:Skyfire can’t handle my test page.
+    * If the <meta viewport> is applied to the page in Samsung WebKit, several other properties change meaning.
+    * Opera Mobile, iPhone, Samsung, and BlackBerry do not allow the user to zoom out.
+
+Meta viewport
+* 意义：设置layout viewport的宽度。
+* 度量单位：CSS像素。
+* 完全支持Opera Mobile，iPhone，Android，Iris，IE，BlackBerry，Obigo。
+* 不支持Opera Mini，Symbian，Bolt，Firefox，MicroB，NetFront。
+* 问题：Skyfire不能处理我的测试页面。
+    * 如果在Samsung WebKit中对页面应用<meta viewport>，一些其他属性的意义会发生变化。
+    * Opera Mobile，iPhone，Samsung和BlackBerry不允许用户进行缩小。
 
 
+    Finally, let’s discuss the <meta name="viewport" content="width=320">; originally an Apple extension but meanwhile copied by many more browsers. It is meant to resize the layout viewport. In order to understand why that’s necessary, let’s take one step back.
+
+最后，让我们讨论一下<meta name="viewport"content="width=320">；起初它是苹果做的一个扩展，但是与此同时被更多的浏览器所借鉴。它的意思是调整layout viewport的大小。为了理解为什么这么做是必要的，让我们后退一步。
+
+    Suppose you build a simple page and give your elements no width. Now they stretch up to take 100% of the width of the layout viewport. Most browsers zoom out to show the entire layout viewport on the screen, giving an effect like this:
+
+假设你创建了一个简单的页面，并且没有给你的元素设置「宽度」。那么现在它们会被拉伸来填满layout viewport宽度的100%。大部分浏览器会进行缩放从而在屏幕上展示整个layout viewport，产生下面这样的效果：
+
+![](img/viewports/mq_none.jpg)
+
+    All users will immediately zoom in, which works, but most browsers keep the width of the elements intact, which makes the text hard to read.
+    
+所有用户将会立刻进行放大操作，这个是工作的，但是大部分浏览器完好无缺的保持元素的宽度，这使得文字很难阅读。    
+    
+![](img/viewports/mq_none_zoomed.jpg)
+
+    (The significant exception here is Android WebKit, which actually reduces the size of text-containing elements so that they fit on the screen. This is absolutely brilliant, and I feel all other browsers should copy this behaviour. I will document it fully later.)
+
+（值得注意的例外是Android WebKit，它实际上会减小包含文字的元素的大小，所以文字就能适配屏幕。这简直太有才了，我觉得所有其他浏览器应该借鉴这个行为。我过阵子将会完整的写一下这个议题。）
+
+    Now what you could try is setting html {width: 320px}. Now the <html> element shrinks, and with it all other elements, which now take 100% of 320px. This works when the user zooms in, but not initially, when the user is confronted with a zoomed-out page that mostly contains nothing.
+
+现在你应该尝试设置html {width: 320px}。现在<html>元素收缩了，并且其他元素现在使用的是320px的100%。这在用户进行放大操作的时候有用，但是在初始状态是没用的，当用户面对一个缩小了的页面这几乎不包含任何内容。
+
+![](img/viewports/mq_html300.jpg)
+
+    It is in order to get around this problem that Apple invented the meta viewport tag. When you set <meta name="viewport" content="width=320"> you set the width of the layout viewport to 320px. Now the initial state of the page is also correct.
+    
+为了绕开这个问题苹果发明了viewport　meta标签。当你设置<meta name="viewport" content="width=320">的时候，你就设置了layout viewport的宽度为320px。现在页面的初始状态也是正确的。
+
+![](img/viewports/mq_yes.jpg)
+
+    You can set the layout viewport’s width to any dimension you want, including device-width. That last one takes screen.width (in device pixels) as its reference and resizes the layout viewport accordingly.
+
+你可以把layout viewport的宽度设置为任何你想要的尺寸，包括device-width。device-width会把screen.width（以设备像素为单位）做为其值，并相应的重置layout viewport的尺寸。
+
+    There’s a catch here, though. Sometimes the formal screen.width does not make much sense because the pixel count is just too high. For instance, the Nexus One has a formal width of 480px, but Google engineers have decided that giving the layout viewport a width of 480px when using device-width is just too much. They shrank it to 2/3rds, so that device-width gives you a width of 320px, just as on the iPhone.
+
+但这里有一个隐情。有时候正规的screen.width不那么明了，因为像素的数量太大了。比如，Nexus One的正规宽度是480px，但是Google的工程师们觉得当使用device-width的时候，layout viewport的宽度为480px，这有些太大了。他们把宽度缩小为三分之二，所以device-width会返回给你一个320px的宽度，就像在iPhone上一样。
+
+    If, as is rumoured, the new iPhone will sport a larger pixel count (which does not necessarily equal a larger screen!), I wouldn’t be surprised if Apple copies this behaviour. Maybe in the end device-width will just mean 320px.
+    
+如果，像传闻那样，新的iPhone将会炫耀一个更大的像素数量（并不意味着一个更大的屏幕），如果苹果借鉴了这个行为我将不会感到惊讶。也许最终device-width就意味着320px。
+
+【Related research 相关研究】    
+
+Several related topics have to be researched further:
+* position: fixed. A fixed element, as we know, is positioned relative to the viewport. But relative to which viewport?
+I’ve done this research meanwhile.
+* Other media queries: dpi, orientation, aspect-ratio. dpi, especially, is a disaster area, not only because all browsers report 96dpi, which is usually false, but also because I’m not yet totally sure which value is most interesting for web developers.
+* What happens when an element is wider than the layout viewport/HTML element? Say I insert an element with width: 1500px into one of my test pages? The element will stick out of the HTML element (overflow: visible), but that means that the actual viewport can become wider than the layout viewport. Besides, an old Android (Nexus One) enlarged the HTML element when this happens. Is that a good idea?
+
+一些相关的主题不得不需要进行更深一步的研究：
+
+* position: fixed。一个固定的元素，就像我们知道的那样，是相对于viewport来进行定位的。但是相对于哪个viewport？我正在同时做这个研究。
+* 其他媒体查询：dpi，orientation，aspect-ratio。尤其是dpi，那是一个灾难地区，不仅仅是因为所有浏览器都返回96dpi，通常都是错的，也是因为我完全不确定对于web开发者来说哪个值是他们最感兴趣的。
+* 当一个元素比layout viewport/HTML元素宽的时候会发生什么？比如我把一个拥有width:1500px属性的元素插入到我的测试页面中的一个？这个元素将会从HTML元素中伸出来（overflow: visible），但这意味着实际的viewport可以变得比layout viewport要宽。除了这个以外，旧Android（Nexus One）还会当这个发生的时候放大HTML元素。这是个好主意吗？
 
 
 
