@@ -1,8 +1,6 @@
 【A tale of two viewports 两个viewports的故事】
 
-http://www.w3cplus.com/css/viewports.html  参照译文1，w3cplus转载  
-
-http://weizhifeng.net/viewports.html 参照译文2，官方原文中文版  
+http://weizhifeng.net/viewports.html 参照译文，官方原文中文版  
 
 http://www.quirksmode.org/mobile/viewports.html  原文1
 
@@ -229,80 +227,110 @@ viewport，接着，实际上等于浏览器窗口：它就是那么定义的。
     
 问题是：在100%缩放的情况下这个工作的很好，现在我们进行了放大操作，viewport变得比我的站点的总体宽度要小。这对于viewport它本身来说没什么影响，内容现在从<html>元素中溢出了，但是那个元素拥有overflow: visible，这意味着溢出的内容在任何情况下都将会被显示出来。
 
-重点：缩放比例100%的情况下很正常，现在我们放大浏览器，viewport变得比网站的总宽度更小。对viewport无影响，但页面的内容溢出了<html>元素，但它却有属性overflow: visible。意味着溢出的部分依然会被显示。
+    But the blue bar doesn’t spill out. I gave it a width: 100%, after all, and the browsers obey by giving it the width of the viewport. They don’t care that that width is now too narrow.
 
-But the blue bar doesn’t spill out. I gave it a width: 100%, after all, and the browsers obey by giving it the width of the viewport. They don’t care that that width is now too narrow.
+但是蓝色边栏并没有溢出。我之前给它设置了width: 100%，并且浏览器把viewport的宽度赋给了它。它们根本就不在乎现在宽度实在是太窄了。
 
-但蓝色栏目却不会溢出。我定义了它宽度为width:100%，结果浏览器为他赋值宽度为viewport的宽度。浏览器不会在乎这个栏目的宽度是不是过窄了。如图2-2
+![](img/viewports/desktop_100percent.jpg)
 
-【页面宽度 document width ?】
+【document width? 页面宽度?】
 
-What I really need to know is how wide the total content of the page is, including the bits that “stick out.” As far as I know it’s not possible to find that value (well, unless you calculate the individual widths and margins of all elements on the page, but that’s error-prone, to put it mildly).
+    What I really need to know is how wide the total content of the page is, including the bits that “stick out.” As far as I know it’s not possible to find that value (well, unless you calculate the individual widths and margins of all elements on the page, but that’s error-prone, to put it mildly).
 
-我真正想要知道的是页面内容的总大小，包括超出浏览器窗口的部分。到目前为止，据我所知并没有办法找到这个值（当然，除非你计算页面所有部分的宽度包括所有元素的margin，但是这种计算很容易出错）。
+我真正需要知道的是页面中全部内容的宽度是多少，包括那些「伸出」的部分。据我所知得到这个值是不可能的（好吧，除非你去计算页面上所有元素的宽度和边距，但是委婉的说，这是容易出错的）。
 
-I am starting to believe that we need a JavaScript property pair that gives what I’ll call the “document width” (in CSS pixels, obviously).
+    I am starting to believe that we need a JavaScript property pair that gives what I’ll call the “document width” (in CSS pixels, obviously).
 
-我开始相信我们需要一个JavaScript特性对(property pair)来标示我所谓的页面宽度 document width(当然，以CSS的pixels来度量)。如图2-3
+我开始相信我们需要一个我称其为「文档宽度」(document width，很显然用CSS像素进行度量)的JavaScript属性对。
 
-And if we’re really feeling funky, why not also expose this value to CSS? I’d love to be able to make the width: 100% of my blue bar dependent on the document width, and not the <html> element’s width. (This is bound to be tricky, though, and I wouldn’t be surprised if it’s impossible to implement.)
+![](img/viewports/desktop_documentwidth.jpg)
 
-如果我们真的感觉对这事儿很烦躁：为什么不在CSS中揭露这些值？我期望定义width:100%来控制页面蓝色栏目的宽度，它基于页面的宽度而不是元素的宽度。这似乎很棘手(This is bound to be tricky）,如果这成功的被实现我也不会感倒惊讶。
+    And if we’re really feeling funky, why not also expose this value to CSS? I’d love to be able to make the width: 100% of my blue bar dependent on the document width, and not the <html> element’s width. (This is bound to be tricky, though, and I wouldn’t be surprised if it’s impossible to implement.)
+    
+并且如果我们真的如此时髦，为什么不把这个值引入到CSS中？我将会给我的蓝色边栏设置width:100%，此值基于文档宽度，而不是<html>元素的宽度。（但是这个很复杂，并且如果不能实现我也不会感到惊讶。）
 
-【度量viewport Measuring the view port】
+    Browser vendors, what do you think?
+
+浏览器厂商们，你们怎么认为的？
+
+
+
+【Measuring the viewport 度量viewport】
+
 document. documentElement. clientWidth/Height
-* 含义：viewport的尺寸
-* 度量：CSS的pixels
-* 兼容性问题：无
+* Meaning:Viewport dimensions
+* Measured in:CSS pixels
+* Browser errors:None
+
+document. documentElement. clientWidth/Height
+* 意义：Viewport尺寸。
+* 度量单位：CSS像素。
+* 浏览器错误：无。
  
-You might want to know the dimensions of the viewport. They can be found in document.documentElement.clientWidth and -Height.
-你也许想要知道viewport的尺寸，他们可以通过document. documentElement. clientWidth/Height来获取。如图2-4
 
-If you know your DOM, you know that document.documentElement is in fact the <html> element: the root element of any HTML document. However, the viewport is one level higher, so to speak; it’s the element that contains the <html> element. That might matter if you give the <html> element a width. (I don’t recommend that, by the way, but it’s possible.)
 
-如果你熟悉DOM，你会知道document.documentElement实际上就是<html>元素：HTML文档的根元素。然而viewport是比<html>更高级别的元素，打个比喻，它是容纳<html>元素的元素。那会和你是否给元素赋值width相关（我不建议这么做，但是却是可行的）
+    You might want to know the dimensions of the viewport. They can be found in document.documentElement.clientWidth and -Height.
 
-In that situation document.documentElement.clientWidth and -Height still gives the dimensions of the viewport, and not of the <html> element. (This is a special rule that goes only for this element only for this property pair. In all other cases the actual width of the element is used.)
+你可能想知道viewport的尺寸。它们可以通过document.documentElement.clientWidth和-Height得到。
 
-在那种情况下document. documentElement. clientWidth/Height依然给出了viewport的尺寸，而不是<html>元素。（这是特殊的规则只针对这个特殊的元素针对这个特性对。在其余任何情况下元素使用实际的宽度）如图2-5。为<html>元素赋值25%。但document. documentElement. clientWidth/Height的值不变。它虽然貌似从<html>元素取值，但实际描述的确是viewport的尺寸。
+![](img/viewports/desktop_client.jpg)
 
-So document.documentElement.clientWidth and -Height always gives the viewport dimensions, regardless of the dimensions of the <html> element.
+    If you know your DOM, you know that document.documentElement is in fact the <html> element: the root element of any HTML document. However, the viewport is one level higher, so to speak; it’s the element that contains the <html> element. That might matter if you give the <html> element a width. (I don’t recommend that, by the way, but it’s possible.)
 
-所以document. documentElement. clientWidth/Height只会给出viewport的尺寸，而不管<html>元素尺寸如何改变。
+如果你了解DOM，你应该知道document.documentElement实际上指的是<html>元素：即任何HTML文档的根元素。可以说，viewport要比它更高一层；它是包含<html>元素的元素。如果你给<html>元素设置width属性，那么这将会产生影响。（我不推荐这么做，但是那是可行的。）
 
-【两个特性对 two property pairs】
+    In that situation document.documentElement.clientWidth and -Height still gives the dimensions of the viewport, and not of the <html> element. (This is a special rule that goes only for this element only for this property pair. In all other cases the actual width of the element is used.)
 
-But aren’t the dimensions of the viewport width also given by window.innerWidth/Height? Well, yes and no.
-但是viewport的尺寸不是也通过window.innerWidth/Height来描述的么？嗯，是，也不是。
+在那种情况下document.documentElement.clientWidth和-Height给出的仍然是viewport的尺寸，而不是<html>元素的。（这是一个特殊的规则，只对这个元素的这个属性对产生作用。在任何其他的情况下，使用的是元素的实际宽度。）
 
-There’s a formal difference between the two property pairs: document.documentElement.clientWidth and -Height doesn’t include the scrollbar, while window.innerWidth/Height does. That’s mostly a nitpick, though.
+![](img/viewports/desktop_client_smallpage.jpg)
 
-这两个特性对有严格的区别，几乎算是吹毛求疵了
-* window.innerWidth/Height包含滚动条
-* document. documentElement. clientWidth/Height不包含
+    So document.documentElement.clientWidth and -Height always gives the viewport dimensions, regardless of the dimensions of the <html> element.
 
-The fact that we have two property pairs is a holdover from the Browser Wars. Back then Netscape only supported window.innerWidth/Height and IE only document.documentElement.clientWidth and -Height. Since then all other browsers started to support clientWidth/Height, but IE didn’t pick up window.innerWidth/Height.
+所以document.documentElement.clientWidth和-Height一直代表的是viewport的尺寸，不管<html>元素的尺寸是多少。
 
-我们能获取这两个特性对是因为他们是浏览器大战的残留。过去Netscape只支持window.innerWidth/Height，IE 只支持document. documentElement. clientWidth/Height。从那时候开始所有其余浏览器都支持这两个特性。但IE一直未支持window.innerWidth/Height。
+【Two property pairs 两个属性对】
 
-Having two property pairs available is a minor nuisance on desktop — but it turns out to be a blessing on mobile, as we’ll see.
+    But aren’t the dimensions of the viewport width also given by window.innerWidth/Height? Well, yes and no.
 
-在桌面系统中，拥有这两个特性对只是一点小麻烦，但在移动设备中却变成了一种祝福。后面我们会看到 。
+但是难道viewport宽度的尺寸也可以通过window.innerWidth/Height来提供吗？怎么说呢，模棱两可。
 
-【度量<html>元素 measuring the <html>element】
+    There’s a formal difference between the two property pairs: document.documentElement.clientWidth and -Height doesn’t include the scrollbar, while window.innerWidth/Height does. That’s mostly a nitpick, though.
 
-So clientWidth/Height gives the viewport dimensions in all cases. But where can we find the dimensions of the <html> element itself? They’re stored in document.documentElement.offsetWidth and -Height.
+两个属性对之间存在着正式区别：document.documentElement.clientWidth和-Height并不包含滚动条，但是window.innerWidth/Height包含。这像是鸡蛋里挑骨头。
+
+    The fact that we have two property pairs is a holdover from the Browser Wars. Back then Netscape only supported window.innerWidth/Height and IE only document.documentElement.clientWidth and -Height. Since then all other browsers started to support clientWidth/Height, but IE didn’t pick up window.innerWidth/Height.
+
+事实上两个属性对的存在是浏览器战争的产物。当时Netscape只支持window.innerWidth/Height，IE只支持document.documentElement.clientWidth和Height。从那时起所有其他浏览器开始支持clientWidth/Height，但是IE没有支持window.innerWidth/Height。
+
+    Having two property pairs available is a minor nuisance on desktop — but it turns out to be a blessing on mobile, as we’ll see.
+
+在桌面环境上拥有两个属性对是有一些累赘的　－　但是就像我们将要看到的，在移动端这将会得到祝福。
+
+【Measuring the <html> element 度量\<html>元素】
 
 document. documentElement. offsetWidth/Height
-* 含义：<html>的尺寸
-* 度量：CSS的pixels
-* 兼容性问题：IE用这个值标示viewport的尺寸而非<html>
+* Meaning:Dimensions of the <html> element (and thus of the page).
+* Measured in:CSS pixels
+* Browser errors:IE measures the viewport, and not the <html> element.
 
-如果clientWidth/Height一直用以标示viewport的尺寸，我们该如何去获取<html>元素的尺寸呢？— document.documentElement.offsetWidth/Height。如图2-6
+document.documentElement.offsetWidth/Height
+* 意义：元素（也就是页面）的尺寸。
+* 度量单位：CSS像素。
+* 浏览器错误：IE度量的是viewport，而不是元素。
 
-These properties truly give you access to the <html> element as a block-level element; if you set a width, offsetWidth will reflect it.
+
+    So clientWidth/Height gives the viewport dimensions in all cases. But where can we find the dimensions of the <html> element itself? They’re stored in document.documentElement.offsetWidth and -Height.
+
+所以clientWidth/Height在所有情况下都提供viewport的尺寸。但是我们去哪里获取<html>元素本身的尺寸呢？它们存储在document.documentElement.offsetWidth和-Height之中。
+
+![](img/viewports/desktop_offset.jpg)
+
+    These properties truly give you access to the <html> element as a block-level element; if you set a width, offsetWidth will reflect it.
   
-这个特性对真实的让你访问块级元素<html>元素，如果你为<html>元素赋值了宽度，offsetWidth会真实的反应出来。如图2-7
+这些属性可以使你以块级元素的形式访问<html>元素；如果你设置width，那么offsetWidth将会表示它。
+
+![](img/viewports/desktop_offset_smallpage.jpg)
 
 
 【事件坐标 Event coordinates】
