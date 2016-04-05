@@ -5484,9 +5484,46 @@ Range.prototype = hideProps({ // Define prototype with nonenumerable properties�
 
 如9.6.6节和例9-10所示，构造函数中的变量和参数可以用做它创建的对象的私有状态。该方法在ECMAScript3的一个缺点是，访问这些私有状态的存取器方法是可以替换的。在ECMAScript5中可以通过定义属性getter和setter方法将状态变量更健壮地封装起来，这两个方法是无法删除的，如例9-21所示。
 例9-21 将Range类的端点严格封装起来
-```
-```
+```javascript
+// This version of the Range class is mutable but encapsulates its endpoint
+// 这个版本的Range类是可变的，但将端点变量进行了良好的封装
+// variables to maintain the invariant that from <= to.
+// 当端点的大小顺序还是固定的：from <= to
+function Range(from, to) {
+    // Verify that the invariant holds when we're created，如果from大于to
+    if (from > to) throw new Error("Range: from must be <= to");
 
+    // Define the accessor methods that maintain the invariant，定义存取器方法以维持不变
+    function getFrom() {  return from; }
+    function getTo() {  return to; }
+    function setFrom(f) {  // Don't allow from to be set > to，设置from的值时，不允许from大于to
+        if (f <= to) from = f;
+        else throw new Error("Range: from must be <= to");
+    }
+    function setTo(t) {    // Don't allow to to be set < from，设置to的值时，不允许to小于from
+        if (t >= from) to = t;
+        else throw new Error("Range: to must be >= from");
+    }
+
+    // Create enumerable, nonconfigurable properties that use the accessors
+    // 将使用取值器的属性设置为可枚举的、不可配置的
+    Object.defineProperties(this, {
+        from: {get: getFrom, set: setFrom, enumerable:true, configurable:false},
+        to: { get: getTo, set: setTo, enumerable:true, configurable:false }
+    });
+}
+
+// The prototype object is unchanged from previous examples.
+// 和前面的例子相比，原型对象没有做任何修改
+// The instance methods read from and to as if they were ordinary properties.
+// 实例方法可以像读取普遍的属性一样读取from和to
+Range.prototype = hideProps({
+    constructor: Range,
+    includes: function(x) { return this.from <= x && x <= this.to; },
+    foreach: function(f) {for(var x=Math.ceil(this.from);x<=this.to;x++) f(x);},
+    toString: function() { return "(" + this.from + "..." + this.to + ")"; }
+});
+```
 
 **9.8.4防止类的扩展**
 **9.8.5子类和ECMAScript5**
