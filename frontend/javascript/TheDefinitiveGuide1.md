@@ -5481,6 +5481,13 @@ Range.prototype = hideProps({ // Define prototype with nonenumerable properties�
 ```
 
 **9.8.3封装对象状态**
+
+如9.6.6节和例9-10所示，构造函数中的变量和参数可以用做它创建的对象的私有状态。该方法在ECMAScript3的一个缺点是，访问这些私有状态的存取器方法是可以替换的。在ECMAScript5中可以通过定义属性getter和setter方法将状态变量更健壮地封装起来，这两个方法是无法删除的，如例9-21所示。
+例9-21 将Range类的端点严格封装起来
+```
+```
+
+
 **9.8.4防止类的扩展**
 **9.8.5子类和ECMAScript5**
 **9.8.6属性描述符**
