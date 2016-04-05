@@ -1,10 +1,14 @@
 【A tale of two viewports 两个viewports的故事】
 
-http://weizhifeng.net/viewports.html 参照译文，官方原文中文版  
+http://weizhifeng.net/viewports.html  参照译文1，官方原文中文版  
+
+http://weizhifeng.net/viewports1.html 参照译文2，官方原文中文版  
 
 http://www.quirksmode.org/mobile/viewports.html  原文1
 
 http://www.quirksmode.org/mobile/viewports2.html 原文2  
+
+(两个viewport的故事（第一部分）)
 
     In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
 
@@ -452,7 +456,66 @@ div.sidebar {
 本文总结了我们对桌面浏览器行为的探寻。这个系列的第二部分把这些概念指向了移动端，并显示的指出了与桌面环境上的一些重要区别。
 
 
+(两个viewport的故事（第二部分）)
 
+    In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
+    
+在这个迷你系列的文章里边我将会解释viewport，以及许多重要元素的宽度是如何工作的，比如<html>元素，也包括窗口和屏幕。
+
+    On this page we’re going to talk about the mobile browsers. If you’re totally new to mobile I advise you to read part one about the desktop browsers first, in order to set the stage in a familiar environment.
+    
+这篇文章我们来聊聊关于移动浏览器的内容。如果你对移动开发完全是一个新手的话，我建议你先读一下第一篇关于桌面浏览器的文章，先在熟悉的环境中进行下热身。
+
+【The problem of mobile browsers Conclusion 移动浏览器的问题】
+
+    When we compare the mobile browsers to the desktop ones, the most obvious difference is screen size. Mobile browsers display significantly less of a desktop-optimised website than desktop browsers; either by zooming out until the text is unreadably small, or by showing only the small part of the site that fits in the screen.
+
+当我们比较移动浏览器和桌面浏览器的时候，它们最显而易见的不同就是屏幕尺寸。为桌面浏览器所设计的网站在移动浏览器中显示的内容明显要少于在桌面浏览器中显示的；不管是对其进行缩放直到文字小得无法阅读，还是在屏幕中以合适的尺寸只显示站点中的一小部分内容。
+
+    A mobile screen is far smaller than a desktop screen; think about 400px wide at maximum, and sometimes a lot less. (Some phones report larger widths, but they’re lying — or at the very least giving us useless information.)
+    
+移动设备的屏幕比桌面屏幕要小得多；想想其最大有400px宽，有时候会小很多。（一些手机声称拥有更大的宽度，但是它在撒谎－或者也可以说它给我们提供了没用的信息。）
+
+    An intermediate layer of tablet devices such as the iPad or the rumoured HP webOS-based one will bridge the gap between desktop and mobile, but that doesn’t change the fundamental problem. Sites must work on mobile devices, too, so we have to get them to display well on a small screen.
+
+平板设备中的像素中间层会在桌面环境和移动环境的缺口之间架起一段桥梁，比如像iPad或者传说中HP基于webOS所研发的设备，但是这并没有改变根本问题。站点必须也能在移动设备上工作，所以我们不得不让它们能在小尺寸的屏幕上正常显示。
+
+    The most important problems center on CSS, especially the dimensions of the viewport. If we’d copy the desktop model one-to-one, our CSS would start to misfire horrendously.
+    
+最重要的问题在CSS上，特别是viewport的尺寸。如果我们照搬桌面环境的模式，那么我们的CSS就要立马熄火了（译者：即显示混乱）。
+
+    Let’s go back to our sidebar with width: 10%. If mobile browsers would do exactly the same as desktop browsers, they’d make the element about 40px wide at most, and that’s far too narrow. Your liquid layout would look horribly squashed.
+    
+让我们看下之前sidebar为width: 10%的例子。如果移动浏览器想要实现跟桌面浏览器一样的行为，它们最多为元素设置40px的宽度，但是这太窄了。你的流式布局会看起来被挤乱了。
+
+    One way of solving the problem is building a special website for mobile browsers. Even apart from the fundamental question of whether you should do that at all, the practical problem is that only very few site owners are sufficiently clued-in to cater specifically to mobile devices.
+
+解决这个问题的一个方法是为移动浏览器建立一个特定的站点。先抛开你是否有必要这么做这个基本问题，而实际的情况是只有很少的网站拥有者真正知道要对移动设备做特殊的处理。
+
+    Mobile browser vendors want to offer their clients the best possible experience, which right now means “as much like desktop as possible.” Hence some sleight of hand was necessary.
+
+移动浏览器厂商想给它们的客户尽可能的提供最好的体验，这现在指的就是「尽可能的跟桌面一样」。因此耍一些花招是必要的。
+
+【The two viewports 两个viewport】
+
+    So the viewport is too narrow to serve as a basis for your CSS layout. The obvious solution is to make the viewport wider. That, however, requires it to be split into two: the visual viewport and the layout viewport.
+
+viewport太窄了，以至于不能正常展示你的CSS布局。明显的解决方案是使viewport变宽一些。无论如何，需要把它分成两部分：visual viewport和layout viewport。
+
+    George Cummins explains the basic concept best here at Stack Overflow:
+    Imagine the layout viewport as being a large image which does not change size or shape. Now image you have a smaller frame through which you look at the large image. The small frame is surrounded by opaque material which obscures your view of all but a portion of the large image. The portion of the large image that you can see through the frame is the visual viewport. You can back away from the large image while holding your frame (zoom out) to see the entire image at once, or you can move closer (zoom in) to see only a portion. You can also change the orientation of the frame, but the size and shape of the large image (layout viewport) never changes.
+    See also this explanation by Chris.
+
+George Cummins在Stack Overflow上对基本概念给出了最佳解释：
+    把layout viewport想像成为一张不会变更大小或者形状的大图。现在想像你有一个小一些的框架，你通过它来看这张大图。（译者：可以理解为「管中窥豹」）这个小框架的周围被不透明的材料所环绕，这掩盖了你所有的视线，只留这张大图的一部分给你。你通过这个框架所能看到的大图的部分就是visual viewport。当你保持框架（缩小）来看整个图片的时候，你可以不用管大图，或者你可以靠近一些（放大）只看局部。你也可以改变框架的方向，但是大图（layout viewport）的大小和形状永远不会变。
+    也看一下Chris给出的解释。
+    
+
+    The visual viewport is the part of the page that’s currently shown on-screen. The user may scroll to change the part of the page he sees, or zoom to change the size of the visual viewport.
+    
+visual viewport是页面当前显示在屏幕上的部分。用户可以通过滚动来改变他所看到的页面的部分，或者通过缩放来改变visual viewport的大小。
+
+![](img/viewports/mobile_visualviewport.jpg)
 
 
 
