@@ -8,7 +8,7 @@ http://www.quirksmode.org/mobile/viewports.html  原文1
 
 http://www.quirksmode.org/mobile/viewports2.html 原文2  
 
-(两个viewport的故事（第一部分）)
+(两个viewport的故事(第一部分))
 
     In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
 
@@ -456,7 +456,7 @@ div.sidebar {
 本文总结了我们对桌面浏览器行为的探寻。这个系列的第二部分把这些概念指向了移动端，并显示的指出了与桌面环境上的一些重要区别。
 
 
-(两个viewport的故事（第二部分）)
+(两个viewport的故事(第二部分))
 
     In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
     
@@ -516,6 +516,173 @@ George Cummins在Stack Overflow上对基本概念给出了最佳解释：
 visual viewport是页面当前显示在屏幕上的部分。用户可以通过滚动来改变他所看到的页面的部分，或者通过缩放来改变visual viewport的大小。
 
 ![](img/viewports/mobile_visualviewport.jpg)
+
+    However, the CSS layout, especially percentual widths, are calculated relative to the layout viewport, which is considerably wider than the visual viewport.
+    
+无论怎样，CSS布局，尤其是百分比宽度，是以layout viewport做为参照系来计算的，它被认为要比visual viewport宽。
+
+    Thus the <html> element takes the width of the layout viewport initially, and your CSS is interpreted as if the screen were significantly wider than the phone screen. This makes sure that your site’s layout behaves as it does on a desktop browser.
+    
+所以<html>元素在初始情况下用的是layout viewport的宽度，并且你的CSS是在屏幕（译者注：宽度等于layout
+viewport的虚拟屏幕）好像明显比电话屏幕宽（物理屏幕）要宽的假设基础上进行解释的。这使得你站点布局的行为与其在桌面浏览器上的一样。
+
+    How wide is the layout viewport? That differs per browser. Safari iPhone uses 980px, Opera 850px, Android WebKit 800px, and IE 974px.
+
+layout viewport有多宽？每个浏览器都不一样。Safari iPhone为980px，Opera为850px，Android WebKit为800px，最后IE为974px。
+
+```
+Some browsers have special behaviour:
+* Symbian WebKit tries to keep the layout viewport equal to the visual viewport, and yes, that means that elements with a percentual width may behave oddly. However, if the page doesn’t fit into the visual viewport due to absolute widths the browser stretches up the layout viewport to a maximum of 850px.
+* Samsung WebKit (on bada) makes the layout viewport as wide as the widest element.
+* On BlackBerry the layout viewport equals the visual viewport at 100% zoom. This does not change.
+```
+
+一些浏览器有特殊的行为：
+* Symbian WebKit会保持layout viewport与visualviewport相等，是的，这意味着拥有百分比宽度元素的行为可能会比较奇怪。但是，如果页面由于设置了绝对宽度而不能放入visual viewport中，那么浏览器会把layout viewport拉伸到最大850px宽。
+* Samsung WebKit (on bada)使layout viewport和最宽的元素一样宽。
+* 在BlackBerry上，layout viewport在100%缩放比例的情况下等于visual viewport。这不会变。 
+
+【Zooming 缩放】
+
+    Both viewports are measured in CSS pixels, obviously. But while the visual viewport dimensions change with zooming (if you zoom in, less CSS pixels fit on the screen), the layout viewport dimensions remain the same. (If they didn’t your page would constantly reflow as percentual widths are recalculated.)
+    
+很显然两个viewport都是以CSS像素度量的。但是当进行缩放（如果你放大，屏幕上的CSS像素会变少）的时候，visual viewport的尺寸会发生变化，layout viewport的尺寸仍然跟之前的一样。（如果不这样，你的页面将会像百分比宽度被重新计算一样而经常被重新布局。）
+
+【Understanding the layout viewport 理解layout viewport】
+
+    In order to understand the size of the layout viewport we have to take a look at what happens when the page is fully zoomed out. Many mobile browsers initially show any page in fully zoomed-out mode.
+    
+为了理解layout viewport的尺寸，我们不得不看一下当页面被完全缩小后会发生什么。许多移动浏览器会在初始情况下以完全缩小的模式来展示任何页面。
+
+    The point is: browsers have chosen their dimensions of the layout viewport such that it completely covers the screen in fully zoomed-out mode (and is thus equal to the visual viewport).
+
+重点是：浏览器已经为自己的layout viewport选择了尺寸，这样的话它在完全缩小模式的情况下完整的覆盖了屏幕（并且等于visual viewport）。
+
+![](img/viewports/mobile_viewportzoomedout.jpg)
+
+    Thus the width and the height of the layout viewport are equal to whatever can be shown on the screen in the maximally zoomed-out mode. When the user zooms in these dimensions stay the same.
+    
+所以layout viewport的宽度和高度等于在最大限度缩小的模式下屏幕上所能显示的任何内容的尺寸。当用户放大的时候这些尺寸保持不变。
+
+![](img/viewports/mobile_layoutviewport.jpg)
+
+    The layout viewport width is always the same. If you rotate your phone, the visual viewport changes, but the browser adapts to this new orientation by zooming in slightly so that the layout viewport is again as wide as the visual viewport.
+
+layout viewport宽度一直是一样的。如果你旋转你的手机，visual viewport会发生变化，但是浏览器通过轻微的放大来适配这个新的朝向，所以layout viewport又和visual viewport一样宽了。
+
+![](img/veiwports/mobile_viewportzoomedout_la.jpg)
+
+    This has consequences for the layout viewport’s height, which is now substantially less than in portrait mode. But web developers don’t care about the height, only about the width.
+
+这对layout viewport的高度会有影响，现在的高度比肖像模式（竖屏）要小。但是web开发者不在乎高度，只在乎宽度。
+
+![](img/viewports/mobile_layoutviewport_la.jpg)
+
+【Measuring the layout viewport 度量layout viewport】
+
+    We now have two viewports that we want to measure. Therefore it’s very lucky that the Browser Wars gave us two property pairs.
+
+我们现在有两个需要度量的viewport。很幸运的是浏览器战争给我们提供了两个属性对。
+
+    document.documentElement.clientWidth and -Height contain the layout viewport’s dimensions.
+
+document.documentElement.clientWidth和-Height包含了layout viewport的尺寸。
+
+document. documentElement. clientWidth/Height
+* Meaning:Layout viewport dimensions
+* Measured in:CSS pixels
+* Full support:Opera, iPhone, Android, Symbian, Bolt, MicroB, Skyfire, Obigo
+* Problems:Visual viewport dimensions in Iris
+    * Samsung WebKit reports the correct values when a <meta viewport> tag is applied to the page; the dimensions of the <html> element otherwise.
+    * Screen dimensions in device pixels in Firefox
+    * IE returns 1024x768. However, it stores the information in document.body.clientWidth/Height. This is consistent with IE6 desktop.
+    * NetFront’s values are only correct at 100% zoom.
+    * Symbian WebKit 1 (older S60v3 devices) does not support these properties.
+* Not supported:BlackBerry
+
+document.documentElement.clientWidth/Height
+* 意义：Layout viewport的尺寸
+* 度量单位：CSS像素
+* 完全支持Opera, iPhone, Android, Symbian, Bolt, MicroB, Skyfire, Obigo。
+* 在Iris中Visual viewport有问题
+    * Samsung WebKit在页面应用了<meta viewport>标签的时候会返回正确的值；否则使用<html>元素的尺寸。
+    * Firefox返回以设备像素为单位的屏幕尺寸。
+    * IE返回1024x768。然而，它把信息存储在document.body.clientWidth/Height中。这和桌面的IE6是一致的。
+    * NetFront的值只在100%缩放比例的情况下是正确的。
+    * Symbian WebKit 1 (老的S60v3设备)不支持这些属性。
+* BlackBerry不支持。
+
+![](img/viewports/mobile_client.jpg)
+
+    The orientation matters for the height, but not for the width.
+
+朝向会对高度产生影响，但对宽度不会产生影响。
+
+![](img/viewports/mobile_client_la.jpg)
+
+
+【Measuring the visual viewport 度量visual viewport】
+
+    As to the visual viewport, it is measured by window.innerWidth/Height. Obviously the measurements change when the user zooms out or in, since more or fewer CSS pixels fit into the screen.
+    
+对于visual viewport，它是通过window.innerWidth/Height来进行度量的。很明显当用户缩小或者放大的时候，度量的尺寸会发生变化，因为屏幕上的CSS像素会增加或者减少。
+
+window.innerWidth/Height
+* Meaning:Visual viewport dimensions
+* Measured in:CSS pixels
+* Full support:iPhone, Symbian, BlackBerry
+* Problems:Opera and Firefox return the screen width in device pixels.
+    * Android, Bolt, MicroB, and NetFront return the layout viewport dimensions in CSS pixels.
+* Not supported:IE, but it gives the visual viewport dimension in document. documentElement. offsetWidth/Height.
+    * Samsung WebKit reports either the dimensions of the layout viewport or of the <html>, depending on whether a <meta viewport> tag has been applied to the page or not.
+* Gibberish:Iris, Skyfire, Obigo
+
+window.innerWidth/Height
+* 意义：Visual viewport的尺寸。
+* 度量单位：CSS像素。
+* 完全支持iPhone，Symbian，BlackBerry。
+* 问题:Opera和Firefox返回以设备像素为单位的屏幕宽度。
+    * Android，Bolt，MicroB和NetFront返回以CSS像素为单位的layout viewport尺寸。
+* 不支持IE，但是它在document.documentElement.offsetWidth/Height中提供visual viewport的尺寸。
+    * Samsung WebKit返回的是layout viewport或者<html>的尺寸，这取决于页面是否应用了<meta viewport>标签。
+* Iris，Skyfire，Obigo根本就是扯淡。
+
+![](img/viewports/mobile_inner.jpg)
+
+    Unfortunately this is an area of incompatibilities; many browsers still have to add support for the measurement of the visual viewport. Still, no browser stores this measurment in any other property pair, so I guess window.innerWidth/Height is a standard, albeit a badly supported one.
+    
+不幸的是这是浏览器不兼容问题中的一部分；许多浏览器仍然不得不增加对visualviewport度量尺寸的支持。但是没有浏览器把这个度量尺寸存放任何其他的属性对中，所以我猜window.innerWidth/Height是标准，尽管它被支持的很糟。
+
+【The screen 屏幕】
+
+    As on desktop, screen.width/height give the screen size, in device pixels. As on the desktop, you never need this information as a web developer. You’re not interested in the physical size of the screen, but in how many CSS pixels currently fit on it.
+    
+像桌面环境一样，screen.width/height提供了以设备像素为单位的屏幕尺寸。像在桌面环境上一样，做为一个开发者你永远不需要这个信息。你对屏幕的物理尺寸不感兴趣，而是对屏幕上当前有多少CSS像素感兴趣。
+
+screen.width and screen.height
+* Meaning:Screen size
+* Measured in:Device pixels
+* Full support:Opera Mini, Android, Symbian, Iris, Firefox, MicroB, IE, BlackBerry
+* Problems:Opera Mobile on Windows Mobile only gives the landscape size. Opera Mobile on S60 gets it right.
+    * Samsung WebKit reports either the dimensions of the layout viewport or of the <html>, depending on whether a <meta viewport> tag has been applied to the page or not.
+    * iPhone and Obigo only give portrait sizes.
+    * NetFront only gives landscape sizes.
+* Gibberish:Bolt, Skyfire
+
+screen.width and screen.height
+* 意义：屏幕尺寸
+* 度量单位：设备像素
+* 完全支持Opera Mini，Android，Symbian，Iris，Firefox，MicroB，IE，BlackBerry。
+* 问题：Windows Mobile上的Opera Mobile只提供了风景模式（横屏）的尺寸。S60上的Opera Mobile返回的值是正确的。
+    * Samsung WebKit返回layout viewport或者<html>的尺寸，这取决于是否在页面上应用了<meta viewport>标签。
+    * iPhone和Obigo只提供了肖像模式（竖屏）的尺寸。
+    * NetFront只提供风景模式（横屏）的尺寸。
+*Bolt，Skyfire依旧在扯淡。
+
+![](img/viewports/mobile_screen.jpg)
+
+
+
 
 
 
