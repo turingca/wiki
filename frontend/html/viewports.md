@@ -333,48 +333,126 @@ document.documentElement.offsetWidth/Height
 ![](img/viewports/desktop_offset_smallpage.jpg)
 
 
-【事件坐标 Event coordinates】
+【Event coordinates 事件中的坐标】
 
 pageX/Y, clientX/Y, screenX/Y
+* Meaning:see main text
+* Measured in:see main text
+* Browser errors:IE doesn’t support pageX/Y.IE and Opera calculate screenX/Y in CSS pixels.
 
-* 含义：见下文
-* 度量：见下文
-* 兼容性问题：IE不支持pageX/Y,IE使用CSSpixels来度量screanX/Y
-* 详细描述:
-* pageX/Y：从<html>原点到事件触发点的CSS的 pixels
-* clientX/Y：从viewport原点（浏览器窗口）到事件触发点的CSS的 pixels
-* screenX/Y：从用户显示器窗口原点到事件触发点的设备 的 pixels。
-
-如图2-8、2-9和2-10
+pageX/Y, clientX/Y, screenX/Y
+* 意义：见正文。
+* 度量单位：见正文。
+* 浏览器错误：IE不支持pageX/Y。IE和Opera以CSS像素为单位计算screenX/Y。
 
 
-9成可能你会用到pageX/Y而1成左右会使用clientX/Y,screenX/Y基本没啥用。
+    Then there are the event coordinates. When a mouse event occurs, no less than five property pairs are exposed to give you information about the exact place of the event. For our discussion three of them are important:
+    1. pageX/Y gives the coordinates relative to the <html> element in CSS pixels.
+    2. clientX/Y gives the coordinates relative to the viewport in CSS pixels.
+    3. screenX/Y gives the coordinates relative to the screen in device pixels.
+    
+然后是事件中的坐标。当一个鼠标事件发生时，有不少于五种属性对可以给你提供关于事件位置的信息。对于我们当前的讨论来说它们当中的三种是重要的：
+
+pageX/Y提供了相对于<html>元素的以CSS像素度量的坐标。
+
+![](img/viewports/desktop_pageXY.jpg)
+
+clientX/Y提供了相对于viewport的以CSS像素度量的坐标。
+
+![](img/viewports/desktop_clientXY.jpg)
+
+screenX/Y提供了相对于屏幕的以设备像素进行度量的坐标。
+
+![](img/viewports/desktop_screenXY.jpg)
+
+    You’ll use pageX/Y 90% of the time; usually you want to know the event position relative to the document. The other 10% of the time you’ll use clientX/Y. You never ever need to know the event coordinates relative to the screen.
+    
+90%的时间你将会使用pageX/Y；通常情况下你想知道的是相对于文档的事件坐标。其他的10%时间你将会使用clientX/Y。你永远不需要知道事件相对于屏幕的坐标。
+
+【Media queries 媒体查询】
+
+Media queries
+* Meaning:see main text
+* Measured in:see main text
+* Browser errors:IE doesn’t support them.
+    * For device-width/height Firefox uses the values screen.width/height would have if they are measured in CSS pixels.
+    * For width/height Safari and Chrome use the values documentElement .clientWidth/Height would have if they are measured in device pixels.
+
+Media queries
+* 意义：见正文。
+* 度量单位：见正文。
+* 浏览器错误：IE不支持它们。
+    * 如果 device-width/height是以CSS像素进行度量的，那么Firefox将会使用screen.width/height的值。
+    * 如果width/height是以设备像素进行度量的，那么Safari和Chrome将会使用documentElement.clientWidth/Height的值。
+    
 
 
-【Media查询 media queries】
-mediaqueries
-* 含义：见下文
-* 度量：见下文
-* 兼容性问题：IE不支持.
+    Finally, some words about media queries. The idea is very simple: you can define special CSS rules that are executed only if the width of the page is larger than, equal to, or smaller than a certain size. For instance:
+```
+div.sidebar {
+    width: 300px;
+}
 
-最后一点文字关于@media的css属性。出发点很简单：你可以根据页面的特定宽度来定义特殊的CSS规则。举个例子。
+@media all and (max-width: 400px) {
+    // styles assigned when width is smaller than 400px;
+    div.sidebar {
+        width: 100px;
+    }
 
-如果宽度大于400px，那么sidebar宽度为300px。反之，sidebar宽度为100px
+}
+```
 
-有两个相关的media查询：width/height 和 device-width/device-height。如图2-11
+最后，说说关于媒体查询的事。原理很简单：你可以声明「只在页面宽度大于，等于或者小于一个特定尺寸的时候才会被执行」的特殊的CSS规则。比如：
+```
+div.sidebar {
+    width: 300px;
+}
 
-* device-width/height使用screen.width/height来做为的判定值。该值以设备的pixels来度量
-* width/height使用documentElement.clientWidth/Height即viewport的值。该值以CSS的pixels来度量
+@media all and (max-width: 400px) {
+    // styles assigned when width is smaller than 400px;
+    div.sidebar {
+        width: 100px;
+    }
 
-到底该使用那个呢？一个很无脑的结果：width。web开发中不需要对设备的宽度感兴趣，而width却使按照浏览器窗口的大小计算的
+}
+```
 
-所以在桌面浏览器中使用width而忘记device-width。接下来我们会看到在移动设备中有点凌乱。
+    Now the sidebar is 300px wide, except when the width is smaller than 400px, in which case the sidebar becomes 100px wide.
 
-【总结】
+当前sidebar是300px宽，除了当宽度小于400px的时候，在那种情况下sidebar变得100px宽。
 
-在此结束对桌面浏览器的特性的简短讨论，第二部分主要涉及移动设备和其与桌面浏览器的重要区别。
+    The question is of course: which width are we measuring here?
 
-【接下来是第二部分内容，来源于A tale of two viewports — part two一文。】
+问题很显然：我们这儿度量的是哪个宽度？
+
+    There are two relevant media queries: width/height and device-width/device-height.
+    1. width/height uses the same values as documentElement .clientWidth/Height (the viewport, in other words). It works with CSS pixels.
+    2. device-width/device-height uses the same values as screen.width/height (the screen, in other words). It works with device pixels.
+
+
+这儿有两个对应的媒体查询：width/height和device-width/device-height。
+1. width/height使用和documentElement .clientWidth/Height（换句话说就是viewport宽高）一样的值。它是工作在CSS像素下的。
+2. device-width/device-height使用和screen.width/height（换句话说就是屏幕的宽高）一样的值。它工作在设备像素下面。
+
+![](img/viewports/desktop_mediaqueries.jpg)
+
+    Which should you use? That’s a no-brainer: width, of course. Web developers are not interested in the device width; it’s the width of the browser window that counts.
+    
+你应该使用哪个？这还用想？当然是width。Web开发者对设备宽度不感兴趣；这个是浏览器窗口的宽度。
+
+    So use width and forget device-width — on desktop. As we’ll see, the situation is much more messy on mobile.
+
+所以在桌面环境下去使用width而去忘记device-width吧。我们即将看到这个情况在移动端会更加麻烦。
+
+
+【Conclusion 总结】
+
+    That concludes our foray into the desktop browsers’ behaviour. The second part of this series ports these concepts to mobile and highlights some important differences with the desktop.
+
+本文总结了我们对桌面浏览器行为的探寻。这个系列的第二部分把这些概念指向了移动端，并显示的指出了与桌面环境上的一些重要区别。
+
+
+
 
 
 
