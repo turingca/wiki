@@ -5526,6 +5526,23 @@ Range.prototype = hideProps({
 ```
 
 **9.8.4防止类的扩展**
+
+通常认为，通过给原型对象添加方法可以动态地对类进行扩展，这是javascript本身的特性。ECMAScript5可以根据需要对此特性加以限制。Object.preventExtensions()可以将对象设置为不可扩展的（见6.8.3节），也就是说不能给对象添加任何新属性。Object.seal()则更加强大，它除了能阻止用户给对象添加新属性，还能将当前已有的属性设置为不可配置的，这样就不能删除这些属性了（但不可配置的属性可以是可写的，也可以转换为只读属性）。可以通过这样一句简单的代码来阻止对Object.prototype的扩展：
+
+    Object.seal(Object.prototype);
+    
+javascript的另外一个动态特性是“对象的方法可以随时替换”（或称为“monkey-patch”）：
+```javascript
+var original_sort_method = Array.prototype.sort;
+Array.prototype.sort = function() {
+    var start = new Date();
+    original_sort_method.apply(this, arguments);
+    var end = new Date();
+    console.log("Array sort took " + (end - start) + " milliseconds.");
+};
+```
+可以
+
 **9.8.5子类和ECMAScript5**
 **9.8.6属性描述符**
 
