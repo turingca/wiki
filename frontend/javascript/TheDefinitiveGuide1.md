@@ -5541,9 +5541,23 @@ Array.prototype.sort = function() {
     console.log("Array sort took " + (end - start) + " milliseconds.");
 };
 ```
-可以
+可以通过将实例方法设置为只读来防止这类修改，一种方法就是使用上面代码所定义的freezeProps()工具函数。另外一种方法是使用Object.freeze()，它的功能和Object.seal()完全一样，它同样会把所有属性都设置为只读的和不可配置的。
+
+理解类的只读属性的特性至关重要。如果对象o继承了只读属性p，那么给o.p的赋值操作将会失败，就不会给o创建新属性。如果你想重写一个继承来的只读属性，就必须使用Object.definePropertiy()、Object.defineProperties()或Object.create()来创建这个新属性。也就是说，如果将类的实例方法设置为只读的，那么重写它的子类的这些方法的难度会更大。
+
+这种锁定原型对象的做法往往没有必要，但的确有一些场景是需要阻止对象的扩展的。回想一下例9-7中的enumeration()，这是一个类工厂函数。这个函数将枚举类型的每个实例都保存在构造函数对象的属性里，以及构造函数的values数组中。这些属性和数组是表示枚举类型实例的正式实例列表，是可以执行“冻结”（freezing）操作的，这样就不能给它添加新的实例，已有实例也无法删除或修改。可以给enumeration()函数添加几行简单的代码：
+```javascript
+Object.freeze(enumeration.values);
+Object.freeze(enumeration);
+```
+需要注意的是，通过在枚举类型中调用Object.freeze()，例9-17中定义的objectId属性之后也无法使用了。这个问题的解决方法是，在枚举类型被“冻结”之前读取一次它的objectId属性（调用潜在的存取器方法并设置内部属性）。
 
 **9.8.5子类和ECMAScript5**
+
+例9-22使用ECMAScript5的特性实现子类。这里使用例9-16中的AbstractWritableSet类来做进一步的说明，来定义这个类的子类StringSet。下面这个例子的最大特点是使用Object.create()创建原型对象，这个原型对象继承自父类的原型，同时给新创建的对象定义属性。这种实现方法的困难之处在于，正如上文所提到的，它需要使用难看的属性描述符。
+
+这个例子中另外一个有趣之处在于，使用Object.create()chu
+
 **9.8.6属性描述符**
 
 **9.9模块**
