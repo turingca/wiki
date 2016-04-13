@@ -7,9 +7,9 @@
 三方平台
 --------
 
-[微信JS-SDK说明文档](other/wechat.md)
+[微信JS-SDK说明文档](other/Wechat.md)
 
-[百度地图JavaScript API v2.0](other/bdmap.md)
+[百度地图JavaScript API v2.0](other/BaiduMap.md)
 
 解决方案
 --------
