@@ -1,23 +1,13 @@
 工具
 -------
+
 [谷歌浏览器](other/Chrome.md)
 
 
-微信
-------
+三方平台
+--------
+
 [微信JS-SDK说明文档](other/wechat.md)
-
-微博
-------
-
-安卓
-------
-
-ios
--------
-
-地图
--------
 
 [百度地图JavaScript API v2.0](other/bdmap.md)
 
