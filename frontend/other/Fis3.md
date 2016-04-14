@@ -15,6 +15,8 @@ node -h 查看nodejs的帮助
 
 NPM（node package manager）
 
+[对npm的介绍](http://www.92fenxiang.com/175.html)
+
 npm -v  查看当前npm版本
 npm config ls -l  查看所有 NPM 的设置
 npm prefix -g     查看全局安装路径
