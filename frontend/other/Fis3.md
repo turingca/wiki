@@ -28,3 +28,5 @@ npm cache clean   清理缓存
 [NPM安装FIS遇到的问题](https://github.com/fex-team/fis/issues/565)
 
 npm install -g fis3 安装到全局目录，如果 npm 长时间运行无响应，推荐使用 cnpm 来安装
+
+npm install -g fis3 --disturl=http://registry.npm.taobao.org/mirrors/node --registry=http://registry.npm.taobao.org
