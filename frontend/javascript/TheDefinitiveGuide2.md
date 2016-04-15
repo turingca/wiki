@@ -1,6 +1,31 @@
-web浏览器中的javascript
+#第二部分 客户端javascript
+
+本书第二部分主要讲解javascript是如何在web浏览器中实现的，这些章节介绍了大量的脚本宿主对象，这些对象可以表示浏览器窗口、文档树和文档的内容等。这些章节同样涵盖重要的web应用所需的网络编程API、本地存储和检索数据、画图等。
+
+第13章web浏览器中的javascript
 -----------------------
+
+本书第一部分介绍了javascript语言核心。第二部分开始转向web浏览器中javascript的讨论，通常称为客户端javascript。迄今为止，我们多看到的大部分例子虽然是合法的javascript代码，但是却没有特定的上下文，也就是说它们不过是一些运行在不明环境中的代码片段。本章提供了一个可以运行javascript的上下文。
+
+在开始讨论javascript之前，有必要先思考一下在web浏览器中是如何呈现web页面的。一些呈现静态信息的页面，叫做文档（document）（由于加入了javascript，静态页面的信息看上去会动来动去，但信息本身是静态的），相对于文档来说，其他web页面则感觉上更像是应用。如果需要的话，这些页面可以动态载入新的信息，因此看起来更加图形化，而非文本化，并且它们可以进行离线操作，以及保存数据到本地，以便再次访问时进行状态恢复。此外，还有其他web页面处于文档和应用的中间，结合了两者的特性。
+
+本章以客户端javascript概述开始，包括一个简单的例子，以及对javascript在web文档和web应用中角色的讨论。概述内容还介绍了哪些内容在后续章节中会有，接下来会详细解释javascript代码在html文档中是如何嵌入并执行的，然后还会介绍兼容性，可访问性和安全性等问题。
+
 **13.1客户端javascript**
+
+window对象是所有客户端javascript特性和API的主要接入点。它表示web浏览器的一个窗口或窗体，并且可以用标识符window来引用它。window对象定义了一些属性，比如，指代Location对象的location属性，Location对象指定当前显示在窗口中的URL，并允许脚本往窗口里载入新的URL：
+```javascript
+//设置location属性，从而跳转到新的web页面
+window.location = "http://www.oreilly.com/";
+```
+window对象还定义了一些方法，比如alert()，可以弹出一个对话框用来显示一些信息。还有setTimeout()，可以注册一个函数，在给定的一段时间之后触发一个回调：
+```javascript
+//等待两秒，然后说 hello
+setTimeout(function() {alert("hello world");}, 2000);
+```
+注意上面的
+
+
 **13.2在html里嵌入javascript**
 **13.3javascript程序的执行**
 **13.4兼容性和互用性**
