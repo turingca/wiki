@@ -58,7 +58,7 @@ Window对象的onload处理程序是最重要的事件处理程序之一。当�
 
 例13-1显示内容的简单客户端javascript
 
-```
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -155,7 +155,7 @@ javascript代码可以以内联的形式出现在html文件里的<script>和</sc
 例13-2展示了一个HTML文件，它包含简单的javascript程序。注释解释了这个程序是做什么的，但这个例子主要演示的是javascript代码以及css样式表是如何嵌入到html文件里。注意这个例子和例13-1的结构类似，并同样使用onload事件处理程序。
 
 例13-2： 实现一个简单的javascript数字时钟程序
-```
+```html
 <!DOCTYPE html>                 <!-- This is an HTML5 file 这是一个HTML5文件-->
 <html>                          <!-- The root element 根节点-->
 <head>                          <!-- Title, scripts & styles go here 标题、脚本和样式都放在这里 -->
@@ -223,6 +223,7 @@ javascript是web的原始脚本语言，而在默认的情况下，假定<script
 type属性的默认值是“text/javascript”。如果需要，可以显式指定此类型，但这完全没必要。
 
 老的浏览器在<script>标记上用language属性代替type属性，这种情况现在也会经常看到：
+
 
     <script language="javascript">
     //这里是javascript代码......
