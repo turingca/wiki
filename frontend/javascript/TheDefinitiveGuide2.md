@@ -128,8 +128,8 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 
 在html文档里嵌入客户端javascript代码有4种方法：
 
-* 内联，放置在<script></script>标签对之间。
-* 放置在由<script>标签的src属性指定的外部文件中。
+* 内联，放置在script>标签对之间。
+* 放置在由script标签的src属性指定的外部文件中。
 * 放置在html事件处理程序中，该事件处理程序由onclick或onmouseover这样的html属性指定。
 * 放在一个URL里，这个url使用特殊的“javascript:”协议。
 
@@ -137,7 +137,7 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 
 **13.2.1<script>元素**
 
-javascript代码可以以内联的形式出现在html文件里的<script>和</script>标签之间：
+javascript代码可以以内联的形式出现在html文件里的script标签之间：
 
     <script>
     //这里是你的javascript代码
@@ -148,7 +148,7 @@ javascript代码可以以内联的形式出现在html文件里的<script>和</sc
     <script>
     <![CDATA[//这里是你的代码]]>
     </script>
-
+    
 例13-2展示了一个HTML文件，它包含简单的javascript程序。注释解释了这个程序是做什么的，但这个例子主要演示的是javascript代码以及css样式表是如何嵌入到html文件里。注意这个例子和例13-1的结构类似，并同样使用onload事件处理程序。
 
 例13-2： 实现一个简单的javascript数字时钟程序
