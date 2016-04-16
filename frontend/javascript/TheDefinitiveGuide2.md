@@ -230,7 +230,13 @@ language属性已经废弃，不应该再使用了。
 
 **13.2.4HTML中的事件处理程序**
 
+当脚本所在的html文件被载入浏览器时，这个脚本里的javascript代码只会执行一次。为了可交互，javascript程序必须定义事件处理程序——web浏览器先注册javascript函数，并在之后调用它作为事件的响应（比如用户输入）。正如本章一开始展示的，javascript代码可以通过把函数赋值给element对象的属性（比如onclick或onmouseover）来注册事件处理程序。（还有其他注册事件处理程序的方法，参见第17章），这个Element对象表示文档里的一个HTML元素。
 
+类似onclick的事件处理程序属性，用相同的名字对应到html属性，并且还可以通过将javascript代码放置在HTML属性里来定义事件处理程序。例如，要定义用户切换表单中的复选框时调用的事件处理程序，可以作为表示复选框的html元素的属性指定处理程序代码：
+
+    <input type="checkbox" name="options" value="giftwrap" onchange="order.options.giftwrap = this.checked;"
+    
+这里的onchange属性比较有意思。这个属性值里的javascript代码会在用户选择或取消选择复选框时执行。
 
 **13.3javascript程序的执行**
 **13.4兼容性和互用性**
