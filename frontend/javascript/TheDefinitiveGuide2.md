@@ -137,6 +137,7 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 **13.2.1<script>元素**
 
 javascript代码可以以内联的形式出现在html文件里的<script>和</script>标签之间：
+
 ```
 <script>
 //这里是你的javascript代码
@@ -145,9 +146,11 @@ javascript代码可以以内联的形式出现在html文件里的<script>和</sc
 
 在XHTML中，<script>标签中的内容被当做其他内容一样对待。如果javascript代码包含了“<”或“&”字符，那么这些字符就被解释成为XML标记。因此，如果要使用XHTML，最好把所有的javascript代码放入到一个CDATA部分里：
 
+
     <script>
     <![CDATA[//这里是你的代码]]>
     </script>
+
 
 例13-2展示了一个HTML文件，它包含简单的javascript程序。注释解释了这个程序是做什么的，但这个例子主要演示的是javascript代码以及css样式表是如何嵌入到html文件里。注意这个例子和例13-1的结构类似，并同样使用onload事件处理程序。
 
@@ -211,19 +214,20 @@ javascript文件的扩展名通常是以.js结尾的。它包含纯粹的javascr
 **13.2.3脚本类型**
 
 javascript是web的原始脚本语言，而在默认的情况下，假定<script>元素包含或引用javascript代码。如果要使用不标准的脚本语言，如Microsoft的VBScript（只有IE支持），就必须用type属性指定脚本的MIME类型：
-```html
+
     <script type="text/vbscript">
     ' 这里是VBScript代码
     </script>
-```
+
+
 type属性的默认值是“text/javascript”。如果需要，可以显式指定此类型，但这完全没必要。
 
 老的浏览器在<script>标记上用language属性代替type属性，这种情况现在也会经常看到：
-```html
+
     <script language="javascript">
     //这里是javascript代码......
     </script>
-```
+
 
 language属性已经废弃，不应该再使用了。
 
