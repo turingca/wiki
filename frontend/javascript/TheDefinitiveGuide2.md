@@ -109,8 +109,10 @@ javascript程序可以通过document对象和它包含的element对象遍历和�
 Web文档里应当少量地使用javascript，因为javascript真正的角色是增强用户的浏览体验，使信息的获取和传递更容易。用户的体验不应依赖于javascript，但javascript可以增强体验，比如通过下面的方式：
 
 * 创建动画和其他视觉效果，巧妙地引导和帮助用户进行页面导航。
-* 对表格的列进行分组，让用户更容易地找到所需要的。、
-* 隐藏某些内容，当用户“深入”到内容里时，再逐渐展示详细信息。
+* 对表格的列进行分组，让用户更容易地找到所需要的。
+* 隐藏某些内容，当用户“深入”到内容里时，再逐渐展示详细信息。  
+
+
 
 **13.1.2Web应用里的javascript**
 
@@ -128,30 +130,28 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 
 在html文档里嵌入客户端javascript代码有4种方法：
 
-* 内联，放置在script>标签对之间。
+* 内联，放置在script标签对之间。
 * 放置在由script标签的src属性指定的外部文件中。
 * 放置在html事件处理程序中，该事件处理程序由onclick或onmouseover这样的html属性指定。
-* 放在一个URL里，这个url使用特殊的“javascript:”协议。
+* 放在一个URL里，这个url使用特殊的“javascript:”协议。  
+
 
 接下来的小节会逐一解释这4种javascript嵌套技术。但是，值得注意的是，html事件处理程序属性的javascript:URL这两种方式在现代javascript代码里已经很少使用（它们在web早期多少有点通用）。内联脚本（没有src属性）也比它们之前用得少了。有个编程哲学叫“Unobtrusive JavaScript”，主张内容（html）和行为（javascript代码）应该尽量地保持分离。根据这个编程哲学，javascript最好通过script元素的src属性来嵌入HTML文档里。Unobtrusive（不显眼） JavaScript是一种将Javascript从HTML结构中抽离的设计概念，避免在HTML标签中夹杂一堆onchange、onclick等属性去挂载javascript事件，让html与javascript分离，依MVC的原则将功能权贵区分清楚，使HTMl也变得结构化容易阅读。
 
 **13.2.1<script>元素**
 
-javascript代码可以以内联的形式出现在html文件里的script标签之间：
+javascript代码可以以内联的形式出现在html文件里的script标签之间:
 
-    <script>
-    //这里是你的javascript代码
-    </script>
+    <script> //这里是你的javascript代码</script>
 
-在XHTML中，<script>标签中的内容被当做其他内容一样对待。如果javascript代码包含了“<”或“&”字符，那么这些字符就被解释成为XML标记。因此，如果要使用XHTML，最好把所有的javascript代码放入到一个CDATA部分里：
+在XHTML中，script标签中的内容被当做其他内容一样对待。如果javascript代码包含了“<”或“&”字符，那么这些字符就被解释成为XML标记。因此，如果要使用XHTML，最好把所有的javascript代码放入到一个CDATA部分里：
 
-    <script>
-    <![CDATA[//这里是你的代码]]>
-    </script>
-    
+    <script><![CDATA[//这里是你的javascript代码]]></script>
+
 例13-2展示了一个HTML文件，它包含简单的javascript程序。注释解释了这个程序是做什么的，但这个例子主要演示的是javascript代码以及css样式表是如何嵌入到html文件里。注意这个例子和例13-1的结构类似，并同样使用onload事件处理程序。
 
 例13-2： 实现一个简单的javascript数字时钟程序
+
 ```html
 <!DOCTYPE html>                 <!-- This is an HTML5 file 这是一个HTML5文件-->
 <html>                          <!-- The root element 根节点-->
@@ -190,14 +190,14 @@ window.onload = displayTime;
 **13.2.2外部文件中的脚本**
 
 script标签支持src属性，这个属性指定包含javascript代码的文件的url。它的用法如下：
-```
-<script src="../../scripts/util.js"></script>
-```
+
+    <script src="../../scripts/util.js"></script>
+
 javascript文件的扩展名通常是以.js结尾的。它包含纯粹的javascript代码，其中既没有script标签，也没有其他html标签。
 
-具有src属性的script标签的行为就像指定的javascript文件的内容直接出现在标签<script></script>之间一样。注意，即便指定了src属性并且<script>和</script>标签之间没有javascript代码，结束的</script>标签也是不能丢的。在XHTML中，在此处可以使用简短的<script/>标签。
+具有src属性的script标签的行为就像指定的javascript文件的内容直接出现在标签script之间一样。注意，即便指定了src属性并且script标签之间没有javascript代码，结束的script标签也是不能丢的。在XHTML中，在此处可以使用简短的“<script/>”标签。
 
-使用src属性时，<script>和</script>标签之间的任何内容都会忽略。如果需要，可以在<script>标签之间添加代码的补充说明文档或版权信息。但要注意，如果有任何非空格或javascript注释的文本出现在<script src="">和</script>之间，HTML5校验器将会报错。
+使用src属性时，script标签之间的任何内容都会忽略。如果需要，可以在<script>标签之间添加代码的补充说明文档或版权信息。但要注意，如果有任何非空格或javascript注释的文本出现在<script src="">和</script>之间，HTML5校验器将会报错。
 
 以下是src属性方式的一些优点：
 * 可以把大块javascript代码从html文件中删除，这有助于保持内容和行为的分离，从而简化html文件。
@@ -210,7 +210,7 @@ javascript文件的扩展名通常是以.js结尾的。它包含纯粹的javascr
 
 **13.2.3脚本类型**
 
-javascript是web的原始脚本语言，而在默认的情况下，假定<script>元素包含或引用javascript代码。如果要使用不标准的脚本语言，如Microsoft的VBScript（只有IE支持），就必须用type属性指定脚本的MIME类型：
+javascript是web的原始脚本语言，而在默认的情况下，假定script元素包含或引用javascript代码。如果要使用不标准的脚本语言，如Microsoft的VBScript（只有IE支持），就必须用type属性指定脚本的MIME类型：
 
     <script type="text/vbscript">
     这里是VBScript代码
@@ -218,7 +218,7 @@ javascript是web的原始脚本语言，而在默认的情况下，假定<script
 
 type属性的默认值是“text/javascript”。如果需要，可以显式指定此类型，但这完全没必要。
 
-老的浏览器在<script>标记上用language属性代替type属性，这种情况现在也会经常看到：
+老的浏览器在script标记上用language属性代替type属性，这种情况现在也会经常看到：
 
     <script language="javascript">
     //这里是javascript代码......
@@ -226,7 +226,7 @@ type属性的默认值是“text/javascript”。如果需要，可以显式指�
 
 language属性已经废弃，不应该再使用了。
 
-当web浏览器遇到<script>元素，并且这个<script>元素包含其值不被浏览器识别的type属性时，它会解析这个元素但不会尝试显示或执行它的内容。这意味着可以使用<script>元素来嵌入任意文本数据到文档里，只要用type属性为数据声明一个不可执行的类型。要获取数据，可以用表示script元素（第15章会解释如何获取这些元素）的HTMLElement对象的text属性。但是，要注意这些数据嵌入技术只对内联脚本生效。如果同时指定src属性和一个未知的类型，那这个脚本会被忽略，并且不会从指定的url下载任何内容。
+当web浏览器遇到script元素，并且这个script元素包含其值不被浏览器识别的type属性时，它会解析这个元素但不会尝试显示或执行它的内容。这意味着可以使用script元素来嵌入任意文本数据到文档里，只要用type属性为数据声明一个不可执行的类型。要获取数据，可以用表示script元素（第15章会解释如何获取这些元素）的HTMLElement对象的text属性。但是，要注意这些数据嵌入技术只对内联脚本生效。如果同时指定src属性和一个未知的类型，那这个脚本会被忽略，并且不会从指定的url下载任何内容。
 
 **13.2.4HTML中的事件处理程序**
 
