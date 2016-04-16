@@ -138,7 +138,7 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 
 接下来的小节会逐一解释这4种javascript嵌套技术。但是，值得注意的是，html事件处理程序属性的javascript:URL这两种方式在现代javascript代码里已经很少使用（它们在web早期多少有点通用）。内联脚本（没有src属性）也比它们之前用得少了。有个编程哲学叫“Unobtrusive JavaScript”，主张内容（html）和行为（javascript代码）应该尽量地保持分离。根据这个编程哲学，javascript最好通过script元素的src属性来嵌入HTML文档里。Unobtrusive（不显眼） JavaScript是一种将Javascript从HTML结构中抽离的设计概念，避免在HTML标签中夹杂一堆onchange、onclick等属性去挂载javascript事件，让html与javascript分离，依MVC的原则将功能权贵区分清楚，使HTMl也变得结构化容易阅读。
 
-**13.2.1<script>元素**
+**13.2.1 script元素**
 
 javascript代码可以以内联的形式出现在html文件里的script标签之间:
 
