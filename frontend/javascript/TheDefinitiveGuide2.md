@@ -127,6 +127,7 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 **13.2在html里嵌入javascript**
 
 在html文档里嵌入客户端javascript代码有4种方法：
+
 * 内联，放置在<script></script>标签对之间。
 * 放置在由<script>标签的src属性指定的外部文件中。
 * 放置在html事件处理程序中，该事件处理程序由onclick或onmouseover这样的html属性指定。
@@ -138,19 +139,15 @@ HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义
 
 javascript代码可以以内联的形式出现在html文件里的<script>和</script>标签之间：
 
-```
-<script>
-//这里是你的javascript代码
-</script>
-```
+    <script>
+    //这里是你的javascript代码
+    </script>
 
 在XHTML中，<script>标签中的内容被当做其他内容一样对待。如果javascript代码包含了“<”或“&”字符，那么这些字符就被解释成为XML标记。因此，如果要使用XHTML，最好把所有的javascript代码放入到一个CDATA部分里：
-
 
     <script>
     <![CDATA[//这里是你的代码]]>
     </script>
-
 
 例13-2展示了一个HTML文件，它包含简单的javascript程序。注释解释了这个程序是做什么的，但这个例子主要演示的是javascript代码以及css样式表是如何嵌入到html文件里。注意这个例子和例13-1的结构类似，并同样使用onload事件处理程序。
 
@@ -216,25 +213,24 @@ javascript文件的扩展名通常是以.js结尾的。它包含纯粹的javascr
 javascript是web的原始脚本语言，而在默认的情况下，假定<script>元素包含或引用javascript代码。如果要使用不标准的脚本语言，如Microsoft的VBScript（只有IE支持），就必须用type属性指定脚本的MIME类型：
 
     <script type="text/vbscript">
-    ' 这里是VBScript代码
+    这里是VBScript代码
     </script>
-
 
 type属性的默认值是“text/javascript”。如果需要，可以显式指定此类型，但这完全没必要。
 
 老的浏览器在<script>标记上用language属性代替type属性，这种情况现在也会经常看到：
 
-
     <script language="javascript">
     //这里是javascript代码......
     </script>
-
 
 language属性已经废弃，不应该再使用了。
 
 当web浏览器遇到<script>元素，并且这个<script>元素包含其值不被浏览器识别的type属性时，它会解析这个元素但不会尝试显示或执行它的内容。这意味着可以使用<script>元素来嵌入任意文本数据到文档里，只要用type属性为数据声明一个不可执行的类型。要获取数据，可以用表示script元素（第15章会解释如何获取这些元素）的HTMLElement对象的text属性。但是，要注意这些数据嵌入技术只对内联脚本生效。如果同时指定src属性和一个未知的类型，那这个脚本会被忽略，并且不会从指定的url下载任何内容。
 
 **13.2.4HTML中的事件处理程序**
+
+
 
 **13.3javascript程序的执行**
 **13.4兼容性和互用性**
