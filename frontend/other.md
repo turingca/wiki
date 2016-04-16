@@ -23,8 +23,8 @@
 面试
 -----
 
-[试题](interview/Interview.md)
+[试题](interview/InterviewQuestion.md)
 
 [书籍](interview/Book.md)
 
-[技能树](interview/Skill.md)
+[技能树](interview/SkillTree.md)
