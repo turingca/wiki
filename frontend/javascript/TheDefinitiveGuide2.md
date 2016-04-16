@@ -23,7 +23,102 @@ window对象还定义了一些方法，比如alert()，可以弹出一个对话�
 //等待两秒，然后说 hello
 setTimeout(function() {alert("hello world");}, 2000);
 ```
-注意上面的
+注意上面的代码并没有显式地使用window属性。在客户端javascript中，Window对象也是全局对象。这意味着Window对象处于作用域链的顶部，它的属性和方法实际上是全局变量和全局函数。Window对象有一个引用自身的属性，叫做window。如果需要引用窗口对象本身，可以用这个属性，但是如果只是想要引用全局窗口对象的属性，通常并不需要用到window。
+
+Window对象还定义了很多其他重要的属性、方法和构造函数，参见第14章查看完整的细节。
+
+Window对象中其中一个最重要的属性是document，它引用Document对象，后者表示显示在窗口中的文档。Document对象有一些重要方法，比如getElementById()，可以基于元素id属性的值返回单一的文档元素（表示HTML标签的一对开始/结束标记，以及它们之间的所有内容）：
+```javascript
+//查找id="timestamp"的元素
+var timestamp = document.getElementById("timestamp");
+```
+getElementById()返回的Element对象有其他重要的属性和方法，比如允许脚本获取它们内容，设置属性值等：
+```javascript
+//如果元素为空，往里面插入当前的日期和时间
+if(timestamp.firstChild == null)
+    timestamp.appendChild(document.createTextNode(new Date().toString()));
+```
+查询、遍历和修改文档内容的方法会在15章介绍。
+
+每个Element对象都有style和className属性，允许脚本指定文档元素的CSS样式，或修改应用到元素上的CSS类名。设置这些CSS相关的属性会改变文档元素的呈现：
+```javascript
+//显式修改目标元素的呈现
+timestamp.style.backgroundColor = "yellow";
+//或者只改变类，让样式表指定具体内容
+timestamp.className = "highlight";
+```
+第16章会介绍style和className属性，以及其他CSS编程技术。
+
+Window、Document和Element对象上另一个重要的属性集合是事件处理程序相关的属性。可以在脚本中为之绑定一个函数，这个函数会在某个事件发生时以异步的方式调用。事件处理程序可以让javascript代码修改窗口、文档和组成文档的元素的行为。事件处理程序的属性名是以单词“on”开始的，用法如下：
+```javascript
+//当用户单击timestamp元素时，更新它的内容
+timestamp.onclick = function() { this.innerHTML = new Date().toString(); }
+```
+Window对象的onload处理程序是最重要的事件处理程序之一。当显示在窗口中的文档内容稳定并可以操作时会触发它。JavaScript代码通常封装在onload事件处理程序里。第17章将会详细讲述事件。例13-1是onload处理程序的演示，并展示了客户端javascript的实例代码，包括查询文档元素、修改css类和定义事件处理程序。这个例子的javascript代码是放置在html的script标签之内的，且在13.2节会对它进行解释。注意代码里的一个函数是在另一个函数里定义的。因为事件处理程序的广泛使用，使得嵌套函数在客户端javascript中非常普遍。
+
+例13-1显示内容的简单客户端javascript
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* CSS styles for this page 本页的CSS样式表 */
+/* Children of class="reveal" are  not shown  class="reveal"的元素的子元素都不显示*/
+.reveal * { display: none; }  
+/* Except for the class="handle" child  除了class="handle"的元素*/
+.reveal *.handle { display: block;} 
+</style>
+<script>
+// Don't do anything until the entire document has loaded
+// 所有的页面逻辑在onload事件之后启动
+window.onload = function() {
+    // Find all container elements with class "reveal"
+    // 找到所有class名为“reveal”的容器元素
+    var elements = document.getElementsByClassName("reveal");
+    for(var i = 0; i < elements.length; i++) {  // For each one... 对每个元素进行遍历
+        var elt = elements[i];
+        // Find the "handle" element with the container
+        // 找到容器中的“handle”元素
+        var title = elt.getElementsByClassName("handle")[0];
+        // When that element is clicked, reveal the rest of the content
+        // 当单击这个元素时，呈现剩下的内容
+        title.onclick = function() {
+            if (elt.className == "reveal") elt.className = "revealed";
+            else if (elt.className == "revealed") elt.className = "reveal";
+        }
+    }
+};
+</script>
+</head>
+<body>
+<div class="reveal">
+<h1 class="handle">Click Here to Reveal Hidden Text</h1>
+<p>This paragraph is hidden. It appears when you click on the title.</p>
+</div>
+</body>
+</html>
+```
+
+在本章的概要介绍中提到了，一些web页面感觉上像文档，而另一些则像应用。接下来的两节会探讨javascript在两种web页面类型里是如何使用的。
+
+**13.1.1Web文档里的javascript**
+
+javascript程序可以通过document对象和它包含的element对象遍历和管理文档内容。它可以通过操纵css样式和类，修改文档内容的呈现。并且可以通过注册适当的事件处理程序来定义文档元素的行为。内容、呈现和行为的组合，叫做动态HTML或DHTML，会在第15~17章里介绍。
+
+Web文档里应当少量地使用javascript，因为javascript真正的角色是增强用户的浏览体验，使信息的获取和传递更容易。用户的体验不应依赖于javascript，但javascript可以增强体验，比如通过下面的方式：
+
+* 创建动画和其他视觉效果，巧妙地引导和帮助用户进行页面导航。
+* 对表格的列进行分组，让用户更容易地找到所需要的。、
+* 隐藏某些内容，当用户“深入”到内容里时，再逐渐展示详细信息。
+
+**13.1.2Web应用里的javascript**
+
+在web文档中使用的javascript DHTML特性在web应用中都会用到，对于web应用来说，除了内容、呈现和操作API之外，还依赖web浏览器环境提供的更基础的服务。
+
+要真正理解web应用，需要先认识到web浏览器已经有了很好的发展，现在已经不仅仅是作为显示文档的工具的角色了，而逐渐变成了一个简易的操作系统。想一下，传统操作系统允许组织桌面和文件夹里的图标（表示文件或应用）；web浏览器允许在工具栏和文件夹例组织书签（表示文档和web应用）。系统可以在一个窗口里运行多个应用；web浏览器可以在一个标签里显示多个文档。操作系统定义了很多底层网络API、提供绘制图像、保存文件等功能。web浏览器也定义底层网络API（第18章）、保存数据（第20章）和绘制图像（第21章）。
+
+谨记web浏览器是简单操作系统的概念，这样就可以把web应用定义为用javascript访问更多浏览器提供的高级服务（比如网络、图像和数据存储）的web页面。高级服务里最有名的是XMLHttpRequest对象，后者可以对HTTP请求编程来启用网络。web应用使用这个服务从服务器
 
 
 **13.2在html里嵌入javascript**
