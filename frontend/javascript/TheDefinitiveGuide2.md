@@ -122,10 +122,115 @@ Web文档里应当少量地使用javascript，因为javascript真正的角色是
 
 HTML5标准（在撰写本书时还是草案）和相关标准为web应用定义了很多其他重要的API。这些API包括21章和第20章的数据存储和图像API，以及很多其他特性的API，如地理位置信息、历史管理和后台线程。在实现这些API之后，会开启一场Web应用的功能的革命。这些API会在第22章中介绍。
 
-当然，javascript在web应用里会比在web文档里显得更加重要。javascript增强了web文档，但是设计良好的文档需要在禁用javascript后还能继续工作。web应用本质上就是javascript程序，后者使用由web浏览器提供的
-
+当然，javascript在web应用里会比在web文档里显得更加重要。javascript增强了web文档，但是设计良好的文档需要在禁用javascript后还能继续工作。web应用本质上就是javascript程序，后者使用由web浏览器提供的操作系统类型的服务，并且不用期望它们在禁用浏览器脚本后还能正常工作。（利用HTML表单提交的方式和服务器CGI脚本进行通信的交互式web页面，是原始的“web应用”，可以不用javascript来实现。但是，我们不会在本书中讨论这种web应用类型。）
 
 **13.2在html里嵌入javascript**
+
+在html文档里嵌入客户端javascript代码有4种方法：
+* 内联，放置在<script></script>标签对之间。
+* 放置在由<script>标签的src属性指定的外部文件中。
+* 放置在html事件处理程序中，该事件处理程序由onclick或onmouseover这样的html属性指定。
+* 放在一个URL里，这个url使用特殊的“javascript:”协议。
+
+接下来的小节会逐一解释这4种javascript嵌套技术。但是，值得注意的是，html事件处理程序属性的javascript:URL这两种方式在现代javascript代码里已经很少使用（它们在web早期多少有点通用）。内联脚本（没有src属性）也比它们之前用得少了。有个编程哲学叫“Unobtrusive JavaScript”，主张内容（html）和行为（javascript代码）应该尽量地保持分离。根据这个编程哲学，javascript最好通过script元素的src属性来嵌入HTML文档里。Unobtrusive（不显眼） JavaScript是一种将Javascript从HTML结构中抽离的设计概念，避免在HTML标签中夹杂一堆onchange、onclick等属性去挂载javascript事件，让html与javascript分离，依MVC的原则将功能权贵区分清楚，使HTMl也变得结构化容易阅读。
+
+**13.2.1<script>元素**
+
+javascript代码可以以内联的形式出现在html文件里的<script>和</script>标签之间：
+```
+<script>
+//这里是你的javascript代码
+</script>
+```
+
+在XHTML中，<script>标签中的内容被当做其他内容一样对待。如果javascript代码包含了“<”或“&”字符，那么这些字符就被解释成为XML标记。因此，如果要使用XHTML，最好把所有的javascript代码放入到一个CDATA部分里：
+
+    <script>
+    <![CDATA[//这里是你的代码]]>
+    </script>
+
+例13-2展示了一个HTML文件，它包含简单的javascript程序。注释解释了这个程序是做什么的，但这个例子主要演示的是javascript代码以及css样式表是如何嵌入到html文件里。注意这个例子和例13-1的结构类似，并同样使用onload事件处理程序。
+
+例13-2： 实现一个简单的javascript数字时钟程序
+```
+<!DOCTYPE html>                 <!-- This is an HTML5 file 这是一个HTML5文件-->
+<html>                          <!-- The root element 根节点-->
+<head>                          <!-- Title, scripts & styles go here 标题、脚本和样式都放在这里 -->
+<title>Digital Clock</title>
+<script>                        // A script of js code ，js代码
+// Define a function to display the current time
+// 定义一个函数用以显示当前的时间
+function displayTime() {
+    var elt = document.getElementById("clock");  // Find element with id="clock"，通过id="clock"找到元素
+    var now = new Date();                        // Get current time，得到当前时间
+    elt.innerHTML = now.toLocaleTimeString();    // Make elt display it，让elt来显示它
+    setTimeout(displayTime, 1000);               // Run again in 1 second，在1秒后再次执行
+}
+// Start displaying the time when document loads.
+// 当onload事件发生时开始显示时间
+window.onload = displayTime;  
+</script>
+<style>                         /* A CSS stylesheet for the clock  钟表的样式*/
+#clock {                        /* Style apply to element with id="clock" 定义id="clock"的元素的样式*/
+  font: bold 24pt sans;         /* Use a big bold font 使用粗体大号字*/
+  background: #ddf;             /* On a light bluish-gray background 定义蓝灰色背景*/
+  padding: 10px;                /* Surround it with some space 周围有一圈空白*/
+  border: solid black 2px;      /* And a solid black border 定义纯黑色边框*/
+  border-radius: 10px;          /* Round the corners (where supported) 定义圆角（如果浏览器支持的话）*/
+}
+</style>
+</head>
+<body>                    <!-- The body is the displayed parts of the doc. body部分是用来显示文档的-->
+<h1>Digital Clock</h1>    <!-- Display a title 显示标题 -->
+<span id="clock"></span>  <!-- The time gets inserted here 输出时钟-->
+</body>
+</html>
+```
+
+**13.2.2外部文件中的脚本**
+
+script标签支持src属性，这个属性指定包含javascript代码的文件的url。它的用法如下：
+```
+<script src="../../scripts/util.js"></script>
+```
+javascript文件的扩展名通常是以.js结尾的。它包含纯粹的javascript代码，其中既没有script标签，也没有其他html标签。
+
+具有src属性的script标签的行为就像指定的javascript文件的内容直接出现在标签<script></script>之间一样。注意，即便指定了src属性并且<script>和</script>标签之间没有javascript代码，结束的</script>标签也是不能丢的。在XHTML中，在此处可以使用简短的<script/>标签。
+
+使用src属性时，<script>和</script>标签之间的任何内容都会忽略。如果需要，可以在<script>标签之间添加代码的补充说明文档或版权信息。但要注意，如果有任何非空格或javascript注释的文本出现在<script src="">和</script>之间，HTML5校验器将会报错。
+
+以下是src属性方式的一些优点：
+* 可以把大块javascript代码从html文件中删除，这有助于保持内容和行为的分离，从而简化html文件。
+* 如果多个web页面共用相同的javascript代码，用src属性可以让你只管理一份代码，而不用在代码改变时编辑每个html文件。
+* 如果一个javascript代码文件由多个页面共享，就只需要下载它一次，通过使用它的第一个页面——随后的页面可以从浏览器缓存检索它。
+* 由于src属性的值可以是任意的URL，因此来自一个web服务器的javascript程序或web页面可以使用由另一个服务器输出的代码。很多互联网广告依赖与此。
+* 从其他网站载入脚本的能力，可以让我们更好地利用缓存，goolge正在为通用的客户端类库推广标准且好记的url，可以让浏览器只缓存一份副本，并且网络上的任意站点都可以使用。链接javascript代码到google服务器，可以减少web页面的启动时间，因为这些类库已经存在于用户的浏览器缓存中，但是你必须相信第三方提供的代码服务，这对于你的站点来说很关键。[参见](http://code.google.com/apis/ajaxlibs/)查看更多信息。
+
+从文档服务器之外的服务器里载入脚本有重要的安全隐患。13.6.2节介绍的同源安全策略会阻止一个域的文档中的javascript和另一个域的内容进行交互。但是，要注意和脚本本身的来源并没有关系，而是和脚本嵌入的文档的来源有关系。因此，同源策略并不适用于如下情况：即便代码和文档有着不同的来源，javascript代码也可以和它嵌入的文档进行交互。当在页面中用src属性包含一个脚本时，就给了脚本作者（以及从中载入这段脚本的域的网站管理员）完全控制web页面的权限。
+
+**13.2.3脚本类型**
+
+javascript是web的原始脚本语言，而在默认的情况下，假定<script>元素包含或引用javascript代码。如果要使用不标准的脚本语言，如Microsoft的VBScript（只有IE支持），就必须用type属性指定脚本的MIME类型：
+```html
+    <script type="text/vbscript">
+    ' 这里是VBScript代码
+    </script>
+```
+type属性的默认值是“text/javascript”。如果需要，可以显式指定此类型，但这完全没必要。
+
+老的浏览器在<script>标记上用language属性代替type属性，这种情况现在也会经常看到：
+```html
+    <script language="javascript">
+    //这里是javascript代码......
+    </script>
+```
+
+language属性已经废弃，不应该再使用了。
+
+当web浏览器遇到<script>元素，并且这个<script>元素包含其值不被浏览器识别的type属性时，它会解析这个元素但不会尝试显示或执行它的内容。这意味着可以使用<script>元素来嵌入任意文本数据到文档里，只要用type属性为数据声明一个不可执行的类型。要获取数据，可以用表示script元素（第15章会解释如何获取这些元素）的HTMLElement对象的text属性。但是，要注意这些数据嵌入技术只对内联脚本生效。如果同时指定src属性和一个未知的类型，那这个脚本会被忽略，并且不会从指定的url下载任何内容。
+
+**13.2.4HTML中的事件处理程序**
+
 **13.3javascript程序的执行**
 **13.4兼容性和互用性**
 **13.5可访问性**
