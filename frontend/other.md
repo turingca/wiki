@@ -24,3 +24,5 @@
 -----
 
 [试题](interview/Interview.md)
+
+[技能](interview/skill.md)
