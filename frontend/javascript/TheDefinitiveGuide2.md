@@ -197,7 +197,7 @@ javascript文件的扩展名通常是以.js结尾的。它包含纯粹的javascr
 
 具有src属性的script标签的行为就像指定的javascript文件的内容直接出现在标签script之间一样。注意，即便指定了src属性并且script标签之间没有javascript代码，结束的script标签也是不能丢的。在XHTML中，在此处可以使用简短的script标签。
 
-使用src属性时，script标签之间的任何内容都会忽略。如果需要，可以在<script>标签之间添加代码的补充说明文档或版权信息。但要注意，如果有任何非空格或javascript注释的文本出现在带src属性的script之间，HTML5校验器将会报错。
+使用src属性时，script标签之间的任何内容都会忽略。如果需要，可以在script标签之间添加代码的补充说明文档或版权信息。但要注意，如果有任何非空格或javascript注释的文本出现在带src属性的script之间，HTML5校验器将会报错。
 
 以下是src属性方式的一些优点：
 * 可以把大块javascript代码从html文件中删除，这有助于保持内容和行为的分离，从而简化html文件。
