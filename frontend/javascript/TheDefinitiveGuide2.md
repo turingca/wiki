@@ -336,10 +336,24 @@ document.write("Generated at" + new Date()); //输出时间戳
 ```
 defer和async属性都像在告诉浏览器链接进来的脚本不会使用document.write()，也不会生成文档内容，因此浏览器可以在下载脚本时继续解析和渲染文档。defer属性使得浏览器延迟脚本的执行，直到文档的载入和解析完成，并可以操作。async属性使得浏览器可以尽快地执行脚本，而不用在下载脚本时阻塞文档解析。如果script标签同时有两个属性，同时支持两者的浏览器会遵从async属性并忽略defer属性。
 
-注意，
+注意，延迟的脚本会按它们在文档里的出现顺序执行。而异步脚本在它们载入后执行，这意味着它们可能会无序执行。
 
-    
+在撰写本书的时候，async和defer属性还没有广泛实现，它们只被一些优化建议所考虑。即便延迟和异步的脚本会同步执行，web页面应该还可以正常工作。
 
+甚至可以在不支持async属性的浏览器里，通过动态创建script元素并把它插入到文档中，来实现脚本的异步载入和执行。例13-4里的loadasync()函数完成了这个工作。第15章会介绍它使用的技术。
+
+例13-4 异步载入并执行脚本  
+```javascript
+// Asynchronously load and execute a script from a specified URL
+// 异步载入并执行一个指定URL中的脚本 
+function loadasync(url) { 
+    var head = document.getElementsByTagName("head")[0]; // Find document <head>，找到head元素
+    var s = document.createElement("script");  // Create a <script> element，创建一个script元素
+    s.src = url;                               // Set its src attribute ，设置其src属性
+    head.appendChild(s);                       // Insert the <script> into head，将script元素插入head标签中  
+}
+```
+注意这个loadsync()函数会动态地载入脚本——脚本载入到文档中，成为正在执行的javascript程序的一部分，既不是通过web页面内联包含，也不是来自web页面的静态引用。  
 
 **13.4兼容性和互用性**
 **13.5可访问性**
