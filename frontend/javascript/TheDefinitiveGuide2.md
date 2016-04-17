@@ -238,6 +238,40 @@ language属性已经废弃，不应该再使用了。
     
 这里的onchange属性比较有意思。这个属性值里的javascript代码会在用户选择或取消选择复选框时执行。
 
+HTML中定义的事件处理程序的属性可以包含任意条javascript语句，相互之间用逗号分隔。这些语句组成一个函数体，然后这个函数成为对应事件处理程序属性的值。（17.2.2节会详细介绍HTML属性文本到javascript函数的转换。）但是，通常html事件处理程序的属性由类似上面的简单赋值或定义在其他地方的简单函数调用组成。这样可以保持大部分实际的javascript代码在脚本里，而不用把javascript和html混在一起。实际上，很多web开发者认为使用html事件处理程序的属性是不好的习惯，他们更喜欢保持内容和行为的分离。
+
+**13.2.5URL中的javascript**
+
+在url后面跟一个javascript:协议限定符，是另一种嵌入javascript代码到客户端的方式。这种特殊的协议类型指定url内容为任意字符串，这个字符串是会被javascript解释器运行的javascript代码。它被当做单独的一行代码对待，这意味着语句之间必须用分号隔开，而//注释必须用/**/注释代替。javascript:URL能识别的“资源”是转换成字符串的执行代码的返回值。如果代码返回undefined，那么这个资源是没有内容的。
+
+javascript:URL可以用在可以使用常规URL的任意地方：比如a标记的href属性，<form>的action属性，甚至window.open()方法的参数。超链接里的javascript url可以是这样：
+```
+<a href="javascript:new Date().toLocaleTimeString();">
+What time is it?
+</a>
+```
+部分浏览器（比如Firefox）会执行URL里的代码，并使用返回的字符串作为待显示新文档的内容。就像单击一个http: URL链接，浏览器会擦除当前文档并显示新文档。以上代码的返回值并不包含任何HTML标签，但是如果有，浏览器会像渲染通常载入的等价HTML文档一样渲染它们。其他浏览器（比如Chrome和Safari）不允许URL像上面一样覆盖当前文档，它们会忽略代码的返回值。但是，类似这样的url还是支持的：
+```
+<a href="javascript:alert(new Date().toLocaleTimeString());">
+检查时间，而不必覆盖整个文档
+</a>
+```
+当浏览器载入这种类型的URL时，它会执行javascript代码，但是由于没有返回值（alert()方法返回undefined）作为新文档的显示内容，类似Firefox的浏览器并不会替换当前显示的文档。（在这种情况下，javascript:URL和onclick事件处理程序的目的一样。上面的链接通过button元素的onclick处理程序来表示会更好，因为a元素通常应该保留为超链接，用来载入新文档。）如果要确保javascript:URL不会覆盖当前文档，可以用void操作符强制函数调用或给表达式赋予undefined值：
+```
+<a href="javascript:void window.open('about:blank');">打开一个窗口</a>
+```
+如果这个URL里没有void操作符，调用window.open()方法返回的值会（在一些浏览器里）被转化为字符串并显示，而当前文档也会覆盖为包含该字符串的文档：
+```
+[object Window]
+```
+和HTML事件处理程序的属性一样，JavaScript URL是web早期的遗物，通常应该避免在现代html里使用。
+但javascript:URL在html文档之外确实有着重要的角色。如果要测试一小段javascript代码，那么可以在浏览器地址栏里直接输入javascript:URL。下面会介绍javascript:URL另一个正统（且强大的）的用法：浏览器书签。
+
+**书签**
+
+在web浏览器中，“书签”就是一个保存起来的URL。如果书签是javascript:URL，
+
+
 **13.3javascript程序的执行**
 **13.4兼容性和互用性**
 **13.5可访问性**
