@@ -308,6 +308,27 @@ javascript程序的执行有两个阶段。在第一个阶段，载入文档内�
 
 **13.3.1同步、异步和延迟的脚本**
 
+javascript第一次添加到web浏览器时，还没有API可以用来遍历和操作文档的结构和内容。当文档还在载入时，javascript影响文档内容的唯一方法是快速生成内容。它使用document.write()方法完成上述任务。例13-3展示了1996年最先进的javascript代码的样子。
+
+例13-3 载入时生成文档内容
+```
+<h1>Table of Factorials</h1>
+<script>
+function factorial(n) {
+    if(n<=1) return n;          //用来计算阶乘的函数
+    else return n*factorial(n-1);
+}
+document.write("<table>");  //开始创建HTML表
+document.write("<tr><th>n</th><th>n!</th></tr>"); //输出表头
+for(var i = 1; i <= 10; i++) {
+    document.write("<tr><td>"+ i + "</td><td>" + factorial(i) + "</td></tr>");
+}
+document.write("</table>"); //表格结束
+document.write("Generated at" + new Date()); //输出时间戳
+</script>
+```
+当脚本把文本
+
 
 **13.4兼容性和互用性**
 **13.5可访问性**
