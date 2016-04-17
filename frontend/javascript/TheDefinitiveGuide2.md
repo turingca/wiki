@@ -391,20 +391,32 @@ window.attachEvent("onload", function() { ... });
 例13-5 onload()，当文档载入完成时调用一个函数
 ```javascript
 // Register the function f to run when the document finishes loading.
+// 注册函数f，当文档载入完成时执行这个函数f
 // If the document has already loaded, run it asynchronously ASAP.
+// 如果文档已经载入完成，尽快以异步方式执行它
 function onLoad(f) {
-    if (onLoad.loaded)                  // If document is already loaded
-        window.setTimeout(f, 0);        // Queue f to be run as soon as possible
-    else if (window.addEventListener)   // Standard event registration method
+    if (onLoad.loaded)                  // If document is already loaded，如果文档已经载入完成
+        window.setTimeout(f, 0);        // Queue f to be run as soon as possible，将f放入异步队列，并尽快执行它
+    else if (window.addEventListener)   // Standard event registration method，注册事件的标准方法
         window.addEventListener("load", f, false);
-    else if (window.attachEvent)        // IE8 and earlier use this instead
+    else if (window.attachEvent)        // IE8 and earlier use this instead，IE8以及更早的IE版本浏览器注册事件的方法
         window.attachEvent("onload", f);
 }
 // Start by setting a flag that indicates that the document is not loaded yet.
+// 给onload设置一个标志，用来指示文档是否载入完成
 onLoad.loaded = false;
 // And register a function to set the flag when the document does load.
+// 注册一个函数，当文档载入完成时设置这个标志
 onLoad(function() { onLoad.loaded = true; });
 ```
+
+**13.3.3客户端javascript线程模型**
+
+javascript语言核心并不包含任何线程机制，并且客户端javascript传统上也没有定义任何线程机制。html5定义了一种作为后台线程的“web worker”，但是客户端javascript还像严格的单线程一样工作。甚至当可能并发执行的时候，客户端javascript也不会知晓是否真的有并行逻辑的执行。
+
+单线程执行是为了让编程更加简单。编写代码时可以确保两个事件处理程序不会同一时刻运行，操作文档内容时也不必担心会有其他线程试图同时修改文档，并且永远不需要在写javascript代码的时候担心锁、死锁和竞态条件（race condition）。
+
+单线程执行意味着浏览器必须在脚本和事件句处理程序执行的时候停止响应用户输入。这为javascript程序员带来了负担，它意味着javascript脚本和事件处理程序不能运行太长时间。如果一个脚本执行计算密集的任务，它将会给文档载入带来延迟，而用户无法在脚本完成前看到文档内容。如果事件处理程序执行计算密集的任务，浏览器可能变得无法响应，可能会导致用户认为浏览器崩溃了。
 
 **13.4兼容性和互用性**
 **13.5可访问性**
