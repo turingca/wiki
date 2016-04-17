@@ -361,6 +361,16 @@ function loadasync(url) {
 
 事件和事件处理是第17章的主题，但是这一节会提供一个快速概览。事件都有名字，比如click、change、load、mouseover、keypress或readystatechange，指示发生的事件的通用类型。事件还有目标，它是一个对象，并且事件就是在它上面发生的。当我们谈论事件的时候，必须同时指定事件类型（名字）和目标：比如，一个单击事件发生在HTMLButtonElement对象上，或者一个readystatechange事件发生在XMLHttpRequest对象上。
 
+如果想要程序响应一个事件，写一个函数，叫做“事件处理程序”、“事件监听器”或“回调”。然后注册这个函数，这样他就会在事件发生时调用它。正如前面提到的，这可以通过HTML属性来完成，但是我们不鼓励将javascript代码和html内容混淆在一起。反之，注册事件处理程序最简单的方法是把javascript函数赋值给目标对象的属性，类似这样的代码：
+```javascript
+window.onload = function() { ... };
+document.getElementById("button1").onclick = function() { ... };
+function handleResponse() { ... }
+request.onreadystatechange = handleResponce;
+```
+注意，按照约定，事件处理程序的属性的名字是以“on”开始，后面跟着事件的名字。还要注意在上面的任何代码里没有函数调用：只是把函数本身赋值给这些属性。浏览器会在事件发生时执行调用。用事件进行异步编程会经常涉及嵌套函数，也经常要在函数的函数里定义函数。
+
+对于
 
 
 **13.4兼容性和互用性**
