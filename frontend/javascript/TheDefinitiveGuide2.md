@@ -385,7 +385,26 @@ window.attachEvent("onload", function() { ... });
 ```
 参见第17章查看更多关于addEventListener()和attachEvent()的内容。
 
-客户端
+客户端javascript程序还使用异步通知类型，这些类型往往不是事件。如果设置window对象的onerror属性为一个函数，会在发生（参阅章14.6节）javascript错误（或其他未捕获的异常）时调用函数。还有，setTimeout()和setInterval()函数（这些是window对象的方法，因此是客户端javascript的全局函数）会在指定的一段时间之后触发指定函数的调用。传递给setIimeout()的函数和真实事件处理程序的注册不同，它们通常叫做“回调逻辑”而不是“处理程序”，但它们和事件处理程序一样，也是异步的。参见14.1节获得更多关于setTimeout()和setInterval()的信息。
+
+例13-5演示了setTimeout()、addEventListener()和attachEvent()，定义一个onload()函数注册在文档载入完成时执行的函数。onload()是非常有用的函数，我们会在本书后面的例子中用到它。
+例13-5 onload()，当文档载入完成时调用一个函数
+```javascript
+// Register the function f to run when the document finishes loading.
+// If the document has already loaded, run it asynchronously ASAP.
+function onLoad(f) {
+    if (onLoad.loaded)                  // If document is already loaded
+        window.setTimeout(f, 0);        // Queue f to be run as soon as possible
+    else if (window.addEventListener)   // Standard event registration method
+        window.addEventListener("load", f, false);
+    else if (window.attachEvent)        // IE8 and earlier use this instead
+        window.attachEvent("onload", f);
+}
+// Start by setting a flag that indicates that the document is not loaded yet.
+onLoad.loaded = false;
+// And register a function to set the flag when the document does load.
+onLoad(function() { onLoad.loaded = true; });
+```
 
 **13.4兼容性和互用性**
 **13.5可访问性**
