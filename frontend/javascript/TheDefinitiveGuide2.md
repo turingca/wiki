@@ -519,11 +519,32 @@ excanvas.js是一个兼容类库的很纯粹的例子。在开发过程中，可
 
 分级浏览器（graded browser support）是由Yahoo!率先提出的一种测试技术。从某种维度对浏览器厂商/版本/操作系统变体进行分级。分级浏览器中的A级要通过所有的功能测试用例。对于C级浏览器来说则不必所有用例都通过测试。A级浏览器需要网页完全可用，C级浏览器只需在HTML完整情况下可用即可，而不需要javascript和css都正常工作。那些不是A级和C级的浏览器都称做X级浏览器：这部分都是全新的浏览器或者太罕见的浏览器。我们默认在这些浏览器中都是网页完全可用的，但官方并不会对X级浏览器中的功能提供完整支持的测试。
 
-你可以在[http://developer.yahoo.com/yui/articles/gbs](http://developer.yahoo.com/yui/articles/gbs)阅读更多关于Yahoo!的分级浏览器支持情况。这个页面还存有Yahoo!当前的A级和C级浏览器列表（这个列表每季度更新一次）。就算自己没有采用任何一种分级浏览器测试基准，使用Yahoo!的A级浏览器列表是一种简单快捷的办法，通过查阅这个列表也能清楚地知道当前比较流行的浏览器是哪些。
+你可以在[http://developer.yahoo.com/yui/articles/gbs](http://developer.yahoo.com/yui/articles/gbs)阅读更多关于Yahoo!的分级浏览器支持情况。这个页面还存有Yahoo!当前的A级和C级浏览器列表（这个列表每季度更新一次，根据2011年第四季度的统计，Yahoo!已经不再将浏览器划分为A级和C
+级，而是统一给出一个测试基准，根据这次更新，可以明显感觉到测试基准向移动终端倾斜）。就算自己没有采用任何一种分级浏览器测试基准，使用Yahoo!的A级浏览器列表是一种简单快捷的办法，通过查阅这个列表也能清楚地知道当前比较流行的浏览器是哪些。
 
 **13.4.3 功能测试**
 
+功能测试（capability testing）是解决不兼容性问题的一种强大的技术。如果你想试用某个功能，但又不清楚这个功能是否在所有的浏览器中都有比较好的兼容性，则需要在脚本中添加相应的代码来检测是否在浏览器中支持该功能。如果期望使用的功能还没有被当前平台所支持，要么不在该平台中使用它，要么提供可在所有平台上运行的代码。
+
+你将会在后面的各章中一次又一次地看到功能测试。例如，在第17章，有如下所示的代码：
+```javascript
+if (element.addEventListener) { //在使用这个W3C方法之前首先检测它是否可用
+    element.addEventListener("keydown", handler, false);
+    element.addEventListener("keypress", handler, false);
+}
+else if (element.attachEvent) { //在使用该IE方法之前首先检测它
+    element.attachEvent("onkeydown", handler);
+    element.attachEvent("onkeypress", handler);
+}
+else { //否则，选择普遍支持的技术
+    element.onkeydown = element.onkeypress = handler;
+}
+```
+关于功能测试最重要的是，它并不涉及浏览器开发商和浏览器的版本号。代码在当前
 **13.5可访问性**
+
+
+
 **13.6安全性**
 **13.7客户端框架**
 
