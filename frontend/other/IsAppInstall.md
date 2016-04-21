@@ -1,7 +1,7 @@
 需求
 --------
 
-页面判断本地环境（IOS、Android）是否安装APP，安装则打开APP相应页面，未安装则自动跳转到下载APP页面（AppStore、微信应用、自定义下载APP页面）。
+页面判断本地环境（IOS、Android）是否安装APP，安装则打开APP相应页面，未安装则自动跳转到下载APP页面（AppStore、腾讯应用宝、自定义下载APP页面）。
 
 参考调研
 ------------
@@ -48,14 +48,14 @@ function loadApp() {
             alert('在浏览器中打开');
         } else if (platform == "pc") {
             location.href = "http://a.app.qq.com/o/simple.jsp?pkgname=com.privatekitchen.huijia";
-      //location.href = 'http://m.oyekeji.com/apk/media/huijiachifan/huijiachifan_user_' + version + '.apk';
+      	    //location.href = 'http://m.oyekeji.com/apk/media/huijiachifan/huijiachifan_user_' + version + '.apk';
     }
 }
 
 var doOpenApp = function() {
     //iframe.src = 'chomecook://jskz/action_name=HomePage';
-	  setTimeout('loadApp();', 3000);
-	  document.getElementById('loadAppButton').click();
+    setTimeout('loadApp();', 3000);
+    document.getElementById('loadAppButton').click();
 };
 window.onload=function(){
     doOpenApp();
@@ -63,3 +63,5 @@ window.onload=function(){
 </script>
 </html>
 ```
+
+
