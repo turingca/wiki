@@ -553,6 +553,48 @@ Microsoft在发布IE6的时候，增加了IE5里没有的很多css标准特性�
 
 **13.4.5 浏览器测试**
 
+功能测试非常适用于检测大型功能领域的支持，比如可以使用这种方法来确定浏览器是否支持W3C事件处理模型还是IE的事件处理模型。另外，有时候可能会需要在某种浏览器中解决个别的bug或难题，但却没有太好的方法来检测bug的存在性。在这种情况下，需要创建一个针对某个平台的解决方案，这个解决方案和特定的浏览器厂商、版本或操作系统（或三方面的组合）联系紧密。
+
+在客户端javascript中检测浏览器类型或版本的方法就是使用Navigator对象，我们将在第14章学习它，确定当前浏览器厂商和版本的代码通常叫做浏览器嗅探器（browser sniffer）或者客户端嗅探器（client sniffer）。例14-3给出了一个简单的例子。在web的早期，当Netscape和IE平台两者互不兼容的时候，客户端嗅探（client sniffer）就是一种常见的客户端编程技术，现在兼容性情况已经基本稳定，浏览器嗅探不像若干年前这样常用，但偶尔有些场景还会用到。
+
+需要注意的是，客户端嗅探也可以在服务器端完成，web服务器根据User-Agent头部可以有选择地返回特定的javascript代码给客户端。
+
+**13.4.6Internet Explorer里的条件注释**
+
+实际上，读者会发现客户端javascript编程中的很多不兼容性都是针对IE的。也就是说，必须按照某种方式为IE编写代码，而按照另一种方式为其他浏览器编写代码。IE支持条件注释（由IE5引入），尽管这种做法并不符合标准规范，但是在处理不兼容性时非常有用。
+
+下面是html中的条件注释的样子，注意，html注释使用结束的分隔符的技巧：
+```html
+<!--[if IE 6]>
+This content is actually inside an HTML comment.
+It will only be displayed in IE6
+<![endif]-->
+<!--[if lte IE'7]>
+This content will only be displayed by IE5,6and7 and earlier.
+lte stands for "less than or equal". You can also use "lt","gt"and"gte".
+<![endif]-->
+<!--[if !IE]><-->
+This is normal HTML content, but IE will not display it.
+because of the comment above and the comment below.
+<!--><![endif]-->
+This is normal content, displayed by all browsers.
+```
+来看一个具体的例子，上文介绍过使用canvas.js类库在Internet Explorer里实现canvas元素。由于这个类库只有IE需要（并且也只为IE工作），因此有理由在页面里使用条件注释引入它，这样其他浏览器就不会载入它：
+```html
+<!--[if IE]><script src="excanvas.js"></script><![endif]-->
+```
+```
+IE的javascript解释器也支持条件注释，C和C++程序员可能觉得它们和C与预处理器的#ifdef/#endif功能很相似。IE中的javascript条件注释以文本/*@cc_on开头，以文本@*/结束，（cc_on stands中cc表示条件编译）。下面的条件注释包含了只在IE中执行的代码：
+```
+```
+/*@cc_on
+  @if(@_jscript)
+  //该代码位于一条js注释内但在IE中执行它
+  alert("In IE");
+  @end
+  @*/
+```
+在一条条件注释内部，关键字
 
 
 **13.5可访问性**
