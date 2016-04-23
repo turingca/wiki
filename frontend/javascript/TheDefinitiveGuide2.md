@@ -594,7 +594,22 @@ IE的javascript解释器也支持条件注释，C和C++程序员可能觉得它�
   @end
   @*/
 ```
-在一条条件注释内部，关键字
+```
+在一条条件注释内部，关键字@if、@else和@end划分出哪些是要被IE的javascript解释器有条件地执行的代码。大多数时候，只需上面所示的简单条件：@if(@_jscript)。JScript是Microsoft自己的javascript解释器的名字，而@_jscript变量在IE中总是为true。
+```
+通过条件注释和常规的javascript注释的合理的交叉组合：可以设置在IE中运行一段代码而在所有其他浏览器中运行另一段不同的代码：
+```
+/*@cc_on
+  @if (@_jscript)
+  //这里的代码在一条条件注释中，也在一条常规的javascript注释中
+  //IE会执行这段代码，其他浏览器不执行它
+  @else*/
+    //这段代码并没在javascript注释中，但仍然在IE条件注释中
+    //也就是说除了IE之外的所有浏览器都执行这里的代码
+    alert('You are not using Internet Explorer');
+/*@end
+  @*/
+```
 
 
 **13.5可访问性**
