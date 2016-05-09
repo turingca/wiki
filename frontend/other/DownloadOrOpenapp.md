@@ -63,5 +63,11 @@ window.onload=function(){
 </script>
 </html>
 ```
+**京东触屏**
 
+m.jd.com
+
+**淘宝触屏**
+
+m.taobao.com
 
