@@ -18,9 +18,11 @@
 
 [原生APP通信](other/WebviewJavascriptBridge.md)
 
-[判断APP是否安装逻辑](other/IsAppInstall.md)
+[打开或者下载APP](other/DownloadOrOpenApp.md)
 
 [防御广告屏蔽规则]()
+
+[追踪术](other/)
 
 面试
 -----
