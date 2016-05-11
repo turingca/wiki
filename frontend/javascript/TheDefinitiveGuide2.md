@@ -726,6 +726,15 @@ HTML5的内容安全策略则更进一步，它为iframe元素定义了一个san
 
 第19章会介绍jQuery，jQuery是当前最流行的框架之一。如果你决定在你的项目中使用jQuery，还应该阅读第19章的内容；理解底层API会帮助你成为更加优秀的web开发者，即使你很少直接使用它们。
 
+除了jQuery以外，还有一些其他的javascript框架——远超过在这里列出的框架。其中有些开源框架非常有名且广泛使用：
+
+* Prototype：Prototype类库（http://prototypejs.org）和jQuery类似，是专门针对DOM和Ajax实现的一套实用工具，此外还为语言核心扩展了很多实用工具，Scriptaculous（http://script.aculo.us）类库是基于Prototype来实现的，可以用来做动画和各种视觉特效。
+* Dojo：Dojo（http://dojotoolkit.org）是一个大型的框架，它宣称自己“深不可测”。它包含一个种类繁多的UI组件集合、包管理系统、数据抽象层等。
+* YUI：YUI（http://developer.yahoo.com/yui/）是Yahoo！使用的一个著名框架，是Yahoo!的工程师团队开发的，已经应用在包含Yahoo!主页在内的诸多项目中。YUI和Dojo一样庞大，是一个无所不包的类库，包括语言工具、DOM工具，UI组件等。目前已经有两个不兼容版本的YUI存在，分别为YUI2和YUI3。
+* Closure：Closure类库（http://code.google.com/closure/library/）是google应用于Gmail、GoogleDocs和其他web应用的客户端类库。这个类库是打算和Closure编译器（http://code.google.com/closure/compiler）配合使用，剔除没有用的类库函数。因为没有用的代码会在部署之前被移除，Closure类库的设计者不需要保持特性集合的紧凑，所以Closure包含一个庞大的实用工具集合。
+* GWT：GWT，即GoogleWebToolkit
+
+
 window对象
 ----------
 **14.1计时器**
