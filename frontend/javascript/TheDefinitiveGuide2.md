@@ -732,12 +732,24 @@ HTML5的内容安全策略则更进一步，它为iframe元素定义了一个san
 * Dojo：Dojo（http://dojotoolkit.org）是一个大型的框架，它宣称自己“深不可测”。它包含一个种类繁多的UI组件集合、包管理系统、数据抽象层等。
 * YUI：YUI（http://developer.yahoo.com/yui/）是Yahoo！使用的一个著名框架，是Yahoo!的工程师团队开发的，已经应用在包含Yahoo!主页在内的诸多项目中。YUI和Dojo一样庞大，是一个无所不包的类库，包括语言工具、DOM工具，UI组件等。目前已经有两个不兼容版本的YUI存在，分别为YUI2和YUI3。
 * Closure：Closure类库（http://code.google.com/closure/library/）是google应用于Gmail、GoogleDocs和其他web应用的客户端类库。这个类库是打算和Closure编译器（http://code.google.com/closure/compiler）配合使用，剔除没有用的类库函数。因为没有用的代码会在部署之前被移除，Closure类库的设计者不需要保持特性集合的紧凑，所以Closure包含一个庞大的实用工具集合。
-* GWT：GWT，即GoogleWebToolkit
+* GWT：GWT，即GoogleWebToolkit（http://code.google.com/webtoolkit/）是一个完全不同类型的客户端框架。它用JAVA定义了web应用接口，并提供编译器，将JAVA程序翻译成兼容的客户端javascript。GWT在一些Google产品中使用，但是不如它们自己的Closure类库使用得那么广泛。
 
 
 window对象
 ----------
+第13章介绍了Window对象及其在客户端javascript中所扮演的核心角色：它是客户端javascript程序的全局对象。本章介绍window对象的属性和方法，这些属性定义了许多不同的API，但是只有一部分实际上和浏览器窗口有关。Window对象是以窗口命名的。本章介绍以下方面：
+
+* 14.1节展示如何使用setTimeout()和setInterval()来注册一个函数，并在指定的时间后调用它。
+* 14.2节讲解如何使用location属性来获取当前显示文档的URL和载入新的文档。
+* 14.3节介绍history属性，并展示如何在历史纪录中向前和向后移动。
+* 14.4节展示如何使用navigator属性来获取浏览器厂商和版本信息，以及如何使用screen属性来查询窗口尺寸。
+* 14.5节展示如何使用alert()、prompt()和confirm()方法来显示简单的文本对话框，以及如何用showModalDialog()显示HTML对话框。
+* 14.6节讲解如何注册onerror处理方法，这个方法在未捕获的javascript异常发生时调用。
+* 14.7节讲解HTML元素的ID和name作为window对象的属性来使用。
+* 14.8节是一个很长的节，讲解如何打开和关闭浏览器窗口，以及如何编写可以在多个窗口和嵌套窗体中工作的javascript代码。
+
 **14.1计时器**
+
 **14.2浏览器定位和导航**
 **14.3浏览历史**
 **14.4浏览器和屏幕信息**
