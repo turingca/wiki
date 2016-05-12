@@ -383,14 +383,321 @@ XMLHttpRequest和本地文件，网页中可以使用相对url的能力通常意
 18.1.1指定请求
 
 创建XMLHttpRequest对象之后，发起http请求的下一步是调用XMLHttpRequest对象的open()方法去指定这个请求的两个必需部分：方法和URL。
-
+```
     rquest.open("GET",      //开始一个HTTP GET请求
                 "data.csv");//URL的内容
+```
+open()第一个参数指定http方法或者动作。这个字符串不区分大小写，但通常大家用大写字母来匹配HTTP协议。“GET”和“POST”方法是得到广泛支持的。
+“GET”用于常规请求，它适用于当url完全指定请求资源，当请求对服务器没有任何副作用以及当服务器的响应是可缓存时。“POST”方法常用于html表单。它在请求主体中包含额外数据（表单数据）且这些数据常存储到服务器上的数据库中（副作用）。相同url的重复post请求从服务器得到的响应可能不同，同时不应该缓存使用这个方法的请求。除了“GET”和“POST”之外，XMLHttpRequest也允许把“DELETE”、“HEAD”、“OPTIONS”和“PUT”作为open()的第一个参数。（“HTTP CONNECT”、“TRACE”和“TRACK”因为安全风险已被明确禁止。）旧浏览器并不支持所有的这些方法，但至少“HEAD”得到了广泛支持，例18-13演示如何使用它。
 
-open()第一个参数指定http方法或者动作。这个字符串不区分大小写，但通常大家用大写字母来匹配HTTP协议。“GET”和“POST”方法是得到广泛支持的。“GET”用于常规请求，它适用于当url完全指定请求资源，当请求对服务器没有任何副作用以及当服务器的响应是可缓存时。“POST”方法常用于html表单。它在请求主体中包含额外数据（表单数据）且这些数据常存储到服务器上的数据库中（副作用）。相同url的重复post请求从服务器得到的响应可能不同，同时不应该缓存使用这个方法的请求。除了“GET”和“POST”之外，xmlhttprequest也允许把“DELETE”、“HEAD”、“OPTIONS”和“PUT”作为open()的第一个参数。（“HTTP CONNECT”、“TRACE”和“TRACK”因为安全风险已被明确禁止。）旧浏览器并不支持所有的这些方法，但至少“HEAD”得到了广泛支持，例18-13演示如何使用它。
+open()的第2个参数是URL，它是请求主题。这是相对于文档的URL，这个文档包含调用open()的脚本。如果指定绝对URL、协议、主机和端口通常必须匹配所在文档的对应内容：跨域的请求通常会报错。（但是当服务器明确允许跨域请求时，2级XMLHttpRequest规范会允许它，见18.1.6节。）
 
+如果有请求头的话，请求进程的下个步骤是设置它。例如，POST请求需要“Content-Type”头指定请求主题的MIME类型：
+```
+request.setRequestHeader("Content-Type", "text/plain");
+```
+如果对相同的头调用setRequestHeader()多次，新值不会取代之前指定的值，相反，HTTP请求将包含这个头的多个副本或这个头将指定多个值。
 
+你不能自己指定“Content-Length”、“Date”、“Referer”或“User-Agent”头，XMLHttpRequest将自动添加这些头而防止伪造它们。类似地，XMLHttpRequest对象自动处理cookie、连接时间、字符集和编码判断，所以你无法向setRequestHeader()传递这些头：
+```
+Accept-Charset  Content-Transfer-Encoding TE
+Accept-Encoding Date                      Trailer
+Connection      Expert                    Transfer-Encoding
+Content-Length  Host                      Upgrade
+Cookie          Keep-Alive                User-Agent
+Cookie2         Referer                   Via
+```
+你能为请求指定“Authorization”头，但通常不需要这么做。如果请求一个受密码保护的URL，把用户名和密码作为第4个和第5个参数传递给open()，则XMLHttpRequest将设置合适的头。（接下来我们将了解关于open()可选的第三个参数。可选的用户名和密码参数会在第四部分有介绍。）
+
+使用XMLHttpRequest发起HTTP请求的最后一步是指定可选的请求主体并向服务器发送它。使用send()方法像如下这样做：
+```
+request.send(null);
+```
+GET请求绝对没有主体，所以应该传递null或省略这个参数。POST请求通常拥有主体，同时它应该匹配使用setRequestHeader()指定的“Content-Type”头。
+
+顺序问题：HTTP请求的各部分有指定顺序：请求方法和URL首先到达，然后是请求头，最后是请求主体。XMLHttpRequest实现通常直到调用send()方法才开始启动网络。但XMLHttpRequest API的设计似乎使每个方法都将写入网络流。这意味着调用XMLHttpRequest方法的顺序必须匹配HTTP请求的架构。例如，setRequestHeader()方法的调用必须在调用open()之前但在调用send()之后，否则它将抛出异常。
+
+例18-1使用了我们目前介绍的所有XMLHttpRequest方法。它用POST方法发送文本字符串给服务器，并忽略服务器返回的任何响应。
+
+例18-1：用POST方法发送纯文本到服务器
+```javascript
+function postMessage(msg) {
+    var request = new XMLHttpRequest();      // New request 新请求
+    request.open("POST", "/log.php");        // POST to a server-side script 用POST向服务器发送脚本
+    // Send the message, in plain-text, as the request body 用请求主体发送纯文本消息
+    request.setRequestHeader("Content-Type", // Request body will be plain text 请求主体将是纯文本
+                             "text/plain;charset=UTF-8");
+    request.send(msg);                       // Send msg as the request body 把msg作为请求主体发送
+    // The request is done. We ignore any response or any error 请求完成，我们将忽略任何响应和任何错误
+}
+```
+注意例18-1中的send()方法启动请求，然后返回，当它等待服务器的响应时并不阻塞。接下来章节介绍的几乎都是异步处理HTTP响应。
+
+**18.1.2取得响应**
+
+一个完整的HTTP响应由状态码、响应头集合和响应主体组成。这些都可以通过XMLHttpRequest对象的属性和方法使用：
+
+* status和statusText属性以数字和文本的形式返回HTTP状态码。这些属性保存标准的HTTP值，像200和“OK”表示成功请求，404和“NotFound”表示URL不能匹配服务器上的任何资源。
+* 使用getResponseHeader()和getAllResponseHeaders()能查询响应头。XMLHttpRequest会自动处理cookie：它会从getAllResponseHeaders()头返回集合中过滤掉cookie头，而如果给getResponseHeader()传递“Set-Cookie”和“Set-Cookie2”则返回null。
+* 响应主体可以从responseText属性中得到文本形式的，从responseXML属性中得到Document形式的。（这个属性名是有历史的：它实际上对XHTML和XML文档有效，但XHR2说它也应该对普通的HTML文档工作。）关于responseXML的更多内容请看18.1.2节下面的“2.响应解码”节。
+
+XMLHttpRequest对象通常（除了见18.1.2节下面的“1.同步响应”节的内容）异步使用：发送请求后，send()方法立即返回，直到响应返回，前面列出的响应方法和属性才有效。为了在响应准备就绪时得到通知，必须监听XMLHttpRequest对象上的readystatechange事件（或者18.1.4节描述新的XHR进度事件）。但为了理解这个事件类型，你必须理解readyState属性。
+
+readyState是一个整数，它指定了HTTP请求的状态，同时表18-1列出了它可能的值。第一列的符号是XMLHttpRequest构造函数定义的常量。这些常量是XMLHttpRequest规范的一部分，但老的浏览器和IE8没有定义它们，通常看到使用硬编码值4来表示XMLHttpRequest.DONE。
+
+表18-1：XMLHttpRequest的readyState值
+
+|常量|值|含义|
+|----|---|---|
+|UNSENT|0|open()尚未调用|
+|OPENED|1|open()已调用|
+|HEADERS_RECEIVED|2|接收到头信息|
+|LOADING|3|接收到响应主体|
+|DONE|4|响应完成|
+
+理论上，每次readyState属性改变都会触发readystatechange事件。实际中，当readyState改变为0或1时可能没有触发这个事件。当调用send()时，即使readyState仍处于OPENED状态，也通常触发它。某些浏览器在LOADING状态时能触发多次事件来给出进度反馈。当readyState值改变为4或服务器的响应完成时，所有的浏览器都触发readystatechange事件。因为在响应完成之前也会触发事件，所以事件处理程序应该一直检验readyState值。
+
+为了监听readystatechange事件，请把事件处理函数设置为XMLHttpRequest对象的onreadystatechange属性。也能使用addEventListener()（或在IE8以及之前版本中使用attachEvent()），但通常每个请求只需要一个处理程序，所以只设置onreadystatechange更容易。
+
+例18-2定义了getText()函数来演示如何监听readystatechange事件。事件处理程序首先要确保请求完成。如果这样，它会检查响应状态码来确保请求成功。然后它查找“Content-Type”头来验证响应主体是否是期望的类型。如果3个条件都得到满足，它会把响主体（以文本形式）发送给指定的回调函数。
+
+例18-2：获取HTTP响应的onreadystatechange
+```javascript
+// Issue an HTTP GET request for the contents of the specified URL.
+// 发出一个HTTP GET请求以获得指定URL的内容
+// When the response arrives successfully, verify that it is plain text
+// 当响应成功到达，验证它是否是纯文本
+// and if so, pass it to the specified callback function
+// 如果是，把它传递给指定回调函数
+function getText(url, callback) {
+    var request = new XMLHttpRequest();         // Create new request 创建新情求
+    request.open("GET", url);                   // Specify URL to fetch 指定待获取的URL
+    request.onreadystatechange = function() {   // Define event listener 定义事件处理程序
+        // If the request is compete and was successful 如果请求成功，则它是成功的
+        if (request.readyState === 4 && request.status === 200) {
+            var type = request.getResponseHeader("Content-Type");
+            if (type.match(/^text/))            // Make sure response is text 确保响应是文本
+                callback(request.responseText); // Pass it to callback 把它传递给回调函数
+        }
+    };
+    request.send(null);                         // Send the request now 立即发送请求
+}
+```
+
+1.同步响应
+
+由于其本身的性质，异步处理HTTP响应是最好的方式。然而，XMLHttpRequest也支持同步响应。如果把false作为第3个参数传递给open()，那么send()方法将阻塞直到请求完成。在这种情况下，不需要使用事件处理程序：一旦send()返回，仅需要检查XMLHttpRequest对象的status和responseText属性。比较例18-2中getText()函数的同步代码：
+```javascript
+//发起同步的HTTP-GET请求以获得指定URL的内容
+//返回响应文本，或如果请求不成功或响应不是文本就报错
+function getTextSync(url) {
+    var request = new XMLHttpRequest(); //创建新请求
+    request.open("GET",url,false);  //传递false实现同步
+    request.send(null);
+    //如果请求不是200 OK，就报错
+    if (request.status !== 200) throw new Error(request.statusText);
+    //如果类型错误，就报错
+    var type = request.getResponseHeader("Content-Type");
+    if (!type.match(/^text/))
+        throw new Error("Expected textual response; got: " + type);
+    return request.responseText;
+}
+```
+同步请求是吸引人的，但应该避免使用它们。客户端javascript是单线程的，当send()方法阻塞时，它通常会导致整个浏览器UI冻结。如果连接的服务器响应慢，那么用户的浏览器将冻结。然而，参见22.4节可接受的使用同步请求的场景。
+
+2.响应解码
+
+在前面的示例中，我们假设服务器使用像“text/plain”、“text/html”或“text/css”这样的的MIME类型发送文本响应，然后我们使用XMLHttpRequest对象的responseText属性得到它。
+
+但是还是其他方式来处理服务器的响应。如果服务器发送XML或XHTML文档作为其响应，你能通过responseXML属性获得一个解析形式的XML文档。这个属性的值是一个Document对象，可以使用第15章介绍的技术搜索和遍历它。（XHR2草案规范指出浏览器也应该自动解析“text/html”类型的响应，使它们也能通过responseXML属性获取其Document文档对象，但在写本章时当前浏览器还没有这么做。）
+
+如果服务器想发送诸如对象或数组这样的结构化数据作为其响应，它应该传输JSON编码（参见6.9节）的字符串数据。当接收它时，可以把responseText属性传递给JSON.parse()。例18-3是例18-2的归纳：它实现指定URL的GET请求并当URL的内容准备就绪时把它们传递给指定的回调函数。但它不是一直传递文本，而是传递Document对象或使用JSON.parse()编码的对象或字符串。
+
+例18-3： 解析HTTP响应
+```
+// Issue an HTTP GET request for the contents of the specified URL. 
+// 发起HTTP-GET响应以获取指定URL的内容
+// When the response arrives, pass it to the callback function as a 
+// parsed XML Document object, a JSON-parsed object, or a string.
+// 当响应到达时，把它以解析后的XML Document对象、解析后的JSON对象或字符串形式传递给回调函数
+function get(url, callback) {
+    var request = new XMLHttpRequest();         // Create new request 创建新请求
+    request.open("GET", url);                   // Specify URL to fetch 指定待获取的URL
+    request.onreadystatechange = function() {   // Define event listener 定义事件监听器
+        // If the request is compete and was successful 如果请求完成且成功
+        if (request.readyState === 4 && request.status === 200) {
+            // Get the type of the response 获得响应的类型
+            var type = request.getResponseHeader("Content-Type");
+            // Check type so we don't get HTML documents in the future
+            // 检查类型，这样我们不能在将来得到HTML文档
+            if (type.indexOf("xml") !== -1 && request.responseXML) 
+                callback(request.responseXML);              // Document response Document对象响应
+            else if (type === "application/json")
+                callback(JSON.parse(request.responseText)); // JSON response JSON响应
+            else 
+                callback(request.responseText);             // String response 字符串响应
+        }
+    };
+    request.send(null);                         // Send the request now 立即发送请求
+}
+```
+例18-3检查该响应的“Content-Type”头且专门处理“application/json”影响。你可能希望特殊编码的另一个响应类型是“application/javascript”或“text/javascript”。你能使用XMLHttpRequest请求javascript脚本，然后使用全局eval()（参见4.12.2节）执行这个脚本。但是，在这种情况下不需要使用XMLHttpRequest对象，因为script元素本身操纵HTTP脚本的能力完全可以实现加载并执行脚本。见示例13-4，且记住script元素能发起跨域HTTP请求，而XMLHttpRequestAPI则禁止。
+
+web服务端通常使用二进制数据（例如，图片文件）响应HTTP请求。responseText属性只能用于文本，且它不能妥善处理二进制响应，即使对最终字符串使用了charCodeAt()方法。XHR2定义了处理二进制响应的方法，但在写本章时，浏览器厂商还没有实现它。进一步详情请参见22.6.2节。
+
+服务器响应的正常解码是假设服务器为这个响应发送了“Content-Type”头和正确的MIME类型。例如，如果服务器发送XML文档但没有设置适当的MIME类型，那么XMLHttpRequest对象将不会解析它且设置responseXML属性。或者，如果服务器在“Content-Type”头中包含了错误的“charset”参数，那么XMLHttpRequest将使用错误的编码来解析响应，并且responseText中的字符可能是错的。XHR2定义了overrideMimeType()方法来解决这个问题，并且大量的浏览器已经实现了它。如果相对于服务器你更了解资源的MIME类型，那么在调用send()之前把类型传递给overrideMimeType()，这将使XMLHttpRequest忽略“Content-Type”头而使用指定的类型。假设你将下载XML文件，而你计划把它当成纯文本对待。可以使用setOverrideMimeType()让XMLHttpRequest知道它不需要把文件解析成XML文档：
+```
+//不要把响应作为XML文档处理
+request.overrideMimeType("text/plain; charset=utf-8")
+```
+
+**18.1.3编码请求主体**
+
+HTTP-POST请求包含一个请求主体，它包含客户端传递给服务器的数据。在例18-1中，请求主体是简单的文本字符串。但是，我们通常使用HTTP请求发送的都是更复杂的数据。本节演示这样做的一些方法。
+
+1.表单编码的请求
+
+考虑HTML表单。当用户提交表单时，表单中的数据（每个表单元素的名字和值）编码到一个字符串中并随请求发送。默认情况下，HTML表单通过POST方法发送给服务器，而编码后的表单数据则用做请求主体。对表单数据使用的编码方案相对简单：对每个表单元素的名字和值执行普通的URL编码（使用十六进制转义码替换特殊字符），使用等号把编码后的名字和值分开，并使用“&”符号分开名/值对。一个简单表单的编码像如下这样：
+```
+find=pizza&zipcode=02134&radius=1km
+```
+表单数据编码格式有一个正式的MIME类型：
+```
+application/x-www-form-urlencoded
+```
+当使用POST方法提交这种顺序的表单数据时，必须设置“Content-Type”请求头为这个值。
+
+注意，这种类型的编码并不需要HTML表单，在本章我们实际上将不需要直接使用表单。在Ajax应用中，你希望发送给服务器的很可能是一个javascript对象。（这个对象可能从HTML表单的用户输入中得到，但这里不是问题。）前面展示的数据变成javascript对象的表单编码形式可能是：
+```
+{
+    find:"pizza",
+    zipcode:02134,
+    radius:"1km"
+}
+```
+表单编码在web上如此广泛使用，同时所有服务器端的编程语言都能得到良好的支持，所以非表单数据的表单编码通常也是容易实现的事情。例18-4展示了如何实现对象属性的表单编码。
+
+例18-4：用于http请求的编码对象
+```
+/**
+ * Encode the properties of an object as if they were name/value pairs from
+ * an HTML form, using application/x-www-form-urlencoded format
+ * 编码对象的属性，如果它们是来自HTML表单的名/值对，使用application/x-www-form-urlencode格式
+ */
+function encodeFormData(data) {
+    if (!data) return "";    // Always return a string 一直返回字符串
+    var pairs = [];          // To hold name=value pairs 为了保持名=值对
+    for(var name in data) {                                  // For each name 为每个名字
+        if (!data.hasOwnProperty(name)) continue;            // Skip inherited 跳过继承属性
+        if (typeof data[name] === "function") continue;      // Skip methods 跳过方法
+        var value = data[name].toString();                   // Value as string 把值转换成字符串
+        name = encodeURIComponent(name.replace(" ", "+"));   // Encode name 编码名字
+        value = encodeURIComponent(value.replace(" ", "+")); // Encode value 编码值
+        pairs.push(name + "=" + value);   // Remember name=value pair 记住名=值对
+    }
+    return pairs.join('&'); // Return joined pairs separated with & 返回使用“&”连接的名/值对
+}
+```
+
+使用已定义的encodeFormData()函数，我们能容易地写出像例18-5中的postData()函数这样的工具函数。需要注意的是，简单来说，postData()函数（在随后的示例中有相似的函数）不能处理服务器的响应。当响应完成，它传递整个XMLHttpRequest对象给指定的回调函数。这个回调函数负责检查响应状态码和提取响应文本。
+
+例18-5：使用表单编码数据发起一个HTTP POST请求
+```
+function postData(url, data, callback) {
+    var request = new XMLHttpRequest();            
+    request.open("POST", url);                    // POST to the specified url 对指定url发生post请求
+    request.onreadystatechange = function() {     // Simple event handler 简单的事件处理程序
+        if (request.readyState === 4 && callback) // When response is complete 当响应完成
+            callback(request);                    // call the callback. 调用回调函数
+    };
+    request.setRequestHeader("Content-Type",      // Set Content-Type 设置Content-Type
+                             "application/x-www-form-urlencoded");
+    request.send(encodeFormData(data));           // Send form-encoded data 发送表单编码的数据
+}
+```
+表单数据同样可以通过GET请求来提交，既然表单提交的目的是为了执行只读查询，因此POST请求比POST请求更合适。（当提交表单的目标仅仅是一个只读查询，GET比POST更合适。）GET请求从来没有主体，所以需要发送给服务器的表单编码数据“负载”要作为URL（后跟一个问号）的查询部分。encodeFormData()工具函数也能用于这种GET请求，且例18-6演示了如何使用它。
+
+例18-6：使用表单编码数据发起GET请求
+```javascript
+function getData(url, data, callback) {
+    var request = new XMLHttpRequest(); 
+    request.open("GET", url +                     // GET the specified url 通过添加的编码数据获取指定的url
+                 "?" + encodeFormData(data));     // with encoded data added
+    request.onreadystatechange = function() {     // Simple event handler 简单事件处理程序
+        if (request.readyState === 4 && callback) callback(request);
+    };
+    request.send(null);                           // Send the request 发送请求
+}
+```
+
+HTML表单在提交的时候会对表单数据进行URL编码，但使用XMLHttpRequest能给我们编码自己想要的任何数据。随着服务器上的适当支持，我们的pizza查询数据将编码成一个更清晰的URL，如下：
+```
+http://restaurantfinder.example.com/02134/ikm/pizza
+```
+
+2.JSON编码的请求
+
+在POST请求主体中使用表单编码是常见惯例，但在任何情况下它都不是HTTP协议的必需品。近年来，作为web交换格式的JSON已经得到普及。例18-7展示如何使用JSON.stringify()（参见6.9节）编码请求主体。注意这个示例和例18-5的不同仅在最后两行。
+
+例18-7：使用JSON编码主体来发起HTTP-POST请求
+```
+function postJSON(url, data, callback) {
+    var request = new XMLHttpRequest();            
+    request.open("POST", url);                    // POST to the specified url 对指定URL发送POST请求
+    request.onreadystatechange = function() {     // Simple event handler 简单的事件处理程序
+        if (request.readyState === 4 && callback) // When response is complete 当响应完成时
+            callback(request);                    // call the callback. 调用回调函数
+    };
+    request.setRequestHeader("Content-Type", "application/json");
+    request.send(JSON.stringify(data));
+}
+```
+
+3.XML编码的请求
+
+XML有时也用于数据传输的编码。javascript对象的用表单编码或JSON编码版本表达的pizza查询，也能用XML文档来表示它。例如，它看起来如下所示：
+```
+<query>
+    <find zipcode="02134" radius="1km">
+        pizza
+    </find>
+</query>
+```
+在目前展示的所有示例中，XMLHttpRequest的send()方法的参数是一个字符串或null。实际上，可以在这里传入XMLDocument对象。例18-8展示如何创建一个简单的XMLDocument对象并使用它作为HTTP请求的主体。
+
+例18-8：使用XML文档作为其主体的HTTP POST请求
+```
+// Encode what, where, and radius in an XML document and post them to the 
+// 在XML中编码什么东西、在哪儿和半径，然后向指定的URL发送POST请求
+// specified url, invoking callback when the response is received
+// 当接收到响应时，调用回调函数
+function postQuery(url, what, where, radius, callback) {
+    var request = new XMLHttpRequest();            
+    request.open("POST", url);                  // POST to the specified url 对指定的URL发送POST请求
+    request.onreadystatechange = function() {   // Simple event handler 简单的事件处理程序
+        if (request.readyState === 4 && callback) callback(request);
+    };
+
+    // Create an XML document with root element <query>
+    var doc = document.implementation.createDocument("", "query", null);
+    var query = doc.documentElement;            // The <query> element query元素
+    var find = doc.createElement("find");       // Create a <find> element 创建find元素
+    query.appendChild(find);                    // And add it to the <query> 并把它添加到query中
+    find.setAttribute("zipcode", where);        // Set attributes on <find> 设置find的属性
+    find.setAttribute("radius", radius);
+    find.appendChild(doc.createTextNode(what)); // And set content of <find> 并设置find的内容
+
+    // Now send the XML-encoded data to the server. 现在向服务器发送XML编码的数据
+    // Note that the Content-Type will be automatically set. 注意将自动设置Content-Type头
+    request.send(doc); 
+}
+```
+
+注意：例18-8不曾为请求设置“Content-Type”头。当给send()方法传入XML文档时，并没有预先指定“Content-Type”头，但XMLHttpRequest对象会自动设置一个合适的头。（类似地，如果给send()传入一个字符串但没有指定Content-Type头，那么XMLHttpRequest将会添加“ext/plain;charset=UTF-8”头。）在例18-1的代码中显式设置了这个头，但实际上对于纯文本的请求主体并不需要这么做。
 
 **18.2借助[script]发送http请求：jsonp**
+
+
+
 **18.3基于服务器端推送事件的comet技术**
 
