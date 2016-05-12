@@ -640,7 +640,7 @@ http://restaurantfinder.example.com/02134/ikm/pizza
 在POST请求主体中使用表单编码是常见惯例，但在任何情况下它都不是HTTP协议的必需品。近年来，作为web交换格式的JSON已经得到普及。例18-7展示如何使用JSON.stringify()（参见6.9节）编码请求主体。注意这个示例和例18-5的不同仅在最后两行。
 
 例18-7：使用JSON编码主体来发起HTTP-POST请求
-```
+```javascript
 function postJSON(url, data, callback) {
     var request = new XMLHttpRequest();            
     request.open("POST", url);                    // POST to the specified url 对指定URL发送POST请求
@@ -666,7 +666,7 @@ XML有时也用于数据传输的编码。javascript对象的用表单编码或J
 在目前展示的所有示例中，XMLHttpRequest的send()方法的参数是一个字符串或null。实际上，可以在这里传入XMLDocument对象。例18-8展示如何创建一个简单的XMLDocument对象并使用它作为HTTP请求的主体。
 
 例18-8：使用XML文档作为其主体的HTTP POST请求
-```
+```javascript
 // Encode what, where, and radius in an XML document and post them to the 
 // 在XML中编码什么东西、在哪儿和半径，然后向指定的URL发送POST请求
 // specified url, invoking callback when the response is received
@@ -694,6 +694,90 @@ function postQuery(url, what, where, radius, callback) {
 ```
 
 注意：例18-8不曾为请求设置“Content-Type”头。当给send()方法传入XML文档时，并没有预先指定“Content-Type”头，但XMLHttpRequest对象会自动设置一个合适的头。（类似地，如果给send()传入一个字符串但没有指定Content-Type头，那么XMLHttpRequest将会添加“ext/plain;charset=UTF-8”头。）在例18-1的代码中显式设置了这个头，但实际上对于纯文本的请求主体并不需要这么做。
+
+4.上传文件
+
+HTML表单的特性之一是当用户通过input属性type="file"元素选择文件时，表单将在它产生的POST请求主体中发送文件内容。HTML表单始终能上传文件，但到目前为止它还不能使用XMLHttpRequestAPI做相同的事情。然后，XHR2API允许通过向send()方法传入File对象来实现上传文件。
+
+没有File()对象构造函数，脚本仅能获得表示用户当前选择文件的File对象。在支持File对象的浏览器中，每个input属性type="file"元素有一个files属性，它是File对象中的类数组对象。拖放API（参见17.7节）允许通过拖放事件的dataTransfer.files属性访问用户“拖放”到元素上的文件。我们将在22.6节和22.7节看到更多关于File对象的内容。但现在来讲，可以将它当做一个用户选择文件完全不透明的表示形式，适用于通过send()来上传文件。例18-9是一个自然的javascript函数，它对某些文件上传元素添加了change事件处理程序，这样它们能自动把任何选择过的文件内容通过POST方法自动发送到指定的URL。
+
+例18-9：使用HTTP-POST请求上传文件
+```
+// Find all <input type="file"> elements with a data-uploadto attribute
+// 查找有data-uploadto属性的全部input属性type为file的元素
+// and register an onchange handler so that any selected file is 
+// 并注册onchange事件处理程序
+// automatically POSTED to the specified "uploadto" URL. The server's
+// 这样任何选择的文件都会自动通过POST方法发送到指定的“uploadto”URL
+// response is ignored.
+// 服务器的响应是忽略的
+whenReady(function() {                        // Run when the document is ready 当文档准备就绪时运行
+    var elts = document.getElementsByTagName("input"); // All input elements 所有的input元素
+    for(var i = 0; i < elts.length; i++) {             // Loop through them 遍历它们
+        var input = elts[i];
+        if (input.type !== "file") continue;  // Skip all but file upload elts 跳过所有非文件上传元素
+        var url = input.getAttribute("data-uploadto"); // Get upload URL 获取上传URL
+        if (!url) continue;                   // Skip any without a url 跳过任何没有URL的元素
+
+        input.addEventListener("change", function() {  // When user selects file 当用户选择文件时
+            var file = this.files[0];         // Assume a single file selection 假设单个文件选择
+            if (!file) return;                // If no file, do nothing 如果没有文件，不做任何事情
+            var xhr = new XMLHttpRequest();   // Create a new request 创建新请求
+            xhr.open("POST", url);            // POST to the URL 向这个url发送post请求
+            xhr.send(file);                   // Send the file as body 把文件作为主体发送
+        }, false);
+    }
+});
+```
+
+正如我们在22.6节所看到的，文件类型是更通用的二进制大对象（Blob）类型中的一个子类型。XHR2允许向send()方法传入任何Blob对象。如果没有显式设置Content-Type头，这个Blob对象的type属性用于设置待上传的Content-Type头。如果需要上传已经产生的二进制数据，可以使用22.5节和22.6.3节展示的技术把数据转化为Blob并将其作为请求主体。
+
+5.multipart/form-data请求
+
+当HTMl表单同时包含文件上传元素和其他元素时，浏览器不能使用普通的表单编码而必须使用称为“multipart/form-data”的特殊Content-Type来用POST方法提交表单。这种编码包括使用长“边界”字符串把请求主体分离成多个部分。对于文本数据，手动创建“multipart/form-data”请求主体是可能的，但很复杂。
+
+XHR2定义了新的FormData API，它容易实现多部分请求主体。首先，使用FormData()构造函数创建FormData对象，然后按需多次调用这个对象的append()方法把个体“部分”（可以是字符串、File或Blob对象）添加到请求中。最后，把FormData对象传递给send()方法。send()方法将对请求定义合适的边界字符串和设置“Content-Type”头。例18-10演示了FormData的使用，同时我们将在例18-11再次看到它。
+
+例18-10：使用POST方法发送multipart/form-data请求主体
+```javascript
+function postFormData(url, data, callback) {
+    if (typeof FormData === "undefined")
+        throw new Error("FormData is not implemented");
+
+    var request = new XMLHttpRequest();            // New HTTP request 新HTTP请求
+    request.open("POST", url);                     // POST to the specified url 对指定URL发送POST请求
+    request.onreadystatechange = function() {      // A simple event handler. 简单的事件处理程序
+        if (request.readyState === 4 && callback)  // When response is complete 当响应完成时
+            callback(request);                     // ...call the callback. 调用回调函数
+    };
+    var formdata = new FormData();
+    for(var name in data) {
+        if (!data.hasOwnProperty(name)) continue;  // Skip inherited properties 跳过继承的属性
+        var value = data[name];
+        if (typeof value === "function") continue; // Skip methods 跳过方法
+        // Each property becomes one "part" of the request. 每个属性变成请求的一个部分
+        // File objects are allowed here 这里允许File对象
+        formdata.append(name, value);              // Add name/value as one part 作为一部分添加名/值对
+    }
+    // Send the name/value pairs in a multipart/form-data request body. Each
+    // 在multipart/form-data请求主体中发送名/值对
+    // pair is one part of the request. Note that send automatically sets
+    // 每对都是请求的一个部分，注意，当传入FormData对象时
+    // the Content-Type header when you pass it a FormData object
+    // send()会自动设置Content-Type头
+    request.send(formdata);  
+}
+```
+
+**18.1.4HTTP进度事件**
+
+在之前的示例中，使用readystatechange事件探测HTTP请求的完成。XHR2规范草案定义了更多有用的事件集，有些已经在Firefox、Chrome和Safari中得到支持。在这个新的事件模型中，XMLHttpRequest对象在请求的不同阶段触发不同类型的事件，所以它不再需要检查readyState属性。
+
+在支持它们的浏览器中，这些新事件会像如下这样触发。当调用send()时，触发单个loadstart事件。当正在加载服务器的响应时，XMLHttpRequest对象会发生progress事件，通常每隔50毫秒左右，所以可以使用这些事件给用户反馈请求的进度。如果请求快速完成，它可能从不会触发progress事件。当事件完成时，会触发load事件。
+
+一个完成的请求不一定是成功的请求，例如，load事件的处理程序应该检查XMLHttpRequest对象的status状态码来确定收到的是“200 OK”而不是“404 NotFound”的HTTP响应。
+
+HTTP请求无法完成有3种情况，对应3种事件。如果请求超时，会触发timeout事件。如果请求中止，会触发abort事件。（18.1.5节包含超时和abort方法的内容。）最后，像太多重定向这样的网络错误会阻止请求完成，但这些情况发生时会触发
 
 **18.2借助[script]发送http请求：jsonp**
 
