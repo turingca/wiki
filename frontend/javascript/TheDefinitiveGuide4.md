@@ -482,6 +482,248 @@ function postFormData(url, data, callback) {
 
 HTTP请求无法完成有3种情况，对应3种事件。如果请求超时，会触发timeout事件。如果请求中止，会触发abort事件。（18.1.5节包含超时和abort方法的内容。）最后，像太多重定向这样的网络错误会阻止请求完成，但这些情况发生时会触发error事件。
 
+对于任何具体请求，浏览器将只会触发load、abort、timeout和error事件中的一个。XHR2规范草案指出一旦这些事件中的一个发生后，浏览器应该触发loaded事件。但在写本章时，尚未有浏览器实现loadend事件。
+
+可以通过XMLHttpRequest对象的addEventListener()方法为这些progress事件中的每个都注册处理程序。如果每种事件只有一个事件处理程序，通常更容易的方法是只设置对应的处理程序属性，比如onprogress和onload。甚至可以使用这些事件属性是否存在来测试浏览器是否支持progress事件：
+```
+if("onprogress" in (new XMLHttpRequest())) {
+    //支持progress事件
+}
+```
+除了像type和timestamp这样常用的Event对象属性外，与这些progress事件相关联的事件对象还有3个有用的属性。loaded属性是目前传输的字节数值。total属性是自“Content-Length”头传输的数据的整体长度（单位是字节），如果不知道内容长度则为0。最后，如果知道内容长度则lengthComputable属性为true；否则为false。显然，total和loaded属性对progress事件处理程序相当有用：
+```
+if ("onprogress" in (new XMLHttpRequest())) {
+    //支持progress事件
+}
+```
+除了像type和timestamp这样常用的Event对象属性外，与这些progress事件相关联的事件对象还有3个有用的属性。loaded属性是目前传输的字节数值。total属性是自“Content-Length”头传输的数据的整体长度（单位是字节），如果不知道内容长度则为0。最后，如果知道内容长度则lengthComputable属性为true；否则为false。显然，total和loaded属性对progress事件处理程序相当有用：
+```javascript
+request.onprogress = function(e) {
+    if (e.lengthComputable)
+    progress.innerHTML = Math.round(100*e.loaded/e.total) + "% Complete";
+}
+```
+
+上传进度事件
+
+除了为监控HTTP响应的加载定义的这些有用的事件外，XHR2也给出了用于监控HTTP请求上传的事件。在实现这些特性的浏览器中，XMLHttpRequest对象将有upload属性。upload属性值是一个对象，它定义了addEventListener()方法和整个progress事件集合，比如onprogress和onload。（但upload对象没有定义onreadystatechange属性，upload仅能触发新的事件类型。）
+
+你能仅仅像使用常见的progress事件处理程序一样使用upload事件处理程序。对于XMLHttpRequest对象X，设置X.onprogress以监控响应的下载进度，并且设置x.upload.onprogress以监控请求的上传进度。
+
+例18-11演示了如何使用upload progress事件把上传进度反馈给用户。这个示例也演示了如何从拖放API中获得File对象和如何使用FormDataAPI在单个XMLHttpRequest请求中上传多个文件。在写本书时，这些功能依旧在草案中，并且这些示例不能在所有的浏览器中工作。
+
+例18-11：监控HTTP上传进度
+```javascript
+// Find all elements of class "fileDropTarget" and register DnD event handlers
+// 查找所有含有“fileDropTarget”类的元素
+// to make them respond to file drops.  When files are dropped, upload them to 
+// 并注册DnD事件处理程序使它们能够响应文件的拖放
+// the URL specified in the data-uploadto attribute.
+// 当文件放下时，上传它们到data-uploadto属性指定的URL
+whenReady(function() {
+    var elts = document.getElementsByClassName("fileDropTarget");
+    for(var i = 0; i < elts.length; i++) {
+        var target = elts[i];
+        var url = target.getAttribute("data-uploadto");
+        if (!url) continue;
+        createFileUploadDropTarget(target, url);
+    }
+
+    function createFileUploadDropTarget(target, url) {
+        // Keep track of whether we're currently uploading something so we can
+        // 跟踪当前是否正在上传，因此我们能拒绝放下
+        // reject drops. We could handle multiple concurrent uploads, but 
+        // 我们可以处理多个并发上传
+        // that would make progress notification too tricky for this example.
+        // 但对这个例子使用进度通知太困难了
+        var uploading = false; 
+
+        console.log(target, url);
+
+        target.ondragenter = function(e) {
+            console.log("dragenter");
+            if (uploading) return;  // Ignore drags if we're busy 如果正在忙，忽略拖放
+            var types = e.dataTransfer.types;
+            if (types && 
+                ((types.contains && types.contains("Files")) ||
+                 (types.indexOf && types.indexOf("Files") !== -1))) {
+                target.classList.add("wantdrop");
+                return false;
+            }
+        };
+        target.ondragover = function(e) { if (!uploading) return false; };
+        target.ondragleave = function(e) {
+            if (!uploading) target.classList.remove("wantdrop");
+        };
+        target.ondrop = function(e) {
+            if (uploading) return false;
+            var files = e.dataTransfer.files;
+            if (files && files.length) {
+                uploading = true;
+                var message = "Uploading files:<ul>";
+                for(var i = 0; i < files.length; i++) 
+                    message += "<li>" + files[i].name + "</li>";
+                message += "</ul>";
+                
+                target.innerHTML = message;
+                target.classList.remove("wantdrop");
+                target.classList.add("uploading");
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", url);
+                var body = new FormData();
+                for(var i = 0; i < files.length; i++) body.append(i, files[i]);
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        target.innerHTML = message +
+                            Math.round(e.loaded/e.total*100) +
+                            "% Complete";
+                    }
+                };
+                xhr.upload.onload = function(e) {
+                    uploading = false;
+                    target.classList.remove("uploading");
+                    target.innerHTML = "Drop files to upload";
+                };
+                xhr.send(body);
+
+                return false;
+            }
+            target.classList.remove("wantdrop");
+        }
+    }
+});
+```
+
+**18.1.5中止请求和超时**
+
+可以通过调用XMLHttpRequest对象的abort()方法来取消正在进行的HTTP请求。abort()方法在所有的XMLHttpRequest版本和XHR2中可用，调用abort()方法在这个对象上触发abort事件。（在写本章时，某些浏览器支持abort事件。可以通过XMLHttpRequest对象的“onabort”属性是否存在来判断。）
+
+调用abort()的主要原因是完成取消或超时请求消耗的时间太长或当响应变得无关时。假设使用XMLHttpRequest为文本输入域请求自动完成推荐。如果用户在服务器的建议达到之前输入了新字符，这时等待请求不再有趣，应该中止。
+
+XHR2定义了timeout属性来指定请求自动中止后的毫秒数，也定义了timeout事件用于当超时发生时触发（不是abort事件）。在写本章时，浏览器不支持这些自动超时（并且它们的XMLHttpRequest对象没有timeout和ontimeout属性）。可以用setTimeout()（参见14.1节）和abort()方法实现自己的超时。例18-12演示如何这么做。
+
+例18-12：实现超时
+```
+// Issue an HTTP GET request for the contents of the specified URL.
+// 发起HTTP GET请求获取指定URL的内容
+// If the response arrives successfully, pass responseText to the callback.
+// 如果响应成功到达，传入responseText给回调函数
+// If the response does not arrive in less than timeout ms, abort the request.
+// 如果响应在timeout毫秒内没有到达，中止这个请求
+// Browsers may fire "readystatechange" after abort(), and if a partial 
+// 浏览器可能在abort()后触发"readystatechange"
+// request has been received, the status property may even be set, so 
+// 如果是部分请求结果到达，甚至可能设置status属性
+// we need to set a flag so that we don't invoke the callback for a partial,
+// 所以需要设置一个标记，当部分且超时的响应到达时不会调用回调函数
+// timed-out response. This problem does not arise if we use the load event.
+//如果使用load事件就没有这个风险
+function timedGetText(url, timeout, callback) {
+    var request = new XMLHttpRequest();         // Create new request. 创建新请求
+    var timedout = false;                       // Whether we timed out or not. 是否超时
+    // Start a timer that will abort the request after timeout ms. 启动计时器，在timeout毫秒后将中止请求
+    var timer = setTimeout(function() {         // Start a timer. If triggered, 如果触发，其动一个计时器
+                               timedout = true; // set a flag and then 设置标记
+                               request.abort(); // abort the request. 然后中止请求
+                           },
+                           timeout);            // How long before we do this 中止请求之前的时长
+    request.open("GET", url);                   // Specify URL to fetch 获取指定的URL
+    request.onreadystatechange = function() {   // Define event listener. 定义事件处理程序
+        if (request.readyState !== 4) return;   // Ignore incomplete requests. 忽略未完成的请求
+        if (timedout) return;                   // Ignore aborted requests. 忽略中止请求
+        clearTimeout(timer);                    // Cancel pending timeout. 取消等待的超时
+        if (request.status === 200)             // If request was successful 如果请求成功
+            callback(request.responseText);     // pass response to callback. 把response传给回调函数
+    };
+    request.send(null);                         // Send the request now 立即发送请求
+}
+```
+
+**18.1.6跨域HTTP请求**
+
+作为同源策略（参见13.6.2节）的一部分，XMLHttpRequest对象通常仅可以发起和文档具有相同的服务器的HTTP请求。这个限制关闭了安全漏洞，但它笨手笨脚并且也阻止了大量合适使用的跨域请求。可以在form和iframe元素中使用跨域URL，而浏览器显示最终的跨域文档。但因为同源策略，浏览器不允许原始脚本查找跨域文档的内容。使用XMLHttpRequest，文档内容都是通过responseText属性暴露，所以同源策略不允许XMLHttpRequest进行跨域请求。（注意script元素并未真正受限于同源策略：它加载并执行任何来源的脚本。如果我们看18.2节，跨域请求的灵活性使得script元素成为取代XMLHttpRequest的主流Ajax传输协议。）
+
+XHR2通过在HTTP响应中选择发送合适的CORS（Cross-Origin Resource Sharing，跨域资源共享）允许跨域访问网站。在写本书时，Firefox、Safari、Chrome的当前版本都支持CORS，而IE8通过这里没有列出的专用XDomainRequest对象支持它。作为Web程序员，使用这个功能并不需要做什么额外的工作：如果浏览器支持XMLHttpRequest的CORS且实现跨域请求的网站决定使用CORS允许跨域请求，那么同源策略将不放宽而跨域请求会正常工作。
+
+虽然实现CORS支持的跨域请求工作不需要做任何事情，但有一些安全细节需要了解。首先，如果给XMLHttpRequest的open()方法传入用户名和密码，那么它们绝对不会通过跨域请求发送（这使分布式密码破解攻击成为可能）。除外，跨域请求通常也不会包含其他任何的用户证书：cookie和HTTP身份验证令牌（token）通常不会作为请求的内容部分发送且任何作为跨域响应来接收的cookie都会丢弃。如果跨域请求需要这几种凭证才能成功，那么必须在用send()发送请求前设置XMLHttpRequest的withCredentials属性为true。这样做不常见，但测试withCredentials的存在性是测试浏览器是否支持CORS的一种方法。
+
+示例8-13是常见的javascript代码，它使用XMLHttpRequest实现HTTP HEAD请求以下载文档中a元素链接资源的类型、大小和时间等信息。这个HEAD请求按需发起，且由此产生的链接信息会出现在工具提示中。这个示例假设跨域链接的信息会出现在工具提示中。这个示例假设跨域链接的信息不可用，但通过支持CORS的浏览器尝试下载它。、
+
+例18-13：使用HEAD和CORS请求链接详细信息
+```
+/**
+ * linkdetails.js
+ *
+ * This unobtrusive JavaScript module finds all <a> elements that have an href
+ * 这个常见的javascript模块查询有href属性但没有
+ * attribute but no title attribute and adds an onmouseover event handler to 
+ * them. The event handler makes an XMLHttpRequest HEAD request to fetch 
+ * details about the linked resource, and then sets those details in the title
+ * attribute of the link so that they will be displayed as a tooltip.
+ */
+whenReady(function() { 
+    // Is there any chance that cross-origin requests will succeed?
+    var supportsCORS = (new XMLHttpRequest()).withCredentials !== undefined;
+
+    // Loop through all links in the document
+    var links = document.getElementsByTagName('a');
+    for(var i = 0; i < links.length; i++) {
+        var link = links[i];
+        if (!link.href) continue; // Skip anchors that are not hyperlinks
+        if (link.title) continue; // Skip links that already have tooltips
+
+        // If this is a cross-origin link
+        if (link.host !== location.host || link.protocol !== location.protocol)
+        {
+            link.title = "Off-site link";  // Assume we can't get any more info 
+            if (!supportsCORS) continue;   // Quit now if no CORS support
+            // Otherwise, we might be able to learn more about the link
+            // So go ahead and register the event handlers so we can try.
+        }
+
+        // Register event handler to download link details on mouse over
+        if (link.addEventListener)
+            link.addEventListener("mouseover", mouseoverHandler, false);
+        else
+            link.attachEvent("onmouseover", mouseoverHandler);
+    }
+
+    function mouseoverHandler(e) {
+        var link = e.target || e.srcElement;      // The <a> element
+        var url = link.href;                      // The link URL
+
+        var req = new XMLHttpRequest();           // New request
+        req.open("HEAD", url);                    // Ask for just the headers
+        req.onreadystatechange = function() {     // Event handler
+            if (req.readyState !== 4) return;     // Ignore incomplete requests
+            if (req.status === 200) {             // If successful
+                var type = req.getResponseHeader("Content-Type");   // Get
+                var size = req.getResponseHeader("Content-Length"); // link
+                var date = req.getResponseHeader("Last-Modified");  // details
+                // Display the details in a tooltip. 
+                link.title = "Type: " + type + "   \n" +  
+                    "Size: " + size + "   \n" + "Date: " + date;
+            }
+            else {
+                // If request failed, and the link doesn't already have an
+                // "Off-site link" tooltip, then display the error.
+                if (!link.title)
+                    link.title = "Couldn't fetch details: \n" +
+                        req.status + " " + req.statusText;
+            }
+        };
+        req.send(null);
+        
+        // Remove handler: we only want to fetch these headers once.
+        if (link.removeEventListener)
+            link.removeEventListener("mouseover", mouseoverHandler, false);
+        else
+            link.detachEvent("onmouseover", mouseoverHandler);
+    }
+});
+```
+
 **18.2借助[script]发送http请求：jsonp**
 
 
