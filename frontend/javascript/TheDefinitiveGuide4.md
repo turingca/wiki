@@ -793,20 +793,28 @@ function getJSONP(url, callback) {
         }
         finally {               // Even if callback or response threw an error 即使回调函数或响应抛出错误
             delete getJSONP[cbnum];                // Delete this function 删除该函数
-            script.parentNode.removeChild(script); // Remove script 
+            script.parentNode.removeChild(script); // Remove script 移除script元素
         }
     };
 
     // Now trigger the HTTP request
-    script.src = url;                  // Set script url
-    document.body.appendChild(script); // Add it to the document
+    script.src = url;                  // Set script url 设置脚本的URL
+    document.body.appendChild(script); // Add it to the document 把它添加到文档中
 }
 
-getJSONP.counter = 0;  // A counter we use to create unique callback names
+getJSONP.counter = 0;  // A counter we use to create unique callback names 用于创建唯一回调函数名称的计数器
 ```
 
-
-
 **18.3基于服务器端推送事件的comet技术**
+
+在服务器端推送事件的标准草案中定义了一个EventSource对象，简化了Comet应用程序的编写可以传递一个URL给EventSource()构造函数，然后在返回的实例上监听消息事件。
+```
+var ticker = new EventSource("stockprices.php");
+ticker.onmessage = function(e) {
+    var type = e.type;
+    var data = e.data;
+    //现在处理事件类型和事件的字符串数据
+}
+```
 
 
