@@ -816,5 +816,51 @@ ticker.onmessage = function(e) {
     //现在处理事件类型和事件的字符串数据
 }
 ```
+与message事件关联的事件对象有一个data属性，这个属性保存服务器作为该事件的负载发送的任何字符串。如同其他类型的事件一样，该对象还有一个type属性，默认值是message，事件源可以修改这个值。onmessage事件处理程序接收从一个给定的服务器事件源发出的所有事件，如果有必要，也可以根据type属性派发一个事件。
 
+服务端推动事件的协议很简单。客户端（创建一个EventSource对象时会）建立一个到服务器的连接，服务器保持这个连接处于打开状态。当方式一个事件时，服务器端在连接中写入几行文本，抛给客户端的事件可能看起来是这样：
+```
+event:bid 设置时间对象的类型
+data:GOOG 设置data属性
+data:999  追加新的一行和更多的数据
+          一个空行会触发消息事件
+```
+该协议还有一些额外的细节，比如允许事件携带给定ID，然后再次连上的客户端告诉服务器它收到的最后一个事件的ID，这样服务器就可以重新发送客户端错过的事件。但是这些细节在此处并不重要。
+
+Comet架构的一个常见应用是聊天应用，聊天客户端可以通过XMLHttpRequest向聊天室发送新的消息，也可以通过EventSource对象订阅聊天信息。例18-15展示了使用EventSource写一个聊天客户端是多么容易。
+
+例18-15：一个使用EventSource的简易聊天客户端
+```
+<script>
+window.onload = function() {
+    // Take care of some UI details 注意一些细节
+    var nick = prompt("Enter your nickname");     // Get user's nickname 获取用户昵称
+    var input = document.getElementById("input"); // Find the input field
+    input.focus();                                // Set keyboard focus
+    // Register for notification of new messages using EventSource
+    var chat = new EventSource("/chat");
+    chat.onmessage = function(event) {            // When a new message arrives
+        var msg = event.data;                     // Get text from event object
+        var node = document.createTextNode(msg);  // Make it into a text node
+        var div = document.createElement("div");  // Create a <div>
+        div.appendChild(node);                    // Add text node to div
+        document.body.insertBefore(div, input);   // And add div before input
+        input.scrollIntoView();                   // Ensure input elt is visible
+    }
+    // Post the user's messages to the server using XMLHttpRequest
+    input.onchange = function() {                 // When user strikes return
+        var msg = nick + ": " + input.value;      // Username plus user's input
+        var xhr = new XMLHttpRequest();           // Create a new XHR
+        xhr.open("POST", "/chat");                // to POST to /chat.
+        xhr.setRequestHeader("Content-Type",      // Specify plain UTF-8 text 
+                             "text/plain;charset=UTF-8");
+        xhr.send(msg);                            // Send the message
+        input.value = "";                         // Get ready for more input
+    }
+};
+</script>
+<!-- The chat UI is just a single text input field -->
+<!-- New chat messages will be inserted before this input field -->
+<input id="input" style="width:100%"/>
+```
 
