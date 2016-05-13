@@ -758,6 +758,45 @@ handleResponse (
 
 例18-14定义了一个getJSONP()函数，它发送JSONP请求。这个例子有点复杂，有几点值得注意。首先，注意它是如何创建一个新的script元素，设置其URL，并把它插入到文档中的。正是该插入操作触发HTTP请求。其次，注意例18-14为每个请求都创建了一个全新的内部回调函数，回调函数作为getJSONP()函数的一个属性存储起来。最后要注意的是回调函数做了一些必要的清理工作：删除脚本元素，并删除自身。
 
+例18-14：使用script元素发送JSONP请求
+```
+// Make a JSONP request to the specified URL and pass the parsed response
+// data to the specified callback. Add a query parameter named "jsonp" to
+// the URL to specify the name of the callback function for the request.
+function getJSONP(url, callback) {
+    // Create a unique callback name just for this request
+    var cbnum = "cb" + getJSONP.counter++; // Increment counter each time
+    var cbname = "getJSONP." + cbnum;      // As a property of this function
+    
+    // Add the callback name to the url query string using form-encoding
+    // We use the parameter name "jsonp".  Some JSONP-enabled services 
+    // may require a different parameter name, such as "callback".
+    if (url.indexOf("?") === -1)   // URL doesn't already have a query section
+        url += "?jsonp=" + cbname; // add parameter as the query section
+    else                           // Otherwise, 
+        url += "&jsonp=" + cbname; // add it as a new parameter.
+
+    // Create the script element that will send this request
+    var script = document.createElement("script");
+
+    // Define the callback function that will be invoked by the script
+    getJSONP[cbnum] = function(response) {
+        try {
+            callback(response); // Handle the response data
+        }
+        finally {               // Even if callback or response threw an error
+            delete getJSONP[cbnum];                // Delete this function
+            script.parentNode.removeChild(script); // Remove script
+        }
+    };
+
+    // Now trigger the HTTP request
+    script.src = url;                  // Set script url
+    document.body.appendChild(script); // Add it to the document
+}
+
+getJSONP.counter = 0;  // A counter we use to create unique callback names
+```
 
 
 
