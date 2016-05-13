@@ -656,33 +656,37 @@ XHR2通过在HTTP响应中选择发送合适的CORS（Cross-Origin Resource Shar
  * linkdetails.js
  *
  * This unobtrusive JavaScript module finds all <a> elements that have an href
- * 这个常见的javascript模块查询有href属性但没有
+ * 这个常见的javascript模块查询有href属性但没有title属性的所有a元素
  * attribute but no title attribute and adds an onmouseover event handler to 
+ * 并给它们注册onmouseover事件处理程序
  * them. The event handler makes an XMLHttpRequest HEAD request to fetch 
+ * 这个事件处理程序使用XMLHttpRequestHEAD请求取得链接资源的详细信息
  * details about the linked resource, and then sets those details in the title
+ * 然后把这些详细信息设置为链接的title属性
  * attribute of the link so that they will be displayed as a tooltip.
+ * 这样它们将会在工具提示中显示
  */
 whenReady(function() { 
-    // Is there any chance that cross-origin requests will succeed?
+    // Is there any chance that cross-origin requests will succeed?是否有机会使用跨域请求？
     var supportsCORS = (new XMLHttpRequest()).withCredentials !== undefined;
 
-    // Loop through all links in the document
+    // Loop through all links in the document 遍历文档中的所有链接
     var links = document.getElementsByTagName('a');
     for(var i = 0; i < links.length; i++) {
         var link = links[i];
-        if (!link.href) continue; // Skip anchors that are not hyperlinks
-        if (link.title) continue; // Skip links that already have tooltips
+        if (!link.href) continue; // Skip anchors that are not hyperlinks 跳过没有超链接的锚点
+        if (link.title) continue; // Skip links that already have tooltips 跳过已经有工具提示的链接
 
-        // If this is a cross-origin link
+        // If this is a cross-origin link 如果这是一个跨域链接
         if (link.host !== location.host || link.protocol !== location.protocol)
         {
-            link.title = "Off-site link";  // Assume we can't get any more info 
-            if (!supportsCORS) continue;   // Quit now if no CORS support
-            // Otherwise, we might be able to learn more about the link
-            // So go ahead and register the event handlers so we can try.
+            link.title = "Off-site link";  // Assume we can't get any more info 假设我们不能得到任何信息
+            if (!supportsCORS) continue;   // Quit now if no CORS support 如果没有CORS支持就退出
+            // Otherwise, we might be able to learn more about the link 否则，我们能了解这个链接的更多信息
+            // So go ahead and register the event handlers so we can try. 所以继续前进，注册事件处理程序，于是我们可以尝试
         }
 
-        // Register event handler to download link details on mouse over
+        // Register event handler to download link details on mouse over 注册事件处理程序，当鼠标悬停时下载链接详细信息
         if (link.addEventListener)
             link.addEventListener("mouseover", mouseoverHandler, false);
         else
@@ -690,24 +694,24 @@ whenReady(function() {
     }
 
     function mouseoverHandler(e) {
-        var link = e.target || e.srcElement;      // The <a> element
-        var url = link.href;                      // The link URL
+        var link = e.target || e.srcElement;      // The <a> element a元素
+        var url = link.href;                      // The link URL 链接URL
 
-        var req = new XMLHttpRequest();           // New request
-        req.open("HEAD", url);                    // Ask for just the headers
-        req.onreadystatechange = function() {     // Event handler
-            if (req.readyState !== 4) return;     // Ignore incomplete requests
-            if (req.status === 200) {             // If successful
-                var type = req.getResponseHeader("Content-Type");   // Get
+        var req = new XMLHttpRequest();           // New request 新请求
+        req.open("HEAD", url);                    // Ask for just the headers 仅仅询问头信息
+        req.onreadystatechange = function() {     // Event handler 事件处理程序
+            if (req.readyState !== 4) return;     // Ignore incomplete requests 忽略未完成的请求
+            if (req.status === 200) {             // If successful 如果成功
+                var type = req.getResponseHeader("Content-Type");   // Get  获取链接的详细情况
                 var size = req.getResponseHeader("Content-Length"); // link
                 var date = req.getResponseHeader("Last-Modified");  // details
-                // Display the details in a tooltip. 
+                // Display the details in a tooltip. 在工具提示中显示详细信息
                 link.title = "Type: " + type + "   \n" +  
                     "Size: " + size + "   \n" + "Date: " + date;
             }
             else {
-                // If request failed, and the link doesn't already have an
-                // "Off-site link" tooltip, then display the error.
+                // If request failed, and the link doesn't already have an 如果请求失败，且链接没有“站外链接”的工具提示
+                // "Off-site link" tooltip, then display the error. 那么显示这个错误
                 if (!link.title)
                     link.title = "Couldn't fetch details: \n" +
                         req.status + " " + req.statusText;
@@ -715,7 +719,7 @@ whenReady(function() {
         };
         req.send(null);
         
-        // Remove handler: we only want to fetch these headers once.
+        // Remove handler: we only want to fetch these headers once. 移除处理程序，仅想一次获取这些头信息
         if (link.removeEventListener)
             link.removeEventListener("mouseover", mouseoverHandler, false);
         else
@@ -726,6 +730,20 @@ whenReady(function() {
 
 **18.2借助[script]发送http请求：jsonp**
 
+本章概述提到过script元素可以作为一种ajax传输机制：只须设置script元素的src属性（假如它还没插入到document中，需要插入进去），然后浏览器就会发送一个HTTP请求以下载src属性所指向的URL。使用script元素进行Ajax传输的一个主要原因是，它不受同源策略的影响，因此可以使用它们从其他的服务器请求数据，第二个原因是包含JSON编码数据的响应体会自动解码（即，执行）。
+
+脚本和安全性：为了使用script元素进行Ajax传输，必须允许web页面可以执行远程服务器发送过来的任何javascript代码。这意味着对于不可信的服务器，不应该采取该技术。当与可信的服务器通信时，要提防攻击者可能进入服务器中，然后黑客会接管你的网页，运行他自己的代码，并显示任何他想要的内容，还表现得就像这些内容本就来自你的网站。
+
+需要注意的是，这种方式普遍用于可信的第三方脚本，特别是在页面中嵌入广告和“组件”。作为Ajax传输使用的script与可信的web服务通信，没有比这更危险的了。
+
+这种使用script元素作为ajax传输的技术称为JSONP，若HTTP请求所得到的响应数据是经过JSON编码的，则适合使用该技术。P代表“填充”或“前缀”——这个一会儿再作解释。
+
+假设你写了一个服务，它处理GET请求并返回JSON编码的数据。同源的文档可以在代码中使用XMLHttpRequest和JSON.parse()，就像例18-3中的代码一样。假如在服务器上启用了CORS，在新的浏览器下，跨域的文档也可以使用XMLHttpRequest享受到该服务。在不支持CROS的旧浏览器下，跨域文档只能通过script元素访问这个服务。使用JSONP，JSON响应数据（理论上）是合法的javascript代码，当它到达时浏览器将执行它。相反，不使用JSONP，而是对JSON编码过的数据解码，结果还是数据，并没有做任何事情。
+
+这就是JSONP中P的意义所在。当通过script元素调用数据时，响应内容必须用javascript函数名和圆括号包裹起来。而不是发送这样一段JSON数据：
+```
+[1,2,{"buckle":"my shoe"}]
+```
 
 
 **18.3基于服务器端推送事件的comet技术**
