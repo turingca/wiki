@@ -981,4 +981,116 @@ if (window.EventSource === undefined) {     // If EventSource is not defined, �
     };
 }
 ```
+我们通过一个服务器示例结束了Comet架构的探讨。例18-17展示了一个用服务器端javascript为Node编写的定制HTTP服务器。当一个客户端请求根URL“/”时，它会把例18-15里展示的聊天客户端代码和例18-16中的模拟代码发送到客户端。当客户端创建了一个指向URL“/chat”的GET请求时，它会用一个数组来保存响应数据流并保持连接处于打开状态。当客户端发起针对“chat”POST请求时，它会将响应的主体部分作为一条聊天消息使用并写入数据，以“data：”作为Server-Sent Events的前缀，添加到每个已打开的响应数据流上。如果安装了Node，那就可以在本地运行这个服务器例子。它监听8000端口，因此在启动服务器之后，就可以用浏览器访问http://localhost:8000来进行聊天。
 
+例18-17：定制的Server-Sent Events聊天服务器
+```javascript
+// This is server-side JavaScript, intended to be run with NodeJS.
+// 这个例子用的是服务器的Javascript，运行在NodeJS平台上
+// It implements a very simple, completely anonymous chat room.
+// 该聊天室的实现比较简单，而且是完全匿名的
+// POST new messages to /chat, or GET a text/event-stream of messages
+// 将新的消息以POST发送到/chat地址，或者以GET形式从同一个URL获取消息的文本/事件流
+// from the same URL. Making a GET request to / returns a simple HTML file
+// 创建一个GET请求到“/”来返回一个简单的HTML文件
+// that contains the client-side chat UI.
+// 这个文件包括客户端聊天UI
+var http = require('http');  // NodeJS HTTP server API NodeJS HTTP服务器API
+
+// The HTML file for the chat client. Used below.聊天客户端使用的HTML文件，在下面会用到
+var clientui = require('fs').readFileSync("chatclient.html");
+var emulation = require('fs').readFileSync("EventSourceEmulation.js");
+
+// An array of ServerResponse objects that we're going to send events to
+// ServerResponse对象数组，用于接收发送的事件
+var clients = [];
+
+// Send a comment to the clients every 20 seconds so they don't 每20秒发送一条注释到客户端
+// close the connection and then reconnect 这样它们就不会关闭连接再重连
+setInterval(function() {
+    clients.forEach(function(client) {
+        client.write(":ping\n");
+    });
+}, 20000);
+
+// Create a new server 创建一个新服务器
+var server = new http.Server();  
+
+// When the server gets a new request, run this function
+// 当服务器获取到一个新的请求，运行回调函数
+server.on("request", function (request, response) {
+    // Parse the requested URL 解析请求的URL
+    var url = require('url').parse(request.url);
+
+    // If the request was for "/", send the client-side chat UI.
+    // 如果请求是发送到“/”，服务器就发送客户端聊天室UI
+    if (url.pathname === "/") {  // A request for the chat UI 聊天客户端的UI请求
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write("<script>" + emulation + "</script>");
+        response.write(clientui);
+        response.end();
+        return;
+    }
+    // Send 404 for any request other than "/chat"
+    // 如果请求是发送到“/chat”之外的地址，则返回404
+    else if (url.pathname !== "/chat") {
+        response.writeHead(404);
+        response.end();
+        return;
+    }
+
+    // If the request was a post, then a client is posting a new message
+    // 如果请求类型是post，那么就有一个客户端发送了一条新的消息
+    if (request.method === "POST") {
+        request.setEncoding("utf8");
+        var body = "";
+        // When we get a chunk of data, add it to the body
+        // 在获取数据之后，将其添加到请求主体中
+        request.on("data", function(chunk) { body += chunk; });
+
+        // When the request is done, send an empty response 
+        // 当请求完成时，发送一个空响应
+        // and broadcast the message to all listening clients.
+        // 并将消息传播到所有处于监听状态的客户端中
+        request.on("end", function() {
+            response.writeHead(200);   // Respond to the request 响应该请求
+            response.end();
+
+            // Format the message in text/event-stream format
+            // 将消息转换成文本/事件流格式
+            // Make sure each line is prefixed with "data:" and that it is
+            // 确保每一行的前缀都是“data:”
+            // terminated with two newlines.
+            // 并以两个换行符结束
+            message = 'data: ' + body.replace('\n', '\ndata: ') + "\r\n\r\n";
+            // Now send this message to all listening clients
+            // 发送消息给所有监听的客户端
+            clients.forEach(function(client) { client.write(message); });
+        });
+    }
+    // Otherwise, a client is requesting a stream of messages
+    else {
+        // Set the content type and send an initial message event 
+        // 如果不是POST类型的请求，则客户端正在请求一组消息
+        response.writeHead(200, {'Content-Type': "text/event-stream" });
+        response.write("data: Connected\n\n");
+
+        // If the client closes the connection, remove the corresponding
+        // 如果客户端关闭了连接
+        // response object from the array of active clients
+        // 从活动客户端数组中删除对应的响应对象
+        request.connection.on("end", function() {
+            clients.splice(clients.indexOf(response), 1);
+            response.end();
+        });
+
+        // Remember the response object so we can send future messages to it
+        // 记下响应对象，这样就可以向它发送未来的消息
+        clients.push(response);
+    }
+});
+
+// Run the server on port 8000. Connect to http://localhost:8000/ to use it.
+// 启动服务器，监听8000端口，访问http://localhost:8000/来进行使用它
+server.listen(8000);
+```
