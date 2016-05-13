@@ -1,47 +1,48 @@
 18章 脚本化http
 ---------------
 
-超文本传输协议（HyperTextTransferProtocol，HTTP）规定web浏览器如何从web服务器获取文档和向Web服务器提交表单内容，以及web服务器如何响应这些请求和提交。web浏览器会处理大量http。通常，http并不在脚本的控制下，只是当用户单击链接、提交表单和输入url时才发生。
+超文本传输协议（HyperTextTransferProtocol，HTTP）规定Web浏览器如何从Web服务器获取文档和向Web服务器提交表单内容，以及Web服务器如何响应这些请求和提交。Web浏览器会处理大量HTTP。通常，HTTP并不在脚本的控制下，只是当用户单击链接、提交表单和输入URL时才发生。
 
-但是，用javascript操纵http是可行的。当用脚本设置window对象的location属性或调用表单对象的submit()方法时，都会初始化http请求。在这两种情况下，浏览器会加载新页面。这种用脚本控制http的方法在多框架页面中非常有用，但这并非我们在此讨论的主题。相反，本章会说明在没有导致web浏览器重新加载任何窗口或窗体的内容情况下，脚本如何实现web浏览器与服务器之间的通信。
+但是，用javascript操纵HTTP是可行的。当用脚本设置window对象的location属性或调用表单对象的submit()方法时，都会初始化HTTP请求。在这两种情况下，浏览器会加载新页面。这种用脚本控制HTTP的方法在多框架页面中非常有用，但这并非我们在此讨论的主题。相反，本章会说明在没有导致web浏览器重新加载任何窗口或窗体的内容情况下，脚本如何实现web浏览器与服务器之间的通信。
 
 术语Ajax描述了一种主要使用脚本操纵http的web应用架构。Ajax应用的主要特点是使用脚本操纵HTTP和Web服务器进行数据交换，不会导致页面重载。避免页面重载（这是Web初期的标准做法）的能力使Web应用感觉更像传统的桌面应用。Web应用可以使用Ajax技术把用户的交互数据记录到服务器中；也可以开始只显示简单的页面，之后按需加载额外的数据和页面组件来提升应用的启动时间。
 
 Ajax是Asynchronous Javascript and XML的缩写（未全部大写）。这个术语是Jesse James Carrett创造，最早出现在他于2005年发表的文章“Ajax:A New Approach to Web Applications”。“Ajax”曾经是一个流行多年的术语，现在它只不过是一个有用的术语，来描述基于用脚本操纵HTTP请求的Web应用架构。
 
-Comet是和使用脚本操纵http的web应用架构相关的术语。在某种意义上，Comet和Ajax相反。在comet中，web服务器发起通信并异步发送消息到客户端。如果web应用需要响应服务端发送的消息，则它使用ajax技术发送或请求数据。在ajax中，客户端从服务端“拉”数据，而在comet中，服务端向客户端“推”数据。comet还包括其他名词（如“服务器推”、“ajax推”和“http流”）。
+Comet是和使用脚本操纵HTTP的Web应用架构相关的术语。在某种意义上，Comet和Ajax相反。在Comet中，Web服务器发起通信并异步发送消息到客户端。如果Web应用需要响应服务端发送的消息，则它使用Ajax技术发送或请求数据。在Ajax中，客户端从服务端“拉”数据，而在Comet中，服务端向客户端“推”数据。Comet还包括其他名词（如“服务器推”、“Ajax推”和“HTTP流”）。
 
-comet这个名字是由Alex Russell在“comet:Low Latency Data for the Browser“中创造的。这个名字可能是对ajax开了个玩笑，comet和ajax都是美国的洗涤日用品牌。
+Comet这个名字是由AlexRussell在“Comet:LowLatencyDatafortheBrowser“（http://infrequently.org/2006/03/comet-low-latency-data-for-the-browser/）中创造的。这个名字可能是对Ajax开了个玩笑，comet和ajax都是美国的洗涤日用品牌。
 
-实现ajax和comet的方式有很多种，而这些底层的实现有时称为传输协议（transport）。例如，img元素有一个src属性。当脚本设置这个属性为url时，浏览器发起的http get请求会从这个url下载图片。因此，脚本通过设置img元素的src属性，且把信息作为图片url的查询字符串部分，就把能经过编码信息传递给web服务器。web服务器实际上必须返回某个图片来作为请求结果，但它一定要不可见：例如，一个1*1像素的透明图片。这种类型的图片也称为网页信标（web bug）。当网页信标不是与当前网页服务器而是其他服务器交流信息时，会担心隐私内容。这种第三方网页信标的方式常用于统计点击次数和网站流量分析。
+实现Ajax和Comet的方式有很多种，而这些底层的实现有时称为传输协议（transport）。例如，img元素有一个src属性。当脚本设置这个属性为url时，浏览器发起的HTTP GET请求会从这个URL下载图片。因此，脚本通过设置img元素的src属性，且把信息作为图片URL的查询字符串部分，就把能经过编码信息传递给web服务器。web服务器实际上必须返回某个图片来作为请求结果，但它一定要不可见：例如，一个1*1像素的透明图片。这种类型的图片也称为网页信标（web bug）。当网页信标不是与当前网页服务器而是其他服务器交流信息时，会担心隐私内容。这种第三方网页信标的方式常用于统计点击次数和网站流量分析。
 
-img元素无法实现完整的ajax传输协议，因为数据交换是单向的：客户端能发送数据到服务器，但服务器的响应一直是张图片导致客户端无法轻易从中提取信息。然而，iframe元素更加强大，为了把iframe作为ajax传输协议使用，脚本首先要把发送给web服务器的信息编码到url中，然后设置iframe的src属性为该url。服务器能创建一个包含响应内容的html文档，并把它返回给web浏览器，并且在iframe中显示它。iframe需要对用户不可见，例如可以使用css隐藏它。脚本通过遍历iframe的文档对象来读取服务器端的响应。注意，这种访问受限于13.6.2节介绍的同源策略问题。
+img元素无法实现完整的Ajax传输协议，因为数据交换是单向的：客户端能发送数据到服务器，但服务器的响应一直是张图片导致客户端无法轻易从中提取信息。然而，iframe元素更加强大，为了把iframe作为Ajax传输协议使用，脚本首先要把发送给web服务器的信息编码到url中，然后设置iframe的src属性为该url。服务器能创建一个包含响应内容的html文档，并把它返回给web浏览器，并且在iframe中显示它。iframe需要对用户不可见，例如可以使用css隐藏它。脚本通过遍历iframe的文档对象来读取服务器端的响应。注意，这种访问受限于13.6.2节介绍的同源策略问题。
 
-实际上，script元素的src属性能设置url并发起http-get请求。使用script元素实现脚本操纵http是非常吸引人的，因为它们可以跨域通信而不受限于同源策略。通常，使用基于script元素的ajax传输协议时，服务器的响应采用json编码（见6.9节）的数据格式，当执行脚本时，javascript解析器能自动将其“编码”。由于它使用json数据格式，因此这种ajax传输协议也叫做“jsonp”。
+实际上，script元素的src属性能设置url并发起http-get请求。使用script元素实现脚本操纵http是非常吸引人的，因为它们可以跨域通信而不受限于同源策略。通常，使用基于script的Ajax传输协议时，服务器的响应采用JSON编码（见6.9节）的数据格式，当执行脚本时，javascript解析器能自动将其“编码”。由于它使用json数据格式，因此这种Ajax传输协议也叫做“JSONP”。
 
-虽然在iframe和script传输协议之上能实现ajax技术，但通常还有更简单的方式。一段时间以来，所有浏览器都支持XMLHttpRequest对象，它定义了用脚本操纵http的api。除了常用的get请求，这个api还包含实现post请求的能力，同时它能用文本或document对象的形式返回服务器的响应。虽然它的名字叫XMLHttpRequestAPI，但并没有限定只能使用XML文档，它能获取任何类型的文本文档。18.1节涵盖XMLHttpRequestAPI和本章的大部分。本章大部分ajax示例都将使用XMLHttpRequest对象来实现协议方案，我们也将在18.2节演示如何使用基于script的传输协议，因为script元素有规避同源限制的能力。
+虽然在iframe和script传输协议之上能实现Ajax技术，但通常还有更简单的方式。一段时间以来，所有浏览器都支持XMLHttpRequest对象，它定义了用脚本操纵HTTP的API。除了常用的get请求，这个API还包含实现POST请求的能力，同时它能用文本或Document对象的形式返回服务器的响应。虽然它的名字叫XMLHttpRequestAPI，但并没有限定只能使用XML文档，它能获取任何类型的文本文档。18.1节涵盖XMLHttpRequestAPI和本章的大部分。本章大部分Ajax示例都将使用XMLHttpRequest对象来实现协议方案，我们也将在18.2节演示如何使用基于script的传输协议，因为script元素有规避同源限制的能力。
 
-Ajax中的X表示XML，这个http（XMLHttpRequest）的主要客户端API在其名字中突出了XML，并且后面我们将看到XMLHttpRequest对象的其中一个属性叫responseXML。它看起来像说明XML是用脚本操纵HTTP的重要部分，但实际上它不是，这些名字只是XML流行时的遗迹。当然，ajax技术能和xml文档一起工作，但使用xml只是一种选择，实际上很少使用。XMLHttpRequest规范列出了这个令人困惑名字的不足之处：对象名XMLHttpRequest是为了兼容web，虽然这个名字的每个部分都可能造成误导。首先，这个对象支持包含XML在内的任何基于文本的格式。其次，它能用于HTTP和HTTPS请求（一些实现支持除了HTTP和HTTPS之外的协议，但规范不包括这些功能）。最后，它所支持的请求是一个广义的概念，指的是对于定义的HTTP方法的涉及HTTP请求或响应的所有活动。
+Ajax中的X表示XML，这个HTTP（XMLHttpRequest）的主要客户端API在其名字中突出了XML，并且后面我们将看到XMLHttpRequest对象的其中一个属性叫responseXML。它看起来像说明XML是用脚本操纵HTTP的重要部分，但实际上它不是，这些名字只是XML流行时的遗迹。当然，Ajax技术能和XML文档一起工作，但使用XML只是一种选择，实际上很少使用。XMLHttpRequest规范列出了这个令人困惑名字的不足之处：对象名XMLHttpRequest是为了兼容web，虽然这个名字的每个部分都可能造成误导。首先，这个对象支持包含XML在内的任何基于文本的格式。其次，它能用于HTTP和HTTPS请求（一些实现支持除了HTTP和HTTPS之外的协议，但规范不包括这些功能）。最后，它所支持的请求是一个广义的概念，指的是对于定义的HTTP方法的涉及HTTP请求或响应的所有活动。
 
-Comet传输协议比Ajax更精妙，但都需要客户端和服务器之间建立（必要时重新建立）连接，同时需要服务器保持连接处于打开状态，这样它才能够发送异步信息。隐藏的iframe能像comet传输协议一样有用，例如，如果服务器以iframe中待执行的script的元素的形式发送每条消息。实现comet的一种更可靠跨平台方案是客户端建立一个和服务器的连接（使用ajax传输协议），同时服务器保持这个连接打开直到它需要推送一条消息。处理该消息之后，客户端马上为后续的消息推送建立一个新连接。
+Comet传输协议比Ajax更精妙，但都需要客户端和服务器之间建立（必要时重新建立）连接，同时需要服务器保持连接处于打开状态，这样它才能够发送异步信息。隐藏的iframe能像Comet传输协议一样有用，例如，如果服务器以iframe中待执行的script的元素的形式发送每条消息。实现comet的一种更可靠跨平台方案是客户端建立一个和服务器的连接（使用Ajax传输协议），同时服务器保持这个连接打开直到它需要推送一条消息。服务器每发送一条消息就关闭这个连接，这样可以确保客户端正确接收到消息。处理该消息之后，客户端马上为后续的消息推送建立一个新连接。
 
-实现可靠的跨平台comet传输协议是非常有挑战性的，所以大部分使用comet架构的web应用开发者依赖于像Dojo这样的web框架库中的传输协议。在写本章时，浏览器正开始实现HTML5相关草案的Server-Sent事件，它用EventSource对象的形式定义了简单的comet-api。18.3节涵盖EventSource-API且演示了一个使用XMLHttpRequest实现的简单模拟示例。
+实现可靠的跨平台Comet传输协议是非常有挑战性的，所以大部分使用Comet架构的web应用开发者依赖于像Dojo这样的Web框架库中的传输协议。在写本章时，浏览器正开始实现HTML5相关草案的Server-Sent事件，它用EventSource对象的形式定义了简单的CometAPI。18.3节涵盖EventSource-API且演示了一个使用XMLHttpRequest实现的简单模拟示例。
 
-在Ajax和Comet之上构建更高级的通信协议是可行的。例如，这些客户端／服务器技术可以用做RPC（Remote Procedure Call，远程过程调用）机制或发布／订阅事件系统的基础。
+在Ajax和Comet之上构建更高级的通信协议是可行的。
+例如，这些客户端／服务器技术可以用做RPC（Remote Procedure Call，远程过程调用）机制或发布／订阅事件系统的基础。
 
-但是本章不会介绍像上面这样更高级的协议，我们重点在能使Ajax和Comet可用在API上。
+但是本章不会介绍像上面这样更高级的协议，我们重点在能使Ajax和Comet可用的API上。
 
 **18.1使用XMLHttpRequest**
 
-浏览器在XMLHttpRequest类上定义了它们的HTTP-API。这个类的每个实例都表示一个独立的请求／响应对，并且这个对象的属性和方法允许指定请求细节和提取响应数据。很多年前web浏览器就开始支持XMLHttpRequest，并且其API已经到了w3c制订标准的最后阶段。同时，w3c正在制订“2级XMLHttpRequest”标准草案。本节涵盖XMLHTTPRequest核心API，也包括当前至少被两款浏览器支持的部分2级XMLHttpRequest标准草案（我们将其称为XHR2）。
+浏览器在XMLHttpRequest类上定义了它们的HTTP-API。这个类的每个实例都表示一个独立的请求／响应对，并且这个对象的属性和方法允许指定请求细节和提取响应数据。很多年前Web浏览器就开始支持XMLHttpRequest，并且其API已经到了W3C制订标准的最后阶段。同时，W3C正在制订“2级XMLHttpRequest”标准草案。本节涵盖XMLHttpRequest核心API，也包括当前至少被两款浏览器支持的部分2级XMLHttpRequest标准草案（我们将其称为XHR2）。
 
-当然，使用这个HTTP-API必须要做的第一件事就是实例化XMLHttpRequest对象：
+当然，使用这个HTTP API必须要做的第一件事就是实例化XMLHttpRequest对象：
 
     var request ＝ new XMLHttpRequest();
     
-你也能重用已存在的XMLHttpRequest，但注意这将会终止之前通过该对像挂起的任何请求。
+你也能重用已存在的XMLHttpRequest，但注意这将会终止之前通过该对象挂起的任何请求。
 
-IE6中的XMLHttpRequest:Microsoft最早把XMLHttpRequest对象引入到IE5中，且在IE5和IE6中它只是一个ActiveX对象。IE7之前的版本不支持非标准的XMLHttpRequest()构造函数，但它能像如下这样模拟：
+IE6中的XMLHttpRequest：Microsoft最早把XMLHttpRequest对象引入到IE5中，且在IE5和IE6中它只是一个ActiveX对象。IE7之前的版本不支持非标准的XMLHttpRequest()构造函数，但它能像如下这样模拟：
 ```javascript
 //在IE5和IE6中模拟XMLHttpRequest()构造函数
 if (window.XMLHttpRequest === undefined) {
@@ -64,24 +65,24 @@ if (window.XMLHttpRequest === undefined) {
 }
 ```
 
-一个http请求由4部分组成：
+一个HTTP请求由4部分组成：
 
-*  http请求方法或“动作”（web）
-* 正在请求的url
+* HTTP请求方法或“动作”（verb）
+* 正在请求的URL
 * 一个可选的请求头集合，其中可能包括身份验证信息
 * 一个可选的请求主体
 
-服务器返回的http响应包含3部分：
+服务器返回的HTTP响应包含3部分：
 
 * 一个数字和文字组成的状态码，用来显示请求的成功和失败
 * 一个响应头集合
 * 响应主体
 
-接下来的前面两节会展示如何设置http请求的每个部分和如何查询http响应的每个部分，随后的核心章节会涵盖更多的专门议题。
+接下来的前面两节会展示如何设置HTTP请求的每个部分和如何查询HTTP响应的每个部分，随后的核心章节会涵盖更多的专门议题。
 
-http的基础请求／响应架构非常简单且易于使用。但在实践中会有各种各样随之而来的复杂问题：客户端和服务器交换cookie，服务器重定向浏览器到其他服务器，缓存某些资源而剩下的不缓存，某些客户端通过代理服务器发送所有的请求等。XMLHttpRequestAPI不是协议级的HTTP-API而是浏览器级的API。浏览器需要考虑cookie，重定向，缓存和代理。但代码只需要担心请求和响应。
+HTTP的基础请求／响应架构非常简单并且易于使用。但在实践中会有各种各样随之而来的复杂问题：客户端和服务器交换cookie，服务器重定向浏览器到其他服务器，缓存某些资源而剩下的不缓存，某些客户端通过代理服务器发送所有的请求等。XMLHttpRequestAPI不是协议级的HTTPAPI而是浏览器级的API。浏览器需要考虑cookie，重定向，缓存和代理。但代码只需要担心请求和响应。
 
-XMLHttpRequest和本地文件，网页中可以使用相对url的能力通常意味着我们能使用本地文件系统来开发和测试html，并避免对web服务器进行不必要的部署。然后当使用XMLHttpRequest进行ajax编程时，这通常是不可行的。XMLHttpRequest用于同http和https协议一起工作。理论上，它能够同像ftp这样的其他协议一起工作，但比如像请求方法和响应状态码等部分api是http特有的。如果从本地文件中加载网页，那么该页面中的脚本将无法通过相对url使用XMLHttpRequest，因为这些url将相对于file://url而不是http://url。而同源策略通常会阻止使用绝对http://url（请参见18.1.6节）。如果是当使用XMLHttpRequest时，为了测试它们通常必须把文件上传到web服务器（或运行一个本地服务器）。
+XMLHttpRequest和本地文件：网页中可以使用相对URL的能力通常意味着我们能使用本地文件系统来开发和测试HTML，并避免对Web服务器进行不必要的部署。然后当使用XMLHttpRequest进行Ajax编程时，这通常是不可行的。XMLHttpRequest用于同HTTP和HTTPS协议一起工作。理论上，它能够同像FTP这样的其他协议一起工作，但比如像请求方法和响应状态码等部分API是HTTP特有的。如果从本地文件中加载网页，那么该页面中的脚本将无法通过相对URL使用XMLHttpRequest，因为这些URL将相对于file://URL而不是http://URL。而同源策略通常会阻止使用绝对http://URL（请参见18.1.6节）。如果是当使用XMLHttpRequest时，为了测试它们通常必须把文件上传到Web服务器（或运行一个本地服务器）。
 
 18.1.1指定请求
 
@@ -90,7 +91,7 @@ XMLHttpRequest和本地文件，网页中可以使用相对url的能力通常意
     rquest.open("GET",      //开始一个HTTP GET请求
                 "data.csv");//URL的内容
 ```
-open()第一个参数指定http方法或者动作。这个字符串不区分大小写，但通常大家用大写字母来匹配HTTP协议。“GET”和“POST”方法是得到广泛支持的。
+open()第一个参数指定HTTP方法或动作。这个字符串不区分大小写，但通常大家用大写字母来匹配HTTP协议。“GET”和“POST”方法是得到广泛支持的。
 “GET”用于常规请求，它适用于当url完全指定请求资源，当请求对服务器没有任何副作用以及当服务器的响应是可缓存时。“POST”方法常用于html表单。它在请求主体中包含额外数据（表单数据）且这些数据常存储到服务器上的数据库中（副作用）。相同url的重复post请求从服务器得到的响应可能不同，同时不应该缓存使用这个方法的请求。除了“GET”和“POST”之外，XMLHttpRequest也允许把“DELETE”、“HEAD”、“OPTIONS”和“PUT”作为open()的第一个参数。（“HTTP CONNECT”、“TRACE”和“TRACK”因为安全风险已被明确禁止。）旧浏览器并不支持所有的这些方法，但至少“HEAD”得到了广泛支持，例18-13演示如何使用它。
 
 open()的第2个参数是URL，它是请求主题。这是相对于文档的URL，这个文档包含调用open()的脚本。如果指定绝对URL、协议、主机和端口通常必须匹配所在文档的对应内容：跨域的请求通常会报错。（但是当服务器明确允许跨域请求时，2级XMLHttpRequest规范会允许它，见18.1.6节。）
