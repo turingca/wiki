@@ -744,6 +744,17 @@ whenReady(function() {
 ```
 [1,2,{"buckle":"my shoe"}]
 ```
+它会发送这样一个包裹后的JSON响应：
+```
+handleResponse (
+[1, 2, {"buckle": "my shoe"}]
+)
+```
+包裹后的响应会成为script元素的内容，它先判断JSON编码后的数据（毕竟就是一个javascript表达式），然后把它传递给handleResponse()函数，我们可以假设，文档会拿这些数据做一些有用的事情。
+
+为了可行起见，我们必须通过某种方式告诉服务，它正在从一个script元素调用，必须返回一个JSONP响应，而不应该是普通的JSON响应。这个可以通过在URL中添加一个查询参数来实现：例如，追加“?json”（或&json）。
+
+在实践中，支持JSONP的服务不会强制指定客户端必须实现的回调函数名称，比如handleResponse。相反，它们使用
 
 
 **18.3基于服务器端推送事件的comet技术**
