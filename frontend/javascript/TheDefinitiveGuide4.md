@@ -5,9 +5,9 @@
 
 但是，用javascript操纵http是可行的。当用脚本设置window对象的location属性或调用表单对象的submit()方法时，都会初始化http请求。在这两种情况下，浏览器会加载新页面。这种用脚本控制http的方法在多框架页面中非常有用，但这并非我们在此讨论的主题。相反，本章会说明在没有导致web浏览器重新加载任何窗口或窗体的内容情况下，脚本如何实现web浏览器与服务器之间的通信。
 
-术语Ajax描述了一种主要使用脚本操纵http的web应用架构。ajax应用的主要特点是使用脚本操纵http和web服务器进行数据交换，不会导致页面重载。避免页面重载（这是web初期的标准做法）的能力使web应用感觉更像传统的桌面应用。web应用可以使用ajax技术把用户的交互数据记录到服务器中；也可以开始只显示简单的页面，之后按需加载额外的数据和页面组件来提升应用的启动时间。
+术语Ajax描述了一种主要使用脚本操纵http的web应用架构。Ajax应用的主要特点是使用脚本操纵HTTP和Web服务器进行数据交换，不会导致页面重载。避免页面重载（这是Web初期的标准做法）的能力使Web应用感觉更像传统的桌面应用。Web应用可以使用Ajax技术把用户的交互数据记录到服务器中；也可以开始只显示简单的页面，之后按需加载额外的数据和页面组件来提升应用的启动时间。
 
-ajax是Asynchronous Javascript and XML的缩写（未全部大写）。这个术语是Jesse James Carrett创造，最早出现在他于2005年发表的文章“Ajax:A New Approach to Web Applications”。“ajax”曾经是一个流行多年的术语，现在它只不过是一个有用的术语，来描述基于用脚本操纵http请求的web应用架构。
+Ajax是Asynchronous Javascript and XML的缩写（未全部大写）。这个术语是Jesse James Carrett创造，最早出现在他于2005年发表的文章“Ajax:A New Approach to Web Applications”。“Ajax”曾经是一个流行多年的术语，现在它只不过是一个有用的术语，来描述基于用脚本操纵HTTP请求的Web应用架构。
 
 Comet是和使用脚本操纵http的web应用架构相关的术语。在某种意义上，Comet和Ajax相反。在comet中，web服务器发起通信并异步发送消息到客户端。如果web应用需要响应服务端发送的消息，则它使用ajax技术发送或请求数据。在ajax中，客户端从服务端“拉”数据，而在comet中，服务端向客户端“推”数据。comet还包括其他名词（如“服务器推”、“ajax推”和“http流”）。
 
