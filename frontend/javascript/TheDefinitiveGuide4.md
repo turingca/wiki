@@ -869,46 +869,52 @@ window.onload = function() {
 例18-16：用XMLHttpRequest模拟EventSource
 ```javascript
 // Emulate the EventSource API for browsers that do not support it.
+// 在不支持EventSource API的浏览器里进行模拟
 // Requires an XMLHttpRequest that sends readystatechange events whenever
+// 需要有一个XMLHttpRequest对象在新数据写到长期存在的HTTP连接中时发送readystatechange事件
 // there is new data written to a long-lived HTTP connection. Note that
+// 注意，这个API的实现是不完整的
 // this is not a complete implementation of the API: it does not support the
+// 它不支持readyState属性、close()方法、open和error事件
 // readyState property, the close() method, nor the open and error events.
+// 消息事件也是通过onmessage属性注册的——这个版本还没有定义addEventListener()方法
 // Also event registration for message events is through the onmessage 
 // property only--this version does not define an addEventListener method.
-if (window.EventSource === undefined) {     // If EventSource is not defined,
-    window.EventSource = function(url) {    // emulate it like this.
-        var xhr;                        // Our HTTP connection...
-        var evtsrc = this;              // Used in the event handlers.
-        var charsReceived = 0;          // So we can tell what is new.
-        var type = null;                // To check property response type.
-        var data = "";                  // Holds message data
-        var eventName = "message";      // The type field of our event objects
-        var lastEventId = "";           // For resyncing with the server
-        var retrydelay = 1000;          // Delay between connection attempts
-        var aborted = false;            // Set true to give up on connecting
+if (window.EventSource === undefined) {     // If EventSource is not defined, 如果未定义EventSource对象
+    window.EventSource = function(url) {    // emulate it like this. 像这样进行模拟
+        var xhr;                        // Our HTTP connection... HTTP连接器
+        var evtsrc = this;              // Used in the event handlers. 在事件处理程序中用到
+        var charsReceived = 0;          // So we can tell what is new. 这样我们就可以知道什么是新的
+        var type = null;                // To check property response type. 检查属性响应类型
+        var data = "";                  // Holds message data 存放消息数据
+        var eventName = "message";      // The type field of our event objects 事件对象的类型字段
+        var lastEventId = "";           // For resyncing with the server 用于和服务器再次同步
+        var retrydelay = 1000;          // Delay between connection attempts 在多个连接请求之间设置延迟
+        var aborted = false;            // Set true to give up on connecting 设置为true表示放弃连接
 
-        // Create an XHR object
+        // Create an XHR object 创建一个XHR对象
         xhr = new XMLHttpRequest(); 
 
-        // Define an event handler for it
+        // Define an event handler for it 定义一个事件处理程序
         xhr.onreadystatechange = function() {
             switch(xhr.readyState) {
-            case 3: processData(); break;   // When a chunk of data arrives
-            case 4: reconnect(); break;     // When the request closes
+            case 3: processData(); break;   // When a chunk of data arrives 当数据块到达时
+            case 4: reconnect(); break;     // When the request closes 当请求关闭的时候
             }
         };
 
-        // And establish a long-lived connection through it
+        // And establish a long-lived connection through it 通过connet()创建一个长期存在的连接
         connect();
 
         // If the connection closes normally, wait a second and try to restart
+        // 如果连接正常关闭，等待1秒钟再尝试连接
         function reconnect() {
-            if (aborted) return;             // Don't reconnect after an abort
-            if (xhr.status >= 300) return;   // Don't reconnect after an error
-            setTimeout(connect, retrydelay); // Wait a bit, then reconnect
+            if (aborted) return;             // Don't reconnect after an abort 在终止连接后不进行重连操作
+            if (xhr.status >= 300) return;   // Don't reconnect after an error 在报错之后不进行重连操作
+            setTimeout(connect, retrydelay); // Wait a bit, then reconnect 等待1秒后进行重连
         };
 
-        // This is how we establish a connection
+        // This is how we establish a connection 这里的代码展示了如何建立一个连接
         function connect() {
             charsReceived = 0; 
             type = null;
@@ -919,9 +925,11 @@ if (window.EventSource === undefined) {     // If EventSource is not defined,
         }
 
         // Each time data arrives, process it and trigger the onmessage handler
+        // 每当数据到达的时候，会处理并触发onmessage处理程序
         // This function handles the details of the Server-Sent Events protocol
+        // 这个函数处理Server-Send Events协议的细节
         function processData() {
-            if (!type) {   // Check the response type if we haven't already
+            if (!type) {   // Check the response type if we haven't already 如果没有准备好，先检查响应类型
                 type = xhr.getResponseHeader('Content-Type');
                 if (type !== "text/event-stream") {
                     aborted = true;
@@ -929,40 +937,40 @@ if (window.EventSource === undefined) {     // If EventSource is not defined,
                     return; 
                 }
             }
-            // Keep track of how much we've received and get only the
-            // portion of the response that we haven't already processed.
+            // Keep track of how much we've received and get only the  记录接收的数据
+            // portion of the response that we haven't already processed. 获得响应中未处理的数据
             var chunk = xhr.responseText.substring(charsReceived);
             charsReceived = xhr.responseText.length;
 
-            // Break the chunk of text into lines and iterate over them.
+            // Break the chunk of text into lines and iterate over them. 将大块的文本数据分成多行并遍历它们
             var lines = chunk.replace(/(\r\n|\r|\n)$/, "").split(/\r\n|\r|\n/);
             for(var i = 0; i < lines.length; i++) {
                 var line = lines[i], pos = line.indexOf(":"), name, value="";
-                if (pos == 0) continue;               // Ignore comments
-                if (pos > 0) {                        // field name:value
+                if (pos == 0) continue;               // Ignore comments 忽略注释
+                if (pos > 0) {                        // field name:value 字段名称：值
                     name = line.substring(0,pos);
                     value = line.substring(pos+1);
                     if (value.charAt(0) == " ") value = value.substring(1);
                 }
-                else name = line;                     // field name only
+                else name = line;                     // field name only 只有字段名称
 
                 switch(name) {
                 case "event": eventName = value; break;
                 case "data": data += value + "\n"; break;
                 case "id": lastEventId = value; break;
                 case "retry": retrydelay = parseInt(value) || 1000; break; 
-                default: break;  // Ignore any other line
+                default: break;  // Ignore any other line 忽略其他行
                 }
 
-                if (line === "") {  // A blank line means send the event
+                if (line === "") {  // A blank line means send the event 一个空行意味着发送事件
                     if (evtsrc.onmessage && data !== "") {
-                        // Chop trailing newline if there is one
+                        // Chop trailing newline if there is one 如果末尾有新行，就裁剪新行
                         if (data.charAt(data.length-1) == "\n")
                             data = data.substring(0, data.length-1);
-                        evtsrc.onmessage({    // This is a fake Event object
-                            type: eventName,  // event type
-                            data: data,       // event data
-                            origin: url       // the origin of the data
+                        evtsrc.onmessage({    // This is a fake Event object 这里是一个伪造的事件对象
+                            type: eventName,  // event type 事件类型
+                            data: data,       // event data 事件数据
+                            origin: url       // the origin of the data 数据源
                         });
                     }
                     data = "";
