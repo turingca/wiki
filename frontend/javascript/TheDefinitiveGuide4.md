@@ -761,32 +761,39 @@ handleResponse (
 例18-14：使用script元素发送JSONP请求
 ```
 // Make a JSONP request to the specified URL and pass the parsed response
+// 根据指定的URL发送一个JSONP请求
 // data to the specified callback. Add a query parameter named "jsonp" to
+// 然后把解析得到的响应数据传递给回调函数
 // the URL to specify the name of the callback function for the request.
+// 在URL中添加一个名为jsonp的查询参数，用于指定该请求的回调函数的名称
 function getJSONP(url, callback) {
     // Create a unique callback name just for this request
-    var cbnum = "cb" + getJSONP.counter++; // Increment counter each time
-    var cbname = "getJSONP." + cbnum;      // As a property of this function
+    // 为本次请求创建一个唯一的回调函数名称
+    var cbnum = "cb" + getJSONP.counter++; // Increment counter each time 每次自增计数器
+    var cbname = "getJSONP." + cbnum;      // As a property of this function 作为JSONP函数的属性
     
     // Add the callback name to the url query string using form-encoding
+    // 将回调函数名称以表单编码的形式添加到URL的查询部分中
     // We use the parameter name "jsonp".  Some JSONP-enabled services 
+    // 使用jsonp作为参数名，一些支持JSONP的服务
     // may require a different parameter name, such as "callback".
-    if (url.indexOf("?") === -1)   // URL doesn't already have a query section
-        url += "?jsonp=" + cbname; // add parameter as the query section
+    // 可能使用其他的参数名，比如callback
+    if (url.indexOf("?") === -1)   // URL doesn't already have a query section URL没有查询部分
+        url += "?jsonp=" + cbname; // add parameter as the query section 作为查询部分添加参数
     else                           // Otherwise, 
-        url += "&jsonp=" + cbname; // add it as a new parameter.
+        url += "&jsonp=" + cbname; // add it as a new parameter. 作为新的参数添加它
 
-    // Create the script element that will send this request
+    // Create the script element that will send this request 创建script元素用于发送请求
     var script = document.createElement("script");
 
-    // Define the callback function that will be invoked by the script
+    // Define the callback function that will be invoked by the script 定义将被脚本执行的回调函数
     getJSONP[cbnum] = function(response) {
         try {
-            callback(response); // Handle the response data
+            callback(response); // Handle the response data 处理响应数据
         }
-        finally {               // Even if callback or response threw an error
-            delete getJSONP[cbnum];                // Delete this function
-            script.parentNode.removeChild(script); // Remove script
+        finally {               // Even if callback or response threw an error 即使回调函数或响应抛出错误
+            delete getJSONP[cbnum];                // Delete this function 删除该函数
+            script.parentNode.removeChild(script); // Remove script 
         }
     };
 
