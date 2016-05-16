@@ -806,7 +806,7 @@ getJSONP.counter = 0;  // A counter we use to create unique callback names 用�
 **18.3基于服务器端推送事件的Comet技术**
 
 在服务器端推送事件的标准草案中定义了一个EventSource对象，简化了Comet应用程序的编写可以传递一个URL给EventSource()构造函数，然后在返回的实例上监听消息事件。
-```
+```javascript
 var ticker = new EventSource("stockprices.php");
 ticker.onmessage = function(e) {
     var type = e.type;
@@ -816,7 +816,7 @@ ticker.onmessage = function(e) {
 ```
 与message事件关联的事件对象有一个data属性，这个属性保存服务器作为该事件的负载发送的任何字符串。如同其他类型的事件一样，该对象还有一个type属性，默认值是message，事件源可以修改这个值。onmessage事件处理程序接收从一个给定的服务器事件源发出的所有事件，如果有必要，也可以根据type属性派发一个事件。
 
-服务端推动事件的协议很简单。客户端（创建一个EventSource对象时会）建立一个到服务器的连接，服务器保持这个连接处于打开状态。当方式一个事件时，服务器端在连接中写入几行文本，抛给客户端的事件可能看起来是这样：
+服务端推动事件的协议很简单。客户端（创建一个EventSource对象时会）建立一个到服务器的连接，服务器保持这个连接处于打开状态。当发生一个事件时，服务器端在连接中写入几行文本，抛给客户端的事件可能看起来是这样：
 ```
 event:bid 设置时间对象的类型
 data:GOOG 设置data属性
@@ -831,7 +831,7 @@ Comet架构的一个常见应用是聊天应用，聊天客户端可以通过XML
 ```
 <script>
 window.onload = function() {
-    // Take care of some UI details 注意一些细节
+    // Take care of some UI details 注意一些UI细节
     var nick = prompt("Enter your nickname");     // Get user's nickname 获取用户昵称
     var input = document.getElementById("input"); // Find the input field 找出input表单元素
     input.focus();                                // Set keyboard focus 设置键盘焦点
