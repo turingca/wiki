@@ -84,7 +84,7 @@ HTTP的基础请求／响应架构非常简单并且易于使用。但在实践�
 
 XMLHttpRequest和本地文件：网页中可以使用相对URL的能力通常意味着我们能使用本地文件系统来开发和测试HTML，并避免对Web服务器进行不必要的部署。然后当使用XMLHttpRequest进行Ajax编程时，这通常是不可行的。XMLHttpRequest用于同HTTP和HTTPS协议一起工作。理论上，它能够同像FTP这样的其他协议一起工作，但比如像请求方法和响应状态码等部分API是HTTP特有的。如果从本地文件中加载网页，那么该页面中的脚本将无法通过相对URL使用XMLHttpRequest，因为这些URL将相对于file://URL而不是http://URL。而同源策略通常会阻止使用绝对http://URL（请参见18.1.6节）。如果是当使用XMLHttpRequest时，为了测试它们通常必须把文件上传到Web服务器（或运行一个本地服务器）。
 
-18.1.1指定请求
+18.1.1 指定请求
 
 创建XMLHttpRequest对象之后，发起http请求的下一步是调用XMLHttpRequest对象的open()方法去指定这个请求的两个必需部分：方法和URL。
 ```
@@ -220,7 +220,7 @@ function getTextSync(url) {
 如果服务器想发送诸如对象或数组这样的结构化数据作为其响应，它应该传输JSON编码（参见6.9节）的字符串数据。当接收它时，可以把responseText属性传递给JSON.parse()。例18-3是例18-2的归纳：它实现指定URL的GET请求并当URL的内容准备就绪时把它们传递给指定的回调函数。但它不是一直传递文本，而是传递Document对象或使用JSON.parse()编码的对象或字符串。
 
 例18-3： 解析HTTP响应
-```
+```javascript
 // Issue an HTTP GET request for the contents of the specified URL. 
 // 发起HTTP-GET响应以获取指定URL的内容
 // When the response arrives, pass it to the callback function as a 
@@ -308,7 +308,7 @@ function encodeFormData(data) {
 使用已定义的encodeFormData()函数，我们能容易地写出像例18-5中的postData()函数这样的工具函数。需要注意的是，简单来说，postData()函数（在随后的示例中有相似的函数）不能处理服务器的响应。当响应完成，它传递整个XMLHttpRequest对象给指定的回调函数。这个回调函数负责检查响应状态码和提取响应文本。
 
 例18-5：使用表单编码数据发起一个HTTP POST请求
-```
+```javascript
 function postData(url, data, callback) {
     var request = new XMLHttpRequest();            
     request.open("POST", url);                    // POST to the specified url 对指定url发生post请求
@@ -321,7 +321,7 @@ function postData(url, data, callback) {
     request.send(encodeFormData(data));           // Send form-encoded data 发送表单编码的数据
 }
 ```
-表单数据同样可以通过GET请求来提交，既然表单提交的目的是为了执行只读查询，因此POST请求比POST请求更合适。（当提交表单的目标仅仅是一个只读查询，GET比POST更合适。）GET请求从来没有主体，所以需要发送给服务器的表单编码数据“负载”要作为URL（后跟一个问号）的查询部分。encodeFormData()工具函数也能用于这种GET请求，且例18-6演示了如何使用它。
+表单数据同样可以通过GET请求来提交，既然表单提交的目的是为了执行只读查询，因此GET请求比POST请求更合适。（当提交表单的目标仅仅是一个只读查询，GET比POST更合适。）GET请求从来没有主体，所以需要发送给服务器的表单编码数据“负载”要作为URL（后跟一个问号）的查询部分。encodeFormData()工具函数也能用于这种GET请求，且例18-6演示了如何使用它。
 
 例18-6：使用表单编码数据发起GET请求
 ```javascript
@@ -399,7 +399,7 @@ function postQuery(url, what, where, radius, callback) {
 }
 ```
 
-注意：例18-8不曾为请求设置“Content-Type”头。当给send()方法传入XML文档时，并没有预先指定“Content-Type”头，但XMLHttpRequest对象会自动设置一个合适的头。（类似地，如果给send()传入一个字符串但没有指定Content-Type头，那么XMLHttpRequest将会添加“ext/plain;charset=UTF-8”头。）在例18-1的代码中显式设置了这个头，但实际上对于纯文本的请求主体并不需要这么做。
+注意：例18-8不曾为请求设置“Content-Type”头。当给send()方法传入XML文档时，并没有预先指定“Content-Type”头，但XMLHttpRequest对象会自动设置一个合适的头。（类似地，如果给send()传入一个字符串但没有指定Content-Type头，那么XMLHttpRequest将会添加“text/plain;charset=UTF-8”头。）在例18-1的代码中显式设置了这个头，但实际上对于纯文本的请求主体并不需要这么做。
 
 4.上传文件
 
@@ -408,7 +408,7 @@ HTML表单的特性之一是当用户通过input属性type="file"元素选择文
 没有File()对象构造函数，脚本仅能获得表示用户当前选择文件的File对象。在支持File对象的浏览器中，每个input属性type="file"元素有一个files属性，它是File对象中的类数组对象。拖放API（参见17.7节）允许通过拖放事件的dataTransfer.files属性访问用户“拖放”到元素上的文件。我们将在22.6节和22.7节看到更多关于File对象的内容。但现在来讲，可以将它当做一个用户选择文件完全不透明的表示形式，适用于通过send()来上传文件。例18-9是一个自然的javascript函数，它对某些文件上传元素添加了change事件处理程序，这样它们能自动把任何选择过的文件内容通过POST方法自动发送到指定的URL。
 
 例18-9：使用HTTP-POST请求上传文件
-```
+```javascript
 // Find all <input type="file"> elements with a data-uploadto attribute
 // 查找有data-uploadto属性的全部input属性type为file的元素
 // and register an onchange handler so that any selected file is 
@@ -488,17 +488,12 @@ HTTP请求无法完成有3种情况，对应3种事件。如果请求超时，�
 对于任何具体请求，浏览器将只会触发load、abort、timeout和error事件中的一个。XHR2规范草案指出一旦这些事件中的一个发生后，浏览器应该触发loaded事件。但在写本章时，尚未有浏览器实现loadend事件。
 
 可以通过XMLHttpRequest对象的addEventListener()方法为这些progress事件中的每个都注册处理程序。如果每种事件只有一个事件处理程序，通常更容易的方法是只设置对应的处理程序属性，比如onprogress和onload。甚至可以使用这些事件属性是否存在来测试浏览器是否支持progress事件：
-```
+```javascript
 if("onprogress" in (new XMLHttpRequest())) {
     //支持progress事件
 }
 ```
-除了像type和timestamp这样常用的Event对象属性外，与这些progress事件相关联的事件对象还有3个有用的属性。loaded属性是目前传输的字节数值。total属性是自“Content-Length”头传输的数据的整体长度（单位是字节），如果不知道内容长度则为0。最后，如果知道内容长度则lengthComputable属性为true；否则为false。显然，total和loaded属性对progress事件处理程序相当有用：
-```
-if ("onprogress" in (new XMLHttpRequest())) {
-    //支持progress事件
-}
-```
+
 除了像type和timestamp这样常用的Event对象属性外，与这些progress事件相关联的事件对象还有3个有用的属性。loaded属性是目前传输的字节数值。total属性是自“Content-Length”头传输的数据的整体长度（单位是字节），如果不知道内容长度则为0。最后，如果知道内容长度则lengthComputable属性为true；否则为false。显然，total和loaded属性对progress事件处理程序相当有用：
 ```javascript
 request.onprogress = function(e) {
@@ -607,7 +602,7 @@ whenReady(function() {
 XHR2定义了timeout属性来指定请求自动中止后的毫秒数，也定义了timeout事件用于当超时发生时触发（不是abort事件）。在写本章时，浏览器不支持这些自动超时（并且它们的XMLHttpRequest对象没有timeout和ontimeout属性）。可以用setTimeout()（参见14.1节）和abort()方法实现自己的超时。例18-12演示如何这么做。
 
 例18-12：实现超时
-```
+```javascript
 // Issue an HTTP GET request for the contents of the specified URL.
 // 发起HTTP GET请求获取指定URL的内容
 // If the response arrives successfully, pass responseText to the callback.
@@ -647,14 +642,14 @@ function timedGetText(url, timeout, callback) {
 
 作为同源策略（参见13.6.2节）的一部分，XMLHttpRequest对象通常仅可以发起和文档具有相同的服务器的HTTP请求。这个限制关闭了安全漏洞，但它笨手笨脚并且也阻止了大量合适使用的跨域请求。可以在form和iframe元素中使用跨域URL，而浏览器显示最终的跨域文档。但因为同源策略，浏览器不允许原始脚本查找跨域文档的内容。使用XMLHttpRequest，文档内容都是通过responseText属性暴露，所以同源策略不允许XMLHttpRequest进行跨域请求。（注意script元素并未真正受限于同源策略：它加载并执行任何来源的脚本。如果我们看18.2节，跨域请求的灵活性使得script元素成为取代XMLHttpRequest的主流Ajax传输协议。）
 
-XHR2通过在HTTP响应中选择发送合适的CORS（Cross-Origin Resource Sharing，跨域资源共享）允许跨域访问网站。在写本书时，Firefox、Safari、Chrome的当前版本都支持CORS，而IE8通过这里没有列出的专用XDomainRequest对象支持它。作为Web程序员，使用这个功能并不需要做什么额外的工作：如果浏览器支持XMLHttpRequest的CORS且实现跨域请求的网站决定使用CORS允许跨域请求，那么同源策略将不放宽而跨域请求会正常工作。
+XHR2通过在HTTP响应中选择发送合适的CORS（CrossOriginResourceSharing，跨域资源共享）允许跨域访问网站。在写本书时，Firefox、Safari、Chrome的当前版本都支持CORS，而IE8通过这里没有列出的专用XDomainRequest对象支持它。作为Web程序员，使用这个功能并不需要做什么额外的工作：如果浏览器支持XMLHttpRequest的CORS且实现跨域请求的网站决定使用CORS允许跨域请求，那么同源策略将不放宽而跨域请求会正常工作。
 
 虽然实现CORS支持的跨域请求工作不需要做任何事情，但有一些安全细节需要了解。首先，如果给XMLHttpRequest的open()方法传入用户名和密码，那么它们绝对不会通过跨域请求发送（这使分布式密码破解攻击成为可能）。除外，跨域请求通常也不会包含其他任何的用户证书：cookie和HTTP身份验证令牌（token）通常不会作为请求的内容部分发送且任何作为跨域响应来接收的cookie都会丢弃。如果跨域请求需要这几种凭证才能成功，那么必须在用send()发送请求前设置XMLHttpRequest的withCredentials属性为true。这样做不常见，但测试withCredentials的存在性是测试浏览器是否支持CORS的一种方法。
 
-示例8-13是常见的javascript代码，它使用XMLHttpRequest实现HTTP HEAD请求以下载文档中a元素链接资源的类型、大小和时间等信息。这个HEAD请求按需发起，且由此产生的链接信息会出现在工具提示中。这个示例假设跨域链接的信息会出现在工具提示中。这个示例假设跨域链接的信息不可用，但通过支持CORS的浏览器尝试下载它。、
+示例8-13是常见的javascript代码，它使用XMLHttpRequest实现HTTP-HEAD请求以下载文档中a元素链接资源的类型、大小和时间等信息。这个HEAD请求按需发起，且由此产生的链接信息会出现在工具提示中。这个示例假设跨域链接的信息会出现在工具提示中。这个示例假设跨域链接的信息不可用，但通过支持CORS的浏览器尝试下载它。
 
 例18-13：使用HEAD和CORS请求链接详细信息
-```
+```javascript
 /**
  * linkdetails.js
  *
@@ -731,7 +726,7 @@ whenReady(function() {
 });
 ```
 
-**18.2借助[script]发送http请求：jsonp**
+**18.2借助script发送http请求：jsonp**
 
 本章概述提到过script元素可以作为一种ajax传输机制：只须设置script元素的src属性（假如它还没插入到document中，需要插入进去），然后浏览器就会发送一个HTTP请求以下载src属性所指向的URL。使用script元素进行Ajax传输的一个主要原因是，它不受同源策略的影响，因此可以使用它们从其他的服务器请求数据，第二个原因是包含JSON编码数据的响应体会自动解码（即，执行）。
 
@@ -762,7 +757,7 @@ handleResponse (
 例18-14定义了一个getJSONP()函数，它发送JSONP请求。这个例子有点复杂，有几点值得注意。首先，注意它是如何创建一个新的script元素，设置其URL，并把它插入到文档中的。正是该插入操作触发HTTP请求。其次，注意例18-14为每个请求都创建了一个全新的内部回调函数，回调函数作为getJSONP()函数的一个属性存储起来。最后要注意的是回调函数做了一些必要的清理工作：删除脚本元素，并删除自身。
 
 例18-14：使用script元素发送JSONP请求
-```
+```javascript
 // Make a JSONP request to the specified URL and pass the parsed response
 // 根据指定的URL发送一个JSONP请求
 // data to the specified callback. Add a query parameter named "jsonp" to
@@ -808,7 +803,7 @@ function getJSONP(url, callback) {
 getJSONP.counter = 0;  // A counter we use to create unique callback names 用于创建唯一回调函数名称的计数器
 ```
 
-**18.3基于服务器端推送事件的comet技术**
+**18.3基于服务器端推送事件的Comet技术**
 
 在服务器端推送事件的标准草案中定义了一个EventSource对象，简化了Comet应用程序的编写可以传递一个URL给EventSource()构造函数，然后在返回的实例上监听消息事件。
 ```
