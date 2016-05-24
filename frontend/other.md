@@ -1,7 +1,7 @@
-老人言
+老司机
 -------
 
-[写给想成为前端工程师的同学们](other/OldManSaid.md)
+[写给想成为前端工程师的同学们](other/OldDriverSaid.md)
 
 工具
 -------
