@@ -27,7 +27,7 @@
 
 有人说前端工程师的技术栈是这样的：
 
-[](../img/system1.jpg)
+![](img/system1.jpg)
 
 
 
