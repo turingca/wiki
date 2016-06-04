@@ -9,7 +9,7 @@
   * [javascript](frontend/javascript.md)
   * [web-security](frontend/websecurity.md)
   * [engineering](frontend/engineering.md)
-  * [server](server/php.md)
+  * [server](frontend/server.md)
   * [other](frontend/other.md)
  
 
