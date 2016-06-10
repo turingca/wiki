@@ -5,6 +5,8 @@ https://en.wikipedia.org/wiki/GNU_Screen
 https://www.gnu.org/software/screen/
 ```
 
+http://talk.linuxtoy.org/cli-tips/#1
+
 reveal.js
 remark.js
 
