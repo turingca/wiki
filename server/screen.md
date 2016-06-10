@@ -11,3 +11,4 @@ reveal.js
 remark.js
 
 http://www.zhihu.com/question/21418449
+http://blog.jobbole.com/87584/
