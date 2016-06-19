@@ -11,6 +11,6 @@ Markdown 是一种轻量级的「标记语言」，它的优点很多，目前�
 
 通用input输入框（限制字数，正则匹配粘贴或输入的内容）
 
-```html
+```
 <input placeholder="请输入手机号码" maxlength="11" pattern="[0-9]*" onafterpaste="this.value=this.value.replace(/\D/g,'');" oninput="this.value=this.value.replace(/\D/g,'');">
 ```
