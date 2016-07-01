@@ -74,9 +74,27 @@ $("#debug").println("x = ", x, "; y = ", y);
 ```javascript
 //该方法输出其参数（使用println()插件方法）
 //到id为“debug”的元素上。如果不存在该元素，则创建一个并添加到文档中
-jQuery.debug = function
+jQuery.debug = function() {
+    var elt = jQuery("#debug"); //查找#debug元素
+    if (elt.length == 0) { //如果它不存在则创建之
+        elt = jQuery("<div id='debug'><h1>Debugging Output</h1></div>");
+        jQuery(document.body).append(elt);
+    }
+    elt.println.apply(elt, arguments); //将参数输出到元素中
+}
 ```
-
+除了定义新方法，还可以扩展jQuery类库的其他部分。例如，在19.5节中，我们已经看到可以通过给jQuery.fx.speeds添加属性来扩充新的动画时长名（除了“fast”和“slow”），也可以通过给jQuery.easing添加属性来添加新的缓动函数。插件甚至可以扩展jQuery的CSS选择器引擎！可以通过给jQuery.expr[':']对象添加属性来添加新的伪类过滤器（比如:first和:input）。下面这个例子定义了一个新的:draggable过滤器，可用来仅返回拥有draggable=true属性的元素：
+```javascript
+jQuery.expr[':'].draggable = function(e) {return e.draggable === true;};
+```
+使用上面定义的这个选择器，可以用$("img:draggable")来选取可拖曳的图片，而不用使用冗长的$("img[draggable=true]")。
+从上面的代码中可以看到，自定义选择器函数的第一个参数是候选的DOM元素。如果该元素匹配选择器，则返回true；否则返回false。许多自定义选择器只需要这一个元素参数，但实际上在调用它们时传入了4个参数。第二个参数是整数序号，表示当前元素在候选元素数组中的位置。候选元素数组作为第4个参数传入，选择器不应该修改它。第三个参数很有趣的：这是调用RegExp.exec()方法后返回的数组。如果有的话，该数组的第4个元素（序号是3）是伪类过滤器后面的圆括号中的值。圆括号和里面的如何引号都去除了，只留下参数字符串。下面是一个例子，用来说明如何实现一个:data(x)伪类，该伪类只在元素拥有data-x属性时返回true（参考15.4.3节）：
+```javascript
+jQuery.expr[':'].data = function(element, index, match, array) {
+    //注意，IE7及其以下版本不支持hasAttribute()
+    return element.hasAttribute("data-" + match[3]);
+};
+```
 
 **19.10 jQuery UI类库**
 
