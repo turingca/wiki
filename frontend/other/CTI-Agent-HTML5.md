@@ -1,6 +1,6 @@
 
-integine
---------
+integine呼叫中心
+----------------
 本文档描述了HTML5版本的Agent（坐席）的使用、二次开发。
 CTI平台针对坐席客户端，分别提供了ActiveX、JavaBean、JavascriptRIA、HTML5版本。
 其中ActiveX提供的是符合ActiveX-COM标准的接口，JavaBean提供的是符合Java标准的接口，Javascript提供的是Javascript+(silverlight或Flash)版本的接口、而HTML5版本提供的是基于最新的支持HTML5浏览器的Javascript版本的接口(无需安装silverlight或者Flash，是真正意义的客户端零安装)。
@@ -16,3 +16,12 @@ CTI平台针对坐席客户端，分别提供了ActiveX、JavaBean、JavascriptR
 |Internet Explorer|最低支持版本: 10+|
 |Opera|最低支持版本: 10+|
 |Safari|最低支持版本: 5+|
+
+本文详细介绍Javascript HTML5接口，为基于Javascript HTML5接口开发Agent业务功能的技术开发人员提供相关的支持。
+
+读者：采用JavaScript开发BS座席业务系统的技术人员。
+
+![](img/agent-html5.png)
+
+其他
+------------
