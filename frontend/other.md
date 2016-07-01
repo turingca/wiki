@@ -31,6 +31,8 @@
 
 [HTML5数据推送应用开发](other/Data-Push-Apps-with-HTML5-SSE.md)
 
+[HTML5呼叫中心坐席Agent](other/CTI-Agent-HTML5.md)
+
 面试
 -----
 
