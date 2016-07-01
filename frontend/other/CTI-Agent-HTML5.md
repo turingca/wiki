@@ -35,5 +35,15 @@ Javascript HTML5 Agent与MIS系统
 
 ![](img/agent-logic.png)
 
+如上图所示，Javascript HTML5版本的Agent提供了3个模块：
+* AgentUI.js
+  * Javascript控件条部分（UI界面部分，采用了ExtJS库），专门负责坐席界面的显示，以及各种对话框的显示：这个js里面关于界面的实现，完全可以换成其他的js界面实现，比如纯html、JQueryUI等等。
+* AgentStateInterpretor.js
+  * Javascript处理软电话状态机和与CTI通讯部分 
+* AgentProxy.js
+  * 提供了上层调用的接口函数和回调事件
+
+由上图结构可见，Agent HTML5的HTML5部分并不是用来绘制界面的，而是利用了其WebSocket通讯功能，做底层的通讯部分和状态处理部分。界面部分是借由ExtJS的js库完成的。而界面部分是可以替换成其他的js实现的。
+
 其他
 ------------
