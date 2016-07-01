@@ -21,7 +21,19 @@ CTI平台针对坐席客户端，分别提供了ActiveX、JavaBean、JavascriptR
 
 读者：采用JavaScript开发BS座席业务系统的技术人员。
 
+MIS：Manager Info System（管理信息系统），即呼叫中心人工服务业务系统。
+
+Javascript HTML5 Agent与MIS系统
+
 ![](img/agent-html5.png)
+
+如上图所示，所有类型的Agent都是通过Socket与CTIServer建立TCP/IP连接；并且，不同类型的Agent都通过标准接口被MIS应用系统所调用。其中，Javascript HTML5标准的Agent采用的是WebSocket。
+
+本文只详细描述Javascript HTML5接口
+
+以下是Javascript HTML5接口的具体逻辑结构图：
+
+![](img/agent-logic.png)
 
 其他
 ------------
