@@ -1,12 +1,17 @@
 老司机
 -------
 
-[写给想成为前端工程师的同学们](other/OldDriverSaid.md)
+[写给想成为前端工程师的同学们](other/Old-Driver-Said-0.md)
+
+[前端主管如何带队](other/Old-Driver-Said-1.md)
+
 
 工具
 -------
 
 [谷歌浏览器](other/Chrome.md)
+
+[Charles](other/Charles.md)
 
 
 三方平台
