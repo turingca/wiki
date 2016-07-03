@@ -26,7 +26,7 @@
 
 [移动端响应式](other/MobileTerminalScreenAdaptation.md)
 
-[原生APP通信](other/WebviewJavascriptBridge.md)
+[原生APP通信](other/Webview-Javascript-Bridge.md)
 
 [打开或者下载APP](other/DownloadOrOpenApp.md)
 
