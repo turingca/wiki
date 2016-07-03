@@ -2,6 +2,7 @@
 -----
 
 工具官网 https://www.charlesproxy.com/
+
 原文地址 http://blog.devtang.com/2015/11/14/charles-introduction/
 
 Charles是在Mac下常用的网络封包截取工具，在做移动开发时，我们为了调试与服务器端的网络通讯协议，常常需要截取网络封包来分析。
@@ -77,5 +78,28 @@ Charles通常用来截取本地上的网络封包，但是当我们需要时，�
 在iPhone的“设置“->”无线局域网“中，可以看到当前连接的wifi名，通过点击右边的详情键，可以看到当前连接上的wifi的详细信息，包括IP地址，子网掩码等信息。在其最底部有「HTTP 代理」一项，我们将其切换成手动，然后填上Charles运行所在的电脑的IP，以及端口号8888。
 
 设置好之后，我们打开iPhone上的任意需要网络通讯的程序，就可以看到Charles弹出iPhone请求连接的确认菜单，点击 “Allow” 即可完成设置。
+
+截取Https通讯信息
+-----------------
+
+**安装证书**
+
+如果你需要截取分析 Https 协议相关的内容。那么需要安装Charles的CA证书。具体步骤如下。
+首先我们需要在Mac电脑上安装证书。点击Charles的顶部菜单，选择“Help”->“SSL Proxying”->“Install Charles Root Certificate”，
+然后输入系统的帐号密码，即可在KeyChain看到添加好的证书。
+
+需要注意的是，即使是安装完证书之后，Charles默认也并不截取Https网络通讯的信息，如果你想对截取某个网站上的所有Https网络请求，可以在该请求上右击，选择SSL proxy。这样，对于该Host的所有SSL请求可以被截取到了。
+
+**截取移动设备中的Https通讯信息**
+
+如果我们需要在iOS或Android机器上截取Https协议的通讯内容，还需要在手机上安装相应的证书。
+点击Charles的顶部菜单，选择 “Help” -> “SSL Proxying” -> “Install Charles Root Certificate on a Mobile Device or Remote Browser”，然后就可以看到Charles弹出的简单的安装教程。
+
+按照我们之前说的教程，在设备上设置好Charles为代理后，在手机浏览器中访问地址： http://charlesproxy.com/getssl ，即可打开证书安装的界面，安装完证书后，就可以截取手机上的Https通讯内容了。不过同样需要注意，默认情况下Charles并不做截取，你还需要在要截取的网络请求上右击，选择SSL proxy菜单项。
+
+模拟慢速网络
+------------
+
+
 
 
