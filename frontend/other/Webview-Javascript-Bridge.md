@@ -6,8 +6,8 @@ H5页面与APP通信（IOS、安卓）
 ```
 前端代码：
 
-```html
-<!doctype html>
+```
+<!Doctype html>
 <html>
 <head>
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
