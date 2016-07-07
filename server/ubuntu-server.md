@@ -35,5 +35,28 @@ apt-get 安装软件
 apt-get update 更新软件源列表
 apt-get install 安装软件
 
+apt-get install apache2 
+apache2 -v
+
+apt-get install php5
+php5 -v
+
+cat /etc/apache2/mods-enabled/php5.load
+出现LoadModule php5_module /usr/lib/apache2/modules/libphp5.so 说明libphp5模块已经被apache加载了
+
+apt-get install mysql-server
+
+cat /etc/php5/conf.d/mysql.ini
+cat: /etc/php5/conf.d/mysql.ini: No such file or directory   php安装过程中默认不安装mysql扩展
+
+apt-get install php5-mysql 安装php的mysql扩展
+
+service mysql restart  重启mysql
+
+多个软件一起安装：apt-get install apache2 php5 mysql-server php5-mysql
+
+一步安装套件：tasksel install lamp-server
+
+
 LNMP
 -----
