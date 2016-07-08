@@ -26,8 +26,6 @@ apt-get install language-pack-zh-hans 或 apt-get install language-pack-zh-hans 
 
 3. SSH 终端未正确配置
 
-
-
 LAMP
 -----
 
@@ -76,14 +74,19 @@ service mysql restart  重启mysql
 
 一步安装套件：tasksel install lamp-server
 
-cd /var/www
+cd /var/www  apache默认根目录
 
 vim info.php 写入如下检测内容
 ```
 <?php
+header('Content-type:text/html;charset=utf-8');
 echo mysql_connect('localhost','root','123456')?'数据库连接成功':'数据库连接失败';
 phpinfo();
 ```
+
+给php添加常用扩展：
+
+apt-get install php5-gd curl libcurl4-openssl-dev php5-curl
 
 LNMP
 -----
