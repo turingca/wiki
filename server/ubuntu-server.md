@@ -20,6 +20,8 @@ LTS版本（Long Term Support），长期支持版，LTS版本至少提供4年�
 
 apt-get install language-pack-zh-hans 或 apt-get install language-pack-zh-hans language-pack-zh-hans-base
 
+http://packages.ubuntu.com/search?keywords=language-pack-zh
+
 2. 未设置正确的默认语言
 
 查看系统的默认语言 echo $LANG
