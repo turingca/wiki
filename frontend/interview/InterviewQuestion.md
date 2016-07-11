@@ -378,13 +378,96 @@ inherit       规定应该从父元素继承 display 属性的值
 **position的值relative和absolute定位原点是？**
 
 absolute
-生成绝对定位的元素，相对于值不为 static的第一个父元素进行定位。
-fixed （老IE不支持）
+生成绝对定位的元素，相对于值不为static的第一个父元素进行定位。
+fixed（老IE不支持）
 生成绝对定位的元素，相对于浏览器窗口进行定位。
 relative
 生成相对定位的元素，相对于其正常位置进行定位。
 static
 默认值。没有定位，元素出现在正常的流中（忽略 top, bottom, left, right z-index 声明）。
 inherit
-规定从父元素继承 position 属性的值。
+规定从父元素继承position属性的值。
+
+**CSS3有哪些新特性？**
+
+新增各种CSS选择器 （:not(.input)：所有class不是“input”的节点）
+圆角              （border-radius:8px）
+多列布局          （multi-column layout）
+阴影和反射        （Shadow\Reflect）
+文字特效          （text-shadow）
+文字渲染          （Text-decoration）
+线性渐变          （gradient）
+旋转              （transform）
+增加了旋转,缩放,定位,倾斜,动画,多背景
+transform:\scale(0.85,0.90)\ translate(0px,-30px)\ skew(-9deg,0deg)\Animation:
+
+**请解释一下CSS3的Flexbox（弹性盒布局模型）,以及适用场景？**
+
+
+
+**用纯CSS创建一个三角形的原理是什么？**
+
+把上、左、右三条边隐藏掉（颜色设为 transparent）
+```
+#demo {
+  width: 0;
+  height: 0;
+  border-width: 20px;
+  border-style: solid;
+  border-color: transparent transparent red transparent;
+}
+```
+
+**一个满屏品字布局如何设计?**
+
+简单的方式：
+上面的div宽100%，
+下面的两个div分别宽50%，
+然后用float或者inline使其不换行即可
+
+**经常遇到的浏览器的兼容性有哪些？原因，解决方法是什么，常用hack的技巧？**
+
+* png24位的图片在IE6浏览器上出现背景，解决方案是做成PNG8.
+
+* 浏览器默认的margin和padding不同。解决方案是加一个全局的*{margin:0;padding:0;}来统一。
+
+* IE6双边距bug:块属性标签float后，又有横行的margin情况下，在ie6显示margin比设置的大。
+
+  浮动ie产生的双倍距离 #box{ float:left; width:10px; margin:0 0 0 100px;}
+
+  这种情况之下IE会产生20px的距离，解决方案是在float的标签样式控制中加入_display:inline将其转化为行内属性。_这个符号只有ie6会识别
+
+  渐进识别的方式，从总体中逐渐排除局部。
+
+  首先，巧妙的使用“\9”这一标记，将IE游览器从所有情况中分离出来。
+  接着，再次使用“+”将IE8和IE7、IE6分离开来，这样IE8已经独立识别。
+
+  css
+    
+  .bb{
+      background-color:#f1ee18;/*所有识别*/
+      .background-color:#00deff\9; /*IE6、7、8识别*/
+      +background-color:#a200ff;/*IE6、7识别*/
+      _background-color:#1e0bd1;/*IE6识别*/
+  }
+
+* IE下,可以使用获取常规属性的方法来获取自定义属性,
+  也可以使用getAttribute()获取自定义属性;
+  Firefox下,只能使用getAttribute()获取自定义属性。
+  解决方法:统一通过getAttribute()获取自定义属性。
+
+* IE下,even对象有x,y属性,但是没有pageX,pageY属性;
+  Firefox下,event对象有pageX,pageY属性,但是没有x,y属性。
+
+* 解决方法：（条件注释）缺点是在IE浏览器下可能会增加额外的HTTP请求数。
+
+* Chrome中文界面下默认会将小于12px的文本强制按照12px显示,
+  可通过加入CSS属性 -webkit-text-size-adjust: none; 解决。
+
+超链接访问过后hover样式就不出现了被点击访问过的超链接样式不在具有hover和active了解决方法是改变CSS属性的排列顺序:
+L-V-H-A :  a:link {} a:visited {} a:hover {} a:active {}
+
+
+
+
 
