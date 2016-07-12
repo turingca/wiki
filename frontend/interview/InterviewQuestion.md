@@ -462,12 +462,465 @@ transform:\scale(0.85,0.90)\ translate(0px,-30px)\ skew(-9deg,0deg)\Animation:
 * 解决方法：（条件注释）缺点是在IE浏览器下可能会增加额外的HTTP请求数。
 
 * Chrome中文界面下默认会将小于12px的文本强制按照12px显示,
-  可通过加入CSS属性 -webkit-text-size-adjust: none; 解决。
+  
+-webkit-transform: scale(0.75); 12*0.75 =9
+注意：transform：scale()针对块级元素，会影响文字所在容器缩放。
+注意：-webkit-text-size-adjust:none;只支持到chrome-27.0，现在最新版本为48.0
 
 超链接访问过后hover样式就不出现了被点击访问过的超链接样式不在具有hover和active了解决方法是改变CSS属性的排列顺序:
 L-V-H-A :  a:link {} a:visited {} a:hover {} a:active {}
 
+**li与li之间有看不见的空白间隔是什么原因引起的？有什么解决办法？**
+
+行框的排列会受到中间空白（回车\空格）等的影响，因为空格也属于字符,这些空白也会被应用样式，占据空间，所以会有间隔，把字符大小设为0，就没有空格了。
+
+**为什么要初始化CSS样式？**
+
+因为浏览器的兼容问题，不同浏览器对有些标签的默认值是不同的，如果没对CSS初始化往往会出现浏览器之间的页面显示差异。
+当然，初始化样式会对SEO有一定的影响，但鱼和熊掌不可兼得，但力求影响最小的情况下初始化。
+
+最简单的初始化方法： *{padding: 0; margin: 0;} （强烈不建议）
+
+淘宝的样式初始化代码：
+```
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, input, textarea, th, td { margin:0; padding:0; }
+body, button, input, select, textarea { font:12px/1.5tahoma, arial, \5b8b\4f53; }
+h1, h2, h3, h4, h5, h6{ font-size:100%; }
+address, cite, dfn, em, var { font-style:normal; }
+code, kbd, pre, samp { font-family:couriernew, courier, monospace; }
+small{ font-size:12px; }
+ul, ol { list-style:none; }
+a { text-decoration:none; }
+a:hover { text-decoration:underline; }
+sup { vertical-align:text-top; }
+sub{ vertical-align:text-bottom; }
+legend { color:#000; }
+fieldset, img { border:0; }
+button, input, select, textarea { font-size:100%; }
+table { border-collapse:collapse; border-spacing:0; }
+```
+
+**absolute的containing block(容器块)计算方式跟正常流有什么不同？**
+
+无论属于哪种，都要先找到其祖先元素中最近的position值不为static的元素，然后再判断：
+1. 若此元素为inline元素，则containing block为能够包含这个元素生成的第一个和最后一个inline box的padding box (除margin, border外的区域) 的最小矩形；
+2. 否则，则由这个祖先元素的padding box构成。
+如果都找不到，则为initial containing block。
+
+补充：
+1. static(默认的)/relative：简单说就是它的父元素的内容框（即去掉padding的部分）
+2. absolute: 向上找最近的定位为absolute/relative的元素
+3. fixed: 它的containing block一律为根元素(html/body)，根元素也是initial containing block
+
+**CSS里的visibility属性有个collapse属性值是干嘛用的？在不同浏览器下以后什么区别？**
+
+**position跟display、margin collapse、overflow、float这些特性相互叠加后会怎么样？**
+
+**对BFC规范(块级格式化上下文：block formatting context)的理解？**
+
+（W3C CSS 2.1 规范中的一个概念，它是一个独立容器，决定了元素如何对其内容进行定位，以及与其他元素的关系和相互作用。）
+ 一个页面是由很多个Box组成的，元素的类型和display属性,决定了这个Box的类型。
+ 不同类型的Box，会参与不同的FormattingContext（决定如何渲染文档的容器），因此Box内的元素会以不同的方式渲染，也就是说BFC内部的元素和外部的元素不会互相影响。
+ 
+**css定义的权重**
+
+以下是权重的规则：标签的权重为1，class的权重为10，id的权重为100，以下例子是演示各种定义的权重值：
+
+```
+/*权重为1*/
+div{
+}
+/*权重为10*/
+.class1{
+}
+/*权重为100*/
+#id1{
+}
+/*权重为100+1=101*/
+#id1 div{
+}
+/*权重为10+1=11*/
+.class1 div{
+}
+/*权重为10+10+1=21*/
+.class1 .class2 div{
+}
+```
+如果权重相同，则最后定义的样式会起作用，但是应该避免这种情况出现。
+
+**请解释一下为什么会出现浮动和什么时候需要清除浮动？清除浮动的方式**
+
+**移动端的布局用过媒体查询吗？**
+
+**使用CSS预处理器吗？喜欢那个？**
+
+SASS (SASS、LESS没有本质区别，只因为团队前端都是用的SASS)
+
+**CSS优化、提高性能的方法有哪些？**
+
+**浏览器是怎样解析CSS选择器的？**
+
+**在网页中的应该使用奇数还是偶数的字体？为什么呢？**
+
+**margin和padding分别适合什么场景使用？**
+
+**抽离样式模块怎么写，说出思路，有无实践经验？[阿里航旅的面试题]**
+
+**元素竖向的百分比设定是相对于容器的高度吗？**
+
+**全屏滚动的原理是什么？用到了CSS的那些属性？**
+
+**瀑布流的原理是什么？有哪些实现方法？**
+
+**什么是响应式设计？响应式设计的基本原理是什么？如何兼容低版本的IE？**
+
+**视差滚动效果，如何给每页做不同的动画？（回到顶部，向下滑动要再次出现，和只出现一次分别怎么做？）**
+
+**::before 和 :after中双冒号和单冒号 有什么区别？解释一下这2个伪元素的作用。**
+
+**如何修改chrome记住密码后自动填充表单的黄色背景？**
+
+**你对line-height是如何理解的？**
+
+**设置元素浮动后，该元素的display值是多少？（自动变成display:block）**
+
+**怎么让Chrome支持小于12px 的文字？**
+
+**让页面里的字体变清晰，变细用CSS怎么做？（-webkit-font-smoothing: antialiased;）**
+
+**font-style属性可以让它赋值为"oblique" oblique是什么意思？**
+
+**position:fixed;在android下无效怎么处理？**
+
+**如果需要手动写动画，你认为最小时间间隔是多久，为什么？（阿里）**
+
+多数显示器默认频率是60Hz，即1秒刷新60次，所以理论上最小间隔为1/60＊1000ms ＝ 16.7ms
+
+**display:inline-block什么时候会显示间隙？(携程)**
+
+移除空格、使用margin负值、使用font-size:0、letter-spacing、word-spacing
+
+**overflow: scroll时不能平滑滚动的问题怎么处理？**
+
+**有一个高度自适应的div，里面有两个div，一个高度100px，希望另一个填满剩下的高度。**
+
+**png、jpg、gif这些图片格式解释一下，分别什么时候用。有没有了解过webp？**
+
+**什么是Cookie 隔离？（或者说：请求资源的时候不要让它带cookie怎么做）**
+
+如果静态文件都放在主域名下，那静态文件请求的时候都带有的cookie的数据提交给server的，非常浪费流量，
+所以不如隔离开。
+
+因为cookie有域的限制，因此不能跨域提交请求，故使用非主要域名的时候，请求头中就不会带有cookie数据，
+这样可以降低请求头的大小，降低请求时间，从而达到降低整体请求延时的目的。
+
+同时这种方式不会将cookie传入Web Server，也减少了Web Server对cookie的处理分析环节，提高了webserver的http请求的解析速度。
+
+**style标签写在body后与body前有什么区别？**
+
+**什么是CSS预处理器/后处理器？**
+
+预处理器例如：LESS、Sass、Stylus，用来预编译Sass或less，增强了css代码的复用性，还有层级、mixin、变量、循环、函数等，具有很方便的UI组件模块化开发能力，极大的提高工作效率。
+
+后处理器例如：PostCSS，通常被视为在完成的样式表中根据CSS规范处理CSS，让其更有效；目前最常做的是给CSS属性添加浏览器私有前缀，实现跨浏览器兼容性的问题。
+
+JavaScript
+----------
+
+**介绍js的基本数据类型**
+
+Undefined、Null、Boolean、Number、String
+
+**介绍js有哪些内置对象？**
+
+Object是JavaScript中所有对象的父对象
+
+数据封装类对象：Object、Array、Boolean、Number和String
+其他对象：Function、Arguments、Math、Date、RegExp、Error
+
+**说几条写JavaScript的基本规范？**
+
+1. 不要在同一行声明多个变量。
+2. 请使用===/!==来比较true/false或者数值
+3. 使用对象字面量替代new Array这种形式
+4. 不要使用全局函数。
+5. Switch语句必须带有default分支
+6. 函数不应该有时候有返回值，有时候没有返回值。
+7. For循环必须使用大括号
+8. If语句必须使用大括号
+9. for-in循环中的变量应该使用var关键字明确限定作用域，从而避免作用域污染。
+
+**JavaScript原型，原型链？有什么特点？**
+
+每个对象都会在其内部初始化一个属性，就是prototype(原型)，当我们访问一个对象的属性时，如果这个对象内部不存在这个属性，那么他就会去prototype里找这个属性，这个prototype又会有自己的prototype，于是就这样一直找下去，也就是我们平时所说的原型链的概念。
+
+关系：instance.constructor.prototype = instance.__proto__
+
+特点：JavaScript对象是通过引用来传递的，我们创建的每个新对象实体中并没有一份属于自己的原型副本。当我们修改原型时，与之相关的对象也会继承这一改变。
+
+当我们需要一个属性的时，Javascript引擎会先看当前对象中是否有这个属性，如果没有的话， 就会查找他的Prototype对象是否有这个属性，如此递推下去，一直检索到Object内建对象。
+```javascript
+  function Func(){}
+  Func.prototype.name = "Sean";
+  Func.prototype.getInfo = function() {
+    return this.name;
+  }
+  var person = new Func();//现在可以参考var person = Object.create(oldObject);
+  console.log(person.getInfo());//它拥有了Func的属性和方法
+  //"Sean"
+  console.log(Func.prototype);
+  // Func { name="Sean", getInfo=function()}
+```
+
+**JavaScript有几种类型的值？，你能画一下他们的内存图吗？**
+
+栈：原始数据类型（Undefined，Null，Boolean，Number、String） 
+堆：引用数据类型（对象、数组和函数）
+
+两种类型的区别是：存储位置不同；
+原始数据类型直接存储在栈(stack)中的简单数据段，占据空间小、大小固定，属于被频繁使用数据，所以放入栈中存储；
+引用数据类型存储在堆(heap)中的对象,占据空间大、大小不固定,如果存储在栈中，将会影响程序运行的性能；引用数据类型在栈中存储了指针，该指针指向堆中该实体的起始地址。当解释器寻找引用值时，会首先检索其在栈中的地址，取得地址后从堆中获得实体
+
+**Javascript如何实现继承？**
+
+1、构造继承
+2、原型继承
+3、实例继承
+4、拷贝继承
+
+原型prototype机制或apply和call方法去实现较简单，建议使用构造函数与原型混合方式。
+```javascript
+function Parent(){
+  this.name = 'wang';
+}
+function Child(){
+  this.age = 28;
+}
+Child.prototype = new Parent();//继承了Parent，通过原型
+var demo = new Child();
+alert(demo.age);
+alert(demo.name);//得到被继承的属性
+}
+```
+
+**JavaScript继承的几种实现方式？**
+
+http://www.ruanyifeng.com/blog/2010/05/object-oriented_javascript_inheritance.html
+
+http://www.ruanyifeng.com/blog/2010/05/object-oriented_javascript_inheritance_continued.html
+
+**javascript创建对象的几种方式？**
+
+javascript创建对象简单的说,无非就是使用内置对象或各种自定义对象，当然还可以用JSON；但写法有很多种，也能混合使用。
 
 
+1. 对象字面量的方式   
+
+```javascript
+person={firstname:"Mark",lastname:"Yun",age:25,eyecolor:"black"};
+```
+
+2. 用function来模拟无参的构造函数
+
+```javascript
+function Person(){}
+var person=new Person();//定义一个function，如果使用new"实例化",该function可以看作是一个Class
+person.name="Mark";
+person.age="25";
+person.work=function(){
+alert(person.name+" hello...");
+}
+person.work();
+```
+
+3. 用function来模拟参构造函数来实现（用this关键字定义构造的上下文属性）
+
+```javascript
+function Pet(name,age,hobby){
+  this.name=name;//this作用域：当前对象
+  this.age=age;
+  this.hobby=hobby;
+  this.eat=function(){
+    alert("我叫"+this.name+",我喜欢"+this.hobby+",是个程序员");
+  }
+}
+var maidou =new Pet("麦兜",25,"coding");//实例化、创建对象
+maidou.eat();//调用eat方法
+```
+
+4. 用工厂方式来创建（内置对象）
+
+```javascript
+var wcDog =new Object();
+wcDog.name="旺财";
+wcDog.age=3;
+wcDog.work=function(){
+  alert("我是"+wcDog.name+",汪汪汪......");
+}
+wcDog.work();
+```
+
+5. 用原型方式来创建
+
+```javascript
+function Dog(){
+
+}
+Dog.prototype.name="旺财";
+Dog.prototype.eat=function(){
+  alert(this.name+"是个吃货");
+}
+var wangcai =new Dog();
+wangcai.eat();
+```
+
+6. 用混合方式来创建
+
+```javascript
+function Car(name,price){
+  this.name=name;
+  this.price=price; 
+}
+Car.prototype.sell=function(){
+  alert("我是"+this.name+"，我现在卖"+this.price+"万元");
+}
+var camry =new Car("凯美瑞",27);
+camry.sell();
+```
 
 
+**Javascript作用链域？**
+
+全局函数无法查看局部函数的内部细节，但局部函数可以查看其上层的函数细节，直至全局细节。
+当需要从局部函数查找某一属性或方法时，如果当前作用域没有找到，就会上溯到上层作用域查找，
+直至全局函数，这种组织形式就是作用域链。
+
+**谈谈This对象的理解。**
+
+this总是指向函数的直接调用者（而非间接调用者）；
+如果有new关键字，this指向new出来的那个对象；
+在事件中，this指向触发这个事件的对象，特殊的是，IE中的attachEvent中的this总是指向全局对象Window；
+
+**eval是做什么的？**
+
+它的功能是把对应的字符串解析成JS代码并运行；
+应该避免使用eval，不安全，非常耗性能（2次，一次解析成js语句，一次执行）。
+由JSON字符串转换为JSON对象的时候可以用eval，var obj =eval('('+ str +')');
+
+**什么是window对象? 什么是document对象？**
+
+**null，undefined的区别？**
+
+null        表示一个对象被定义了，值为“空值”；
+undefined   表示不存在这个值。
+
+typeof undefined
+    //"undefined"
+    undefined :是一个表示"无"的原始值或者说表示"缺少值"，就是此处应该有一个值，但是还没有定义。当尝试读取时会返回undefined； 
+    例如变量被声明了，但没有赋值时，就等于undefined
+
+typeof null
+    //"object"
+    null : 是一个对象(空对象, 没有任何属性和方法)；
+    例如作为函数的参数，表示该函数的参数不是对象；
+
+注意：
+    在验证null时，一定要使用　=== ，因为 == 无法分别null和undefined
+
+
+再来一个例子：
+
+  null
+  Q：有张三这个人么？
+  A：有！
+  Q：张三有房子么？
+  A：没有！
+
+  undefined
+  Q：有张三这个人么？
+  A：没有！
+
+
+http://www.ruanyifeng.com/blog/2014/03/undefined-vs-null.html
+
+**写一个通用的事件侦听器函数。**
+
+```javascript
+//event(事件)工具集，来源：github.com/markyun
+    markyun.Event = {
+        // 页面加载完成后
+        readyEvent : function(fn) {
+            if (fn==null) {
+                fn=document;
+            }
+            var oldonload = window.onload;
+            if (typeof window.onload != 'function') {
+                window.onload = fn;
+            } else {
+                window.onload = function() {
+                    oldonload();
+                    fn();
+                };
+            }
+        },
+        // 视能力分别使用dom0||dom2||IE方式 来绑定事件
+        // 参数： 操作的元素,事件名称 ,事件处理程序
+        addEvent : function(element, type, handler) {
+            if (element.addEventListener) {
+                //事件类型、需要执行的函数、是否捕捉
+                element.addEventListener(type, handler, false);
+            } else if (element.attachEvent) {
+                element.attachEvent('on' + type, function() {
+                    handler.call(element);
+                });
+            } else {
+                element['on' + type] = handler;
+            }
+        },
+        // 移除事件
+        removeEvent : function(element, type, handler) {
+            if (element.removeEventListener) {
+                element.removeEventListener(type, handler, false);
+            } else if (element.datachEvent) {
+                element.detachEvent('on' + type, handler);
+            } else {
+                element['on' + type] = null;
+            }
+        },
+        // 阻止事件 (主要是事件冒泡，因为IE不支持事件捕获)
+        stopPropagation : function(ev) {
+            if (ev.stopPropagation) {
+                ev.stopPropagation();
+            } else {
+                ev.cancelBubble = true;
+            }
+        },
+        // 取消事件的默认行为
+        preventDefault : function(event) {
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                event.returnValue = false;
+            }
+        },
+        // 获取事件目标
+        getTarget : function(event) {
+            return event.target || event.srcElement;
+        },
+        // 获取event对象的引用，取到事件的所有信息，确保随时能使用event；
+        getEvent : function(e) {
+            var ev = e || window.event;
+            if (!ev) {
+                var c = this.getEvent.caller;
+                while (c) {
+                    ev = c.arguments[0];
+                    if (ev && Event == ev.constructor) {
+                        break;
+                    }
+                    c = c.caller;
+                }
+            }
+            return ev;
+        }
+    };
+```
