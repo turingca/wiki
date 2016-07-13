@@ -14,3 +14,18 @@ Markdown 是一种轻量级的「标记语言」，它的优点很多，目前�
 ```
 <input placeholder="请输入手机号码" maxlength="11" pattern="[0-9]*" onafterpaste="this.value=this.value.replace(/\D/g,'');" oninput="this.value=this.value.replace(/\D/g,'');">
 ```
+
+meta
+----
+
+[meta](html/meta.md)
+
+viewport
+--------
+
+[viewport](html/viewport.md)
+
+
+
+
+
