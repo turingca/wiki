@@ -1,4 +1,7 @@
-【A tale of two viewports 两个viewports的故事】
+前言
+------
+
+    A tale of two viewports 两个viewports的故事
 
 http://weizhifeng.net/viewports.html  参照译文1，官方原文中文版  
 
@@ -8,17 +11,18 @@ http://www.quirksmode.org/mobile/viewports.html  原文1
 
 http://www.quirksmode.org/mobile/viewports2.html 原文2  
 
-(两个viewport的故事(第一部分))
+两个viewport的故事第一部分
+---------------------------
 
     In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
 
-在这个迷你系列的文章里我将解释viewports以及许多重要的HTML标签元素的宽度是如何工作的，例如<html>元素，也包括窗口（window）和屏幕（screen）。
+在这个迷你系列的文章里我将解释viewports以及许多重要的HTML标签元素的宽度是如何工作的，例如html元素，也包括窗口window和屏幕screen。
 
     This page is about the desktop browsers, and its sole purpose is to set the stage for a similar discussion of the mobile browsers. Most web developers will already intuitively understand most desktop concepts. On mobile we’ll find the same concepts, but more complicated, and a prior discussion on terms everybody already knows will greatly help your understanding of the mobile browsers.
 
-这篇文章（第一部分）主要关于桌面浏览器的，其唯一的目的就是为移动浏览器中相似的讨论做个铺垫。大部分开发者凭直觉已经明白了大部分桌面浏览器中的概念。在移动端我们将会接触到相同的概念，但是会更加复杂，所以对大家已经知道的术语做个提前的讨论将会对你理解移动浏览器产生巨大的帮助（友好的预热）。
+这篇文章第一部分主要关于桌面浏览器的，其唯一的目的就是为移动浏览器中相似的讨论做个铺垫。大部分开发者凭直觉已经明白了大部分桌面浏览器中的概念。在移动端我们将会接触到相同的概念，但是会更加复杂，所以对大家已经知道的术语做个提前的讨论将会对你理解移动浏览器产生巨大的帮助（友好的预热）。
 
-【Concept: device pixels and CSS pixels 概念：设备像素和CSS像素】
+**Concept: device pixels and CSS pixels 概念：设备像素和CSS像素**
 
     The first concept you need to understand is CSS pixels, and the difference with device pixels.
 
@@ -71,7 +75,7 @@ http://www.quirksmode.org/mobile/viewports2.html 原文2
 设备像素对你（译者：指的是开发者）来说基本上没用。但是对于用户不一样；用户将会放大或者缩小页面直到他能舒服的阅读为止。无论怎样，缩放比例对你不会产生影响。浏览器将会自动的使你的CSS布局被拉伸或者被压缩。
 
 
-【100% zoom 100% 缩放】
+**100% zoom 100% 缩放**
 
     I started the example by assuming a zoom level of 100%. It’s time to define that slightly more strictly:
         
