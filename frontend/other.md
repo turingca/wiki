@@ -11,7 +11,9 @@
 
 [谷歌浏览器](other/Chrome.md)
 
-[Charles](other/Charles.md)
+[抓包Charles](other/Charles.md)
+
+[工程构建FIS3](other/Fis3.md)
 
 
 三方平台
