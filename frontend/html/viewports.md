@@ -584,7 +584,7 @@ Some browsers have special behaviour:
 
 layout viewport宽度一直是一样的。如果你旋转你的手机，visual viewport会发生变化，但是浏览器通过轻微的放大来适配这个新的朝向，所以layout viewport又和visual viewport一样宽了。
 
-![](img/veiwports/mobile_viewportzoomedout_la.jpg)
+![](img/viewports/mobile_viewportzoomedout_la.jpg)
 
     This has consequences for the layout viewport’s height, which is now substantially less than in portrait mode. But web developers don’t care about the height, only about the width.
 
