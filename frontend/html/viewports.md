@@ -77,24 +77,23 @@ http://www.quirksmode.org/mobile/viewports2.html 原文2
 
 **100% zoom 100% 缩放**
 
-    I started the example by assuming a zoom level of 100%. It’s time to define that slightly more strictly:
-        
-        At zoom level 100% one CSS pixel is exactly equal to one device pixel.
+    I started the example by assuming a zoom level of 100%. It’s time to define that slightly more strictly:At zoom level 100% one CSS pixel is exactly equal to one device pixel.
 
-我是以假设缩放比例为100%来开始这个例子的。是时候需要更加严格的来定义一下这个100%了：
+我是以假设缩放比例为100%来开始这个例子的。是时候需要更加严格的来定义一下这个100%了：在缩放比例100%的情况下一个CSS像素完全等于一个设备像素。
 
-    在缩放比例100%的情况下一个CSS像素完全等于一个设备像素。
+    The concept of 100% zoom is very useful in the explanations that are going to follow, but you shouldn’t overly worry about it in your daily work. On desktop you will generally test your sites in 100% zoom, but even if the user zooms in or out the magic of CSS pixels will make sure that your layout retains the same ratios.
 
-The concept of 100% zoom is very useful in the explanations that are going to follow, but you shouldn’t overly worry about it in your daily work. On desktop you will generally test your sites in 100% zoom, but even if the user zooms in or out the magic of CSS pixels will make sure that your layout retains the same ratios.
 
 100%缩放的概念在接下来的解释中会非常有用，但是在你的日常工作中你不用过分的担心它。在桌面环境上你将会在100%缩放比例的情况下测试你的站点，但即使用户放大或者缩小，CSS像素的魔力将会保证你的布局保持相同的比率。
 
-【Screen size 屏幕尺寸】
+**Screen size 屏幕尺寸**
 
+```
 screen.width/height
 * Meaning:Total size of the user’s screen.
 * Measured in:Device pixels
 * Browser errors:IE8 measures it in CSS pixels, in both IE7 and IE8 mode.
+```
 
 screen.width/height
 * 含义：用户屏幕的整体大小。。
@@ -116,16 +115,17 @@ Fun! 但是这些信息跟对我们有什么用呢？
 
 基本上没用。用户的显示器尺寸对于我们来说不重要－好吧，除非你想度量它来丰富你的web统计数据库。
 
-【Window size 窗口尺寸】
+**Window size 窗口尺寸**
 
+```
 window.innerWidth/Height
 * Meaning:Total size of the browser window, including scrollbars.
 * Measured in:CSS pixels
 * Browser errors:Not supported by IE.
     * Opera measures it in device pixels.
+```
 
 window.innerWidth/Height
-
 * 含义：浏览器窗口的整体大小，包括滚动条。
 * 度量单位：CSS像素。
 * 兼容性问题：IE7不支持。Opera以设备像素进行度量。
@@ -151,19 +151,20 @@ window.innerWidth/Height
 
 注意，窗口内部宽度和高度的尺寸，包含了滚动条的尺寸。（这主要是来至于历史原因）
 
-【Scrolling offset 滚动距离】
+**Scrolling offset 滚动距离**
 
+```
 window.pageX/YOffset
 * Meaning:Scrolling offset of the page.
 * Measured in:CSS pixels
 * Browser errors:None
+```
 
 window.pageX/YOffset
 * 含义：页面滚动的距离。
 * 度量单位：CSS像素。
 * 兼容性问题：pageXOffset 和 pageYOffset 在 IE 8 及之前版本的IE不支持, 使用”document.body.scrollLeft” and “document.body.scrollTop” 来取代
 
-    
 
     window.pageXOffset and window.pageYOffset, contain the horizontal and vertical scrolling offsets of the document. Thus you can find out how much the user has scrolled.
 
@@ -181,7 +182,7 @@ window.pageXOffset和window.pageYOffset，包含了文档水平和垂直方向�
 
 ![](img/viewports/desktop_page_zoomed.jpg)
 
-【Concept: the viewport 概念：viewport】
+**Concept: the viewport 概念：viewport**
 
     Before we continue with more JavaScript properties we have to introduce another concept: the viewport.
 
@@ -215,7 +216,7 @@ viewport的功能是用来约束你网站中最顶级包含块元素（containin
 
 viewport，接着，实际上等于浏览器窗口：它就是那么定义的。viewport不是一个HTML结构，所以你不能用CSS来改变它。它在桌面环境下只是拥有浏览器窗口的宽度和高度。在移动环境下它会有一些复杂。
 
-【Consequences 后果】
+**Consequences 后果**
 
     This state of affairs has some curious consequences. You can see one of them right here on this site. Scroll all the way up to the top, and zoom in two or three steps so that the content of this site spills out of the browser window.
     
@@ -241,7 +242,7 @@ viewport，接着，实际上等于浏览器窗口：它就是那么定义的。
 
 ![](img/viewports/desktop_100percent.jpg)
 
-【document width? 页面宽度?】
+**document width? 页面宽度？**
 
     What I really need to know is how wide the total content of the page is, including the bits that “stick out.” As far as I know it’s not possible to find that value (well, unless you calculate the individual widths and margins of all elements on the page, but that’s error-prone, to put it mildly).
 
@@ -262,13 +263,14 @@ viewport，接着，实际上等于浏览器窗口：它就是那么定义的。
 浏览器厂商们，你们怎么认为的？
 
 
+**Measuring the viewport 度量viewport**
 
-【Measuring the viewport 度量viewport】
-
+```
 document. documentElement. clientWidth/Height
 * Meaning:Viewport dimensions
 * Measured in:CSS pixels
 * Browser errors:None
+```
 
 document. documentElement. clientWidth/Height
 * 意义：Viewport尺寸。
@@ -297,7 +299,7 @@ document. documentElement. clientWidth/Height
 
 所以document.documentElement.clientWidth和-Height一直代表的是viewport的尺寸，不管<html>元素的尺寸是多少。
 
-【Two property pairs 两个属性对】
+**Two property pairs 两个属性对**
 
     But aren’t the dimensions of the viewport width also given by window.innerWidth/Height? Well, yes and no.
 
@@ -315,12 +317,14 @@ document. documentElement. clientWidth/Height
 
 在桌面环境上拥有两个属性对是有一些累赘的　－　但是就像我们将要看到的，在移动端这将会得到祝福。
 
-【Measuring the <html> element 度量\<html>元素】
+**Measuring the <html> element 度量\<html>元素**
 
+```
 document. documentElement. offsetWidth/Height
 * Meaning:Dimensions of the <html> element (and thus of the page).
 * Measured in:CSS pixels
 * Browser errors:IE measures the viewport, and not the <html> element.
+```
 
 document.documentElement.offsetWidth/Height
 * 意义：元素（也就是页面）的尺寸。
@@ -341,12 +345,14 @@ document.documentElement.offsetWidth/Height
 ![](img/viewports/desktop_offset_smallpage.jpg)
 
 
-【Event coordinates 事件中的坐标】
+**Event coordinates 事件中的坐标**
 
+```
 pageX/Y, clientX/Y, screenX/Y
 * Meaning:see main text
 * Measured in:see main text
 * Browser errors:IE doesn’t support pageX/Y.IE and Opera calculate screenX/Y in CSS pixels.
+```
 
 pageX/Y, clientX/Y, screenX/Y
 * 意义：见正文。
@@ -377,14 +383,16 @@ screenX/Y提供了相对于屏幕的以设备像素进行度量的坐标。
     
 90%的时间你将会使用pageX/Y；通常情况下你想知道的是相对于文档的事件坐标。其他的10%时间你将会使用clientX/Y。你永远不需要知道事件相对于屏幕的坐标。
 
-【Media queries 媒体查询】
+**Media queries 媒体查询**
 
+```
 Media queries
 * Meaning:see main text
 * Measured in:see main text
 * Browser errors:IE doesn’t support them.
     * For device-width/height Firefox uses the values screen.width/height would have if they are measured in CSS pixels.
     * For width/height Safari and Chrome use the values documentElement .clientWidth/Height would have if they are measured in device pixels.
+```
 
 Media queries
 * 意义：见正文。
@@ -396,6 +404,7 @@ Media queries
 
 
     Finally, some words about media queries. The idea is very simple: you can define special CSS rules that are executed only if the width of the page is larger than, equal to, or smaller than a certain size. For instance:
+
 ```
 div.sidebar {
     width: 300px;
@@ -453,14 +462,15 @@ div.sidebar {
 所以在桌面环境下去使用width而去忘记device-width吧。我们即将看到这个情况在移动端会更加麻烦。
 
 
-【Conclusion 总结】
+**Conclusion 总结**
 
     That concludes our foray into the desktop browsers’ behaviour. The second part of this series ports these concepts to mobile and highlights some important differences with the desktop.
 
 本文总结了我们对桌面浏览器行为的探寻。这个系列的第二部分把这些概念指向了移动端，并显示的指出了与桌面环境上的一些重要区别。
 
 
-(两个viewport的故事(第二部分))
+两个viewport的故事第二部分
+------------------------------
 
     In this mini-series I will explain how viewports and the widths of various important elements work, such as the <html> element, as well as the window and the screen.
     
@@ -470,7 +480,7 @@ div.sidebar {
     
 这篇文章我们来聊聊关于移动浏览器的内容。如果你对移动开发完全是一个新手的话，我建议你先读一下第一篇关于桌面浏览器的文章，先在熟悉的环境中进行下热身。
 
-【The problem of mobile browsers Conclusion 移动浏览器的问题】
+**The problem of mobile browsers Conclusion 移动浏览器的问题**
 
     When we compare the mobile browsers to the desktop ones, the most obvious difference is screen size. Mobile browsers display significantly less of a desktop-optimised website than desktop browsers; either by zooming out until the text is unreadably small, or by showing only the small part of the site that fits in the screen.
 
@@ -500,7 +510,7 @@ div.sidebar {
 
 移动浏览器厂商想给它们的客户尽可能的提供最好的体验，这现在指的就是「尽可能的跟桌面一样」。因此耍一些花招是必要的。
 
-【The two viewports 两个viewport】
+**The two viewports 两个viewport**
 
     So the viewport is too narrow to serve as a basis for your CSS layout. The obvious solution is to make the viewport wider. That, however, requires it to be split into two: the visual viewport and the layout viewport.
 
@@ -546,13 +556,13 @@ Some browsers have special behaviour:
 * Samsung WebKit (on bada)使layout viewport和最宽的元素一样宽。
 * 在BlackBerry上，layout viewport在100%缩放比例的情况下等于visual viewport。这不会变。 
 
-【Zooming 缩放】
+**Zooming 缩放**
 
     Both viewports are measured in CSS pixels, obviously. But while the visual viewport dimensions change with zooming (if you zoom in, less CSS pixels fit on the screen), the layout viewport dimensions remain the same. (If they didn’t your page would constantly reflow as percentual widths are recalculated.)
     
 很显然两个viewport都是以CSS像素度量的。但是当进行缩放（如果你放大，屏幕上的CSS像素会变少）的时候，visual viewport的尺寸会发生变化，layout viewport的尺寸仍然跟之前的一样。（如果不这样，你的页面将会像百分比宽度被重新计算一样而经常被重新布局。）
 
-【Understanding the layout viewport 理解layout viewport】
+**Understanding the layout viewport 理解layout viewport**
 
     In order to understand the size of the layout viewport we have to take a look at what happens when the page is fully zoomed out. Many mobile browsers initially show any page in fully zoomed-out mode.
     
@@ -625,7 +635,7 @@ document.documentElement.clientWidth/Height
 ![](img/viewports/mobile_client_la.jpg)
 
 
-【Measuring the visual viewport 度量visual viewport】
+**Measuring the visual viewport 度量visual viewport**
 
     As to the visual viewport, it is measured by window.innerWidth/Height. Obviously the measurements change when the user zooms out or in, since more or fewer CSS pixels fit into the screen.
     
@@ -657,7 +667,7 @@ window.innerWidth/Height
     
 不幸的是这是浏览器不兼容问题中的一部分；许多浏览器仍然不得不增加对visualviewport度量尺寸的支持。但是没有浏览器把这个度量尺寸存放任何其他的属性对中，所以我猜window.innerWidth/Height是标准，尽管它被支持的很糟。
 
-【The screen 屏幕】
+**The screen 屏幕**
 
     As on desktop, screen.width/height give the screen size, in device pixels. As on the desktop, you never need this information as a web developer. You’re not interested in the physical size of the screen, but in how many CSS pixels currently fit on it.
     
@@ -685,7 +695,7 @@ screen.width and screen.height
 
 ![](img/viewports/mobile_screen.jpg)
 
-【The zoom level 缩放比例 zoom level】
+**The zoom level 缩放比例 zoom level**
 
     Reading out the zoom level directly is not possible, but you can get it by dividing screen.width by window.innerWidth. Of course that only works if both properties are perfectly supported.
 
@@ -696,7 +706,7 @@ screen.width and screen.height
 幸运的是缩放比例并不太重要。你需要知道的是当前屏幕上有多少个CSS像素。你可以通过window.innerWidth来获取这个信息，如果它被正确支持的话。
 
 
-【Scrolling offset 滚动距离Scrolling offset】
+**Scrolling offset 滚动距离Scrolling offset**
 
     What you also need to know is the current position of the visual viewport relative to the layout viewport. This is the scrolling offset, and, just as on desktop, it’s stored in window.pageX/YOffset.
     
@@ -720,7 +730,7 @@ window.pageX/YOffset
 
 ![](img/viewports/mobile_page.jpg)
 
-【<html> element \<html> 元素】
+**<html> element \<html> 元素**
 
     Just as on desktop, document.documentElement.offsetWidth/Height gives the total size of the <html> element in CSS pixels.
 
@@ -742,7 +752,7 @@ document.documentElement.offsetWidth/Height
 
 ![](img/viewports/mobile_offset.jpg)
 
-【Media queries 媒体查询Media queries】
+**Media queries 媒体查询Media queries**
 
     Media queries work the same as on desktop. width/height uses the layout viewport as its reference and is measured in CSS pixels, device-width/height uses the device screen and is measured in device pixels.
     
@@ -786,7 +796,7 @@ Media queries
 
 或者还有其他用处。
 
-【Event coordinates 事件坐标】
+**Event coordinates 事件坐标**
 
     Event coordinates work more or less as on desktop. Unfortunately, of the twelve tested browsers only two, Symbian WebKit and Iris, get all three exactly right. All other browsers have more or less serious problems.
 
@@ -836,7 +846,7 @@ screenX/Y是相对于屏幕来计算，以设备像素为单位。当然，这�
 
 ![](img/viewports/mobile_clientXY.jpg)
 
-【Meta viewport viewport meta标签】    
+**Meta viewport viewport meta标签**
 
 Meta viewport
 * Meaning:Set the layout viewport’s width.
@@ -901,7 +911,7 @@ Meta viewport
     
 如果，像传闻那样，新的iPhone将会炫耀一个更大的像素数量（并不意味着一个更大的屏幕），如果苹果借鉴了这个行为我将不会感到惊讶。也许最终device-width就意味着320px。
 
-【Related research 相关研究】    
+**Related research 相关研究**  
 
 Several related topics have to be researched further:
 * position: fixed. A fixed element, as we know, is positioned relative to the viewport. But relative to which viewport?
