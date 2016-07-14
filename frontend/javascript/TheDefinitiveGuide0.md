@@ -1,14 +1,23 @@
-第1章 概述
-----------
+前言
+-------
 
 本文修摘自《javascript权威指南》第6版
+
+
+第1章 javascript概述
+--------------------
+
+JavaScript是面向Web的编程语言。绝大多数现代网站都使用了JavaScript，并且所有的现代
+
 javascript是一门弱类型、非传统面向对象的编程语言。
 javascript和java是完全不同的两种编程语言。
 ECMAScript是javascript的语言标准版本，现在最新版本为ES6。
 
-以下先对javascript做一个快速概览
+**1.1JavaScript语言核心**
+
+本节是JavaScript语言的一个快速概览，也是本书第一部分的快速概览。在本章之后，我们将着重关注JavaScript的基础知识，第2章讲解JavaScript注释、分号和Unicode字符集；第3章会更加有意思，主要讲解JavaScript变量和赋值。这里有一些示例代码来说明这两章的的重点内容：
+
 ```javascript
-javascript语言核心快速概览
 //这是注释
 var x; //声明变量
 x=0;    //通过等号赋值给变量
@@ -149,9 +158,15 @@ Point.prototype.r = function() {
 p.r()                                 //=> 1.414...
 ```
 
+第9章是第一部分的精华所在，后续的章节做了一些零星的延伸，将我们对JavaScript语言核心的探索带向尾声。第10章主要讲解了正则表达式的语法，并演示了如何使用这些“正则表达式”进行文本的模式匹配。第11章介绍JavaScript语言核心的子集和超集。最后，在进入客户端JavaScript的内容之前，第12章介绍两种在web浏览器之外的两种JavaScript运行环境。
+
+**1.2客户端JavaScript**
+
+JavaScript语言核心部分的内容中的知识点交叉引用比较多，且知识点的层次感并不分明。而在客户端JavaScript部分的内容编排方式有了较大改变。依照本书给定的知识点顺序进行学习，完全可以学会如何在Web浏览器中使用JavaScript。但如果你想通过阅读本书来学习客户端JavaScript的话，不能只将眼光落在第二部分，所以本书会对于客户端编程技术做一个快速概览，随后会给出一个深度的示例。
+
+第13章是第二部分的第一章，该章介绍如何让JavaScript在Web浏览器中运行起来。从该章学到的最重要的内容是，JavaScript代码可以通过script标签来嵌入到HTML文件中：
+
 ```
-客户端javascript快速概览
-javascript代码可以通过<script>标签来嵌入到HTML文件中：
 <html>
 <head>
 引入一个javascript库
@@ -166,6 +181,8 @@ javascript代码可以通过<script>标签来嵌入到HTML文件中：
 </body>
 </html>
 ```
+
+
 
 ```javascript
 web浏览器端的脚本技术，涵盖客户端javascript中的一些重要全局函数
