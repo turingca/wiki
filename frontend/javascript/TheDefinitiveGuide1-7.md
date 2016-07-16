@@ -7,11 +7,15 @@
 第1章 javascript概述
 --------------------
 
-JavaScript是面向Web的编程语言。绝大多数现代网站都使用了JavaScript，并且所有的现代
+JavaScript是面向Web的编程语言。绝大多数现代网站都使用了JavaScript，并且所有的现代Web浏览器——基于桌面系统、游戏机、平板电脑和智能手机的浏览器——均包含了JavaScript解释器。这使得JavaScript能够称得上史上使用最广泛的编程语言。JavaScript也是前端开发工程师必须掌握的三种技能之一：描述网页内容的HTML、描述网页样式的CSS以及描述网页行为的JavaScript。本书能够帮助你掌握JavaScript这门语言。
 
-javascript是一门弱类型、非传统面向对象的编程语言。
-javascript和java是完全不同的两种编程语言。
-ECMAScript是javascript的语言标准版本，现在最新版本为ES6。
+如果你有其他语言的编程经历，这会有助你了解JavaScript是一门高端的、动态的、弱类型的编程语言，非常适合面向对象和函数式的编程风格。JavaScript的语法源自Java，它的一等函数（first-class function）来自于Scheme，它的基于原型（prototype-based）的继承来自于Self。
+
+但使用本书学习不必去了解那些（Java/Scheme/Self）语言或熟悉那些术语。
+
+JavaScript这个名字经常被误解。除了语法看起来和Java类似之外，JavaScript和Java是完全不同的两种编程语言。JavaScript早已超出了其脚本语言（scripting-language）本身的范畴，而成为一种集健壮性、高效性和通用性为一身的编程语言。最新语言版本为严谨的大型软件开发定义了诸多新的特性。
+
+ECMAScript是JavaScript的语言标准版本，现在最新版本为ES6。
 
 **1.1JavaScript语言核心**
 
@@ -182,10 +186,43 @@ JavaScript语言核心部分的内容中的知识点交叉引用比较多，且�
 </html>
 ```
 
+第14章讲解Web浏览器脚本技术，并涵盖客户端JavaScript中的一些重要全局函数。
 
+例如：
+```javascript
+function moveon() {
+    //通过弹出一个对话框来询问用户问题
+    var answer = confirm("准备好了吗?");
+    //单击“确定”按钮，浏览器会加载一个新页面
+    if(answer) window.location = "http://taobao.com";
+}
+//在1分钟（6万毫秒）后执行定义的这个函数
+setTimeout(moveon,6000);
+```
+
+我们注意到，本节展示的客户端示例代码要比前面的示例代码要长很多。这里的示例代码并不是用在Firebug（或者其他调试工具）控制台窗口中直接输入的，而是作为一个单独的HTML文件，并在Web浏览器中直接打开运行的。比如，上述代码段就是一个HTML文件的完整内容。
+
+第15章的内容更加务实——通过脚本来操纵HTML文档内容。它将展示如何选取特定的HTML元素、如何给HTML元素设置属性、如何修改元素内容，以及如何给文档添加新节点。这里的示例函数展示了如何查找和修改基本文档的内容：
 
 ```javascript
-web浏览器端的脚本技术，涵盖客户端javascript中的一些重要全局函数
+//在document中的一个指定的区域输出调试消息
+//如果document不存在这样一个区域，则创建一个
+function debug(msg) {
+    //通过查看HTML元素id属性来查找文档的调试部分
+    var log = document.getElementById("debuglog");
+    //如果这个元素不存在，则创建一个
+    if(!log) {
+        log = document.createElement("div"); //创建一个新的div元素
+        log.id = "debuglog"; //给这个元素的HTML id赋值
+        log.innerHTML = "<h1>DebugLog</h1>"; //定义初始内容
+        document.body.appendChild(log); //将其添加到文档的末尾
+    }
+    //将消息包装到<pre>中，并添加至log中
+    var pre = document.createElement("pre"); // 创建pre标签
+    var text = document.createTextNode(msg); // 将msg包装在一个文本节点中
+    pre.appendChild(text); // 将文本添加至pre
+    log.appendChild(pre);  // 将pre添加至log
+}
 ```
 
 
