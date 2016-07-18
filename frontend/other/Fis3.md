@@ -39,3 +39,11 @@ npm install -g fis3 --disturl=http://registry.npm.taobao.org/mirrors/node --regi
 npm update -g fis3
 
 重装 npm install -g fis3
+
+命令
+------
+
+进入项目根目录，执行命令，进行构建。
+
+项目根目录：FIS3 配置文件（默认fis-conf.js）所在的目录为项目根目录。
+
