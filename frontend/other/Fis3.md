@@ -32,3 +32,10 @@ npm cache clean   清理缓存
 npm install -g fis3 安装到全局目录，如果 npm 长时间运行无响应，推荐使用 cnpm 来安装
 
 npm install -g fis3 --disturl=http://registry.npm.taobao.org/mirrors/node --registry=http://registry.npm.taobao.org
+
+升级Fis3
+--------
+
+npm update -g fis3
+
+重装 npm install -g fis3
