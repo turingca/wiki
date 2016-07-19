@@ -89,9 +89,612 @@ fis.match()
 fis.match(selector, props);
 ```
 
-selector ：FIS3 把匹配文件路径的路径作为selector，匹配到的文件会分配给它设置的 props。关于selector语法，请参看Glob说明
-props ：编译规则属性，包括文件属性和插件属性，更多属性
+selector ：FIS3 把匹配文件路径的路径作为selector，匹配到的文件会分配给它设置的 props。关于selector语法，请参看Glob说明.
+props ：编译规则属性，包括文件属性和插件属性。
 
+重要特性:
+
+规则覆盖
+
+假设有两条规则A和B，它俩同时命中了文件test.js，如果A在B前面，B的属性会覆盖A的同名属性。不同名属性追加到test.js的File对象上。
+
+```javascript
+//A
+fis.match('*', {
+  release: '/dist/$0'
+});
+
+//B
+fis.match('test.js', {
+  useHash: true,
+  release: '/dist/js/$0'
+})
+```
+
+那么test.js分配到的属性
+
+```
+{
+  useHash: true, // B
+  release: '/dist/js/$0' // B
+}
+```
+
+fis.media()
+
+fis.media()接口提供多种状态功能，比如有些配置是仅供开发环境下使用，有些则是仅供生产环境使用的。
+
+```javascript
+fis.match('*', {
+  useHash: false
+});
+
+fis.media('prod').match('*.js', {
+  optimizer: fis.plugin('uglify-js')
+});
+```
+
+```
+fis3 release <media>
+```
+
+<media> 配置的 media 值
+
+fis3 release prod
+
+编译时使用prod指定的编译配置，即对js进行压缩。
+
+如上，fis.media()可以使配置文件变为多份（多个状态，一个状态一份配置）。
+
+```javascript
+fis.media('rd').match('*', {
+  deploy: fis.plugin('http-push', {
+    receiver: 'http://remote-rd-host/receiver.php'
+  })
+});
+
+fis.media('qa').match('*', {
+  deploy: fis.plugin('http-push', {
+    receiver: 'http://remote-qa-host/receiver.php'
+  })
+});
+```
+
+fis3 release rd push 到 RD 的远端机器上
+fis3 release qa push 到 QA 的远端机器上
+
+media dev 已经被占用，默认情况下不加 <media> 参数时默认为 dev
+
+我们执行fis3 inspect来查看文件命中属性的情况。
+fis3 inspect 是一个非常重要的命令，可以查看文件分配到的属性，这些属性决定了文件将如何被编译处理。
+
+```
+~ /app.js
+ -- useHash false `*.js`   (0th)
+
+ ~ /img/list-1.png
+ -- useHash false `*.png`   (2th)
+
+ ~ /img/list-2.png
+ -- useHash false `*.png`   (2th)
+
+ ~ /img/logo.png
+ -- useHash false `*.png`   (2th)
+
+ ~ /style.css
+ -- useHash false `*.css`   (1th)
+
+ ~ ::package
+ -- empty
+```
+
+fis3 inspect <media> 查看特定 media 的分配情况
+
+文件指纹
+
+文件指纹，唯一标识一个文件。在开启强缓存的情况下，如果文件的URL 不发生变化，无法刷新浏览器缓存。一般都需要通过一些手段来强刷缓存，一种方式是添加时间戳，每次上线更新文件，给这个资源文件的URL添加上时间戳。
+
+```
+<img src="a.png?t=12012121">
+```
+
+而FIS3选择的是添加MD5戳，直接修改文件的URL，而不是在其后添加query。
+
+对js、css、png图片引用URL添加md5戳，配置如下；
+```
+//清除其他配置，只剩下如下配置
+fis.match('*.{js,css,png}', {
+  useHash: true
+});
+```
+
+构建到 ../output 目录下看变化。
+```
+fis3 release -d ../output
+```
+
+构建出的文件携带了md5 戳
+对应url也带上了md5 戳
+
+
+压缩资源
+
+为了减少资源网络传输的大小，通过压缩器对js、css、图片进行压缩是一直以来前端工程优化的选择。在 FIS3 中这个过程非常简单，通过给文件配置压缩器即可。
+
+```
+// 清除其他配置，只保留如下配置
+fis.match('*.js', {
+  // fis-optimizer-uglify-js 插件进行压缩，已内置
+  optimizer: fis.plugin('uglify-js')
+});
+
+fis.match('*.css', {
+  // fis-optimizer-clean-css 插件进行压缩，已内置
+  optimizer: fis.plugin('clean-css')
+});
+
+fis.match('*.png', {
+  // fis-optimizer-png-compressor 插件进行压缩，已内置
+  optimizer: fis.plugin('png-compressor')
+});
+```
+
+构建到 ../output 目录下看变化。
+
+```
+fis3 release -d ../output
+```
+
+查看 ../output 目录下已经被压缩过的结果。
+
+
+CssSprite图片合并
+
+压缩了静态资源，我们还可以对图片进行合并，来减少请求数量。
+
+FIS3提供了比较简易、使用方便的图片合并工具。通过配置即可调用此工具并对资源进行合并。
+
+FIS3构建会对CSS中，路径带 ?__sprite的图片进行合并。为了节省编译的时间，分配到useSprite: true 的CSS文件才会被处理。
+
+默认情况下，对打包css文件启动图片合并功能。
+
+```
+li.list-1::before {
+  background-image: url('./img/list-1.png?__sprite');
+}
+
+li.list-2::before {
+  background-image: url('./img/list-2.png?__sprite');
+}
+```
+
+```
+// 启用 fis-spriter-csssprites 插件
+fis.match('::package', {
+  spriter: fis.plugin('csssprites')
+})
+
+// 对 CSS 进行图片合并
+fis.match('*.css', {
+  // 给匹配到的文件分配属性 `useSprite`
+  useSprite: true
+});
+```
+
+CssSprites 详细配置参见 fis-spriter-csssprites
+
+功能组合
+
+我们学习了如何用 FIS3 做压缩、文件指纹、图片合并、资源定位，现在把这些功能组合起来，配置文件如下；
+
+```
+// 加md5
+fis.match('*.{js,css,png}', {
+  useHash: true
+});
+// 启用 fis-spriter-csssprites 插件
+fis.match('::package', {
+  spriter: fis.plugin('csssprites')
+})
+// 对 CSS 进行图片合并
+fis.match('*.css', {
+  // 给匹配到的文件分配属性 `useSprite`
+  useSprite: true
+});
+fis.match('*.js', {
+  // fis-optimizer-uglify-js 插件进行压缩，已内置
+  optimizer: fis.plugin('uglify-js')
+});
+fis.match('*.css', {
+  // fis-optimizer-clean-css 插件进行压缩，已内置
+  optimizer: fis.plugin('clean-css')
+});
+fis.match('*.png', {
+  // fis-optimizer-png-compressor 插件进行压缩，已内置
+  optimizer: fis.plugin('png-compressor')
+});
+```
+
+fis3 release时添加md5、静态资源压缩、css 文件引用图片进行合并
+
+可能有时候开发的时候不需要压缩、合并图片、也不需要hash。那么给上面配置追加如下配置；
+
+```
+fis.media('debug').match('*.{js,css,png}', {
+  useHash: false,
+  useSprite: false,
+  optimizer: null
+})
+```
+fis3 release debug 启用 media debug 的配置，覆盖上面的配置，把诸多功能关掉。
+
+
+
+**Fis3常用配置**
+
+制定目录规范
+
+相信在前端工程化开发中，目录规范是必不可少的，比如哪些目录下是组件，哪些目录下的js要被特殊的插件处理，满足特殊的需求，比如对commonjs、AMD 的支持。
+
+这一节给大家介绍目录规范的制定，把它跟部署目录衔接起来；
+
+源码目录规范
+
+```
+.
+├── page
+│   └── index.html
+├── static
+│   └── lib
+├── test
+└── widget
+    ├── header
+    ├── nav
+    └── ui
+```
+
+page 放置页面模板
+widget 一切组件，包括模板、css、js、图片以及其他前端资源
+test 一些测试数据、用例
+static 放一些组件公用的静态资源
+static/lib 放置一些公共库，例如 jquery, zepto, lazyload 等
+当编译产出时，产出结果目录是这样的；
+
+```
+.
+├── static
+├── template
+└── test
+```
+
+static 所有的静态资源都放到这个目录下
+template 所有的模板都放到这个目录下
+test 还是一些测试数据、用例
+那么，我们的源码目录规范的指定是为了我们好维护，其产出目录规范是为了我们容易部署。
+
+用fis3可以很方便的搞定这个事情；
+
+fis-conf.js
+
+```
+// 所有的文件产出到static/ 目录下
+fis.match('*', {
+    release: '/static/$0'
+});
+// 所有模板放到 tempalte 目录下
+fis.match('*.html', {
+    release: '/template/$0'
+});
+// widget源码目录下的资源被标注为组件
+fis.match('/widget/**/*', {
+    isMod: true
+});
+// widget下的 js 调用 jswrapper 进行自动化组件化封装
+fis.match('/widget/**/*.js', {
+    postprocessor: fis.plugin('jswrapper', {
+        type: 'commonjs'
+    })
+});
+// test 目录下的原封不动产出到 test 目录下
+fis.match('/test/**/*', {
+    release: '$0'
+});
+```
+
+这样就完成了目录规范的制定
+
+等等，可能我们还需要做一些优化，来实现对整个工程的优化；
+
+需要做以下几个方面的事情
+
+js, css 在开发时不压缩，但在产品发布时压缩
+代码进行合理的合并处理
+```
+// 所有的文件产出到 static/ 目录下
+fis.match('*', {
+    release: '/static/$0'
+});
+
+// 所有模板放到 tempalte 目录下
+fis.match('*.html', {
+    release: '/template/$0'
+});
+
+// widget源码目录下的资源被标注为组件
+fis.match('/widget/**/*', {
+    isMod: true
+});
+
+// widget下的 js 调用 jswrapper 进行自动化组件化封装
+fis.match('/widget/**/*.js', {
+    postprocessor: fis.plugin('jswrapper', {
+        type: 'commonjs'
+    })
+});
+
+// test 目录下的原封不动产出到 test 目录下
+fis.match('/test/**/*', {
+    release: '$0'
+});
+
+// optimize
+fis.media('prod')
+    .match('*.js', {
+        optimizer: fis.plugin('uglify-js', {
+            mangle: {
+                expect: ['require', 'define', 'some string'] //不想被压的
+            }
+        })
+    })
+    .match('*.css', {
+        optimizer: fis.plugin('clean-css', {
+            'keepBreaks': true //保持一个规则一个换行
+        })
+    });
+
+// pack
+fis.media('prod')
+    // 启用打包插件，必须匹配 ::package
+    .match('::package', {
+        packager: fis.plugin('map'),
+        spriter: fis.plugin('csssprites', {
+            layout: 'matrix',
+            margin: '15'
+        })
+    })
+    .match('*.js', {
+        packTo: '/static/all_others.js'
+    })
+    .match('*.css', {
+        packTo: '/staitc/all_others.css'
+    })
+    .match('/widget/**/*.js', {
+        packTo: '/static/all_comp.js'
+    })
+    .match('/widget/**/*.css', {
+        packTo: '/static/all_comp.css'
+    });
+```
+
+发布 fis3 release prod，进行合并、压缩等优化
+发布 fis3 release 不做压缩不做合并
+
+
+部署远端测试机
+
+由于前端项目的特殊性，一般都需要放到服务器上去运行，那么在本地开发完成后，需要把编译产出部署到测试远端机器上面去，这节就给大家分享一下在fis3这个操作怎么做；
+
+在fis3中用fis.media提供各个状态区分，那么我们也可以轻松制定不同状态下的发布方式；比如要部署到qa 的机器上抑或是rd的机器；
+
+准备工作，我们先选定自己需要使用的deploy插件，在fis3部署方式都是用插件实现的；
+```
+fis3-deploy-http-push
+```
+这个插件就是以 HTTP 提交的方式来完成远端部署的，当然由于安全性等原因这种方式只适用于测试阶段，请勿直接拿来上线；
+
+HTTP提交的方式上传就得有一个接受端，http-push提供了一个php版本的接收端receiver.php，其他后端可以模仿实现一个。这个接收端需要放到你的 Web服务WWW目录下，并且可以被访问到；
+
+部署好接收端，并且它能正常被访问到，比如url是http:///receiver.php 其配置如下
+```
+fis.media('qa').match('**', {
+    deploy:  fis.plugin('http-push', {
+        receiver: 'http:///receiver.php',
+        to: '/home/work/www'
+    })
+});
+```
+fis3 release qa 当执行时就会部署到配置的qa的机器上。
+
+异构语言 less 的使用
+```
+fis.match('**.less', {
+    parser: fis.plugin('less'), // invoke `fis-parser-less`,
+    rExt: '.css'
+});
+```
+异构语言 sass 的使用
+```
+fis.match('**.sass', {
+    parser: fis.plugin('sass'), // invoke `fis-parser-sass`,
+    rExt: '.css'
+});
+```
+前端模板的使用
+```
+fis.match('**.tmpl', {
+    parser: fis.plugin('utc'), // invoke `fis-parser-utc`
+    isJsLike: true    
+});
+```
+某些资源不产出
+```
+fis.match('*.inline.css', {
+  // 设置release 为 FALSE，不再产出此文件
+  release: false
+})
+```
+某些资源从构建中去除
+FIS3 会读取全部项目目录下的资源，如果有些资源不想被构建，通过以下方式排除。
+```
+fis.set('project.ignore', [
+  'output/**',
+  'node_modules/**',
+  '.git/**',
+  '.svn/**'
+]);
+```
+
+
+**更多配置**
+
+fis3 通过配置来决定代码、资源该如何处理，包括配置、压缩、CDN、合并等；
+
+配置API
+
+fis.set()
+
+设置一些配置，如系统内置属性project、namespace、modules、settings。 fis.set设置的值通过fis.get()获取
+
+```
+fis.set(key, value)
+```
+
+key 任意字符串，但系统占用了 project、namespace、modules、settings 它们在系统中有特殊含义，详见
+
+当字符串以 . 分割的，.字符后的字符将会是字符前字符同名对象的健
+
+value 任意变量
+
+```
+fis.set('namespace', 'home');
+fis.set('my project namespace', 'common');
+fis.set('a.b.c', 'some value'); // fis.get('a') => {b: {c: 'some value'}}
+```
+
+fis.get()
+
+获取已经配置的属性，和fis.set()成对使用
+
+fis.get(key)
+
+key 任意字符串
+
+```
+// fis.set('namespace', 'common')
+var ns = fis.get('namespace');
+// fis.set('a.b.c', 'd')
+fis.get('a'); // => {b:{c: 'd'}}
+fis.get('a.b'); // => {c:'d'}
+fis.get('a.b.c'); // => 'd'
+```
+
+fis.match()
+
+给匹配到的文件分配属性，文件属性决定了这个文件进行怎么样的操作；
+
+fis.match 模拟一个类似 css 的覆盖规则，负责给文件分配规则属性，这些规则属性决定了这个文件将会被如何处理；
+
+就像css的规则一样，后面分配到的规则会覆盖前面的；如
+```
+fis.match('{a,b}.js', {
+    release: '/static/$0'
+});
+
+fis.match('b.js', {
+    release: '/static/new/$0'
+});
+```
+
+b.js 最终分配到的规则属性是
+
+```
+{
+  release: '/static/new/$0'
+}
+```
+
+那么 b.js 将会产出到 /static/new 目录下；
+```
+fis.match(selector, props[, important])
+```
+
+selector glob 或者是任意正则
+
+props 文件属性
+
+important bool 设置了这个属性为true，即表示设置的规则无法被覆盖；具体行为可参考css !important
+
+```
+fis.match('*.js', {
+  useHash: true,
+  release: '/static/$0'
+});
+```
+
+fis.media()
+
+fis.media是模仿自css的@media，表示不同的状态。这是fis3中的一个重要概念，其意味着有多份配置，每一份配置都可以让fis3进行不同的编译；
+
+比如开发时和上线时的配置不同，比如部署测试机时测试机器目录不同，比如测试环境和线上机器的静态资源domain不同，一切这些不同都可以设定特定的fis.media来搞定；
+```
+fis.media(mode)
+```
+参数，mode 
+
+string mode，设定不同状态，比如 rd、qa、dev、production
+
+返回值 `fis` 对象
+
+```
+fis.media('dev').match('*.js', {
+    optimizer: null
+});
+fis.media('rd').match('*.js', {
+  domain: 'http://rd-host/static/cdn'
+});
+```
+
+fis.plugin()
+
+插件调用接口
+
+语法
+
+```
+fis.plugin(name [, props [, position]])
+```
+
+属性
+
+name
+
+插件名，插件名需要特殊说明一下，fis3固定了插件扩展点，每一个插件都有个类型，体现在插件发布的npm包名字上；比如fis-parser-less插件，parser指的是在parser扩展点做了个解析.less 的插件。
+
+那么设置插件的时候，插件名 less，比如设置一个parser类型的插件是这么设置的；
+
+```
+fis.match('*.less', {
+  parser: fis.plugin('less', {}) //属性 parser表示了插件的类型
+})
+```
+
+props
+
+对象，给插件设置用户属性
+```
+fis.match('*.less', {
+  parser: fis.plugin('less', {});
+});
+```
+position
+
+设置插件位置，如果目标文件已经设置了某插件，默认再次设置会覆盖掉。如果希望在已设插件执行之前插入或者之后插入，请传入prepend或者append
+
+```
+fis.match('*.less', {
+   parser: fis.plugin('another', null, 'append');
+});
+```
 
 **glob**
 
