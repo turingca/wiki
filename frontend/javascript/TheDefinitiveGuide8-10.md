@@ -3140,28 +3140,3 @@ pattern.test("JavaScript"); //返回 true
 调用test()和调用exec()等价，当exec()的返回结果不是null时，test()返回true。由于这种等价性，当一个全局正则表达式调用方法test()时，它的行为和exec()相同，因为它从lastIndex指定的位置处开始检索某个字符串，如果它找到了一个匹配结果，那么它就立即设置lastIndex为当前匹配子串的结束位置。这样一来，就可以使用test()来遍历字符串，就像用exec()方法一样。
 
 与exec()和test()不同，String方法search()、replace()和match()并不会用到lastIndex属性。实际上，String方法只是简单地将lastIndex属性重置为0。如果让一个带有修饰符g的正则表达式对多个字符串执行exec()或test()，要么在每个字符串中找出所有的匹配以便将lastIndex自动重置为零，要么显式将lastIndex手动设置为0（当最后一次检索失败时需要手动设置lastIndex）。如果忘了手动设置lastIndex的值，那么下一次对新字符串进行检索时，执行检索的起始位置可能就不是字符串的开始位置，而可能是任意位置。当然，如果RegExp不带有修饰符g，则不必担心会发生这种情况。同样要记住，在ECMAScript5中，正则表达式直接量的每次计算都会创建一个新的RegExp对象，每个新RegExp对象具有各自的lastIndex属性，这势必会大大减少“残留”lastIndex对程序造成的意外影响。
-
-
-第11章 JavaScript的子集和扩展
------------------------------
-**11.1javascript的子集**
-**11.2常量和局部变量**
-**11.3解构赋值**
-**11.4迭代**
-**11.5函数简写**
-**11.6多catch从句**
-**11.7e4x:ecmascript for xml
-
-第12章 服务器端javascript
--------------------------
-
-前面的章节已经介绍了javascript语言核心，我们即将开始本书的第二部分，该部分会介绍javascript嵌入web浏览器的原理，并涵盖庞杂的客户端JavaScript API。可以说javascript是基于web的编程语言，因为绝大部分javascript代码是为web浏览器而编写的。但是作为一门高效和通用的语言，javascript理所当然能用于其他编程工作。所以在过渡到服务端javascript之前，我们先快速了解一下另外两种javascript嵌入。
-Rhino是基于Java的javascript解析器，实现了通过javascript程序访问整个Java API，12.1节将会介绍它。
-Node是Google的V8 javascript解析器的一个特别版本，它在底层绑定了POSIX（Unix）API，包括文件、进程、流和套接字等，并侧重于异步I/O、网络和HTTP。12.2节将会介绍它。Node是其官方名字，Node.js是非官方的名字，用于和其他node区分，[具体内容见](https://github.com/nodejs/node/wiki)
-
-本章标题表明本章是关于“服务器端”的javascript，Node和Rhino常用于创建脚本服务器。但“服务器”这个词也意味着“Web浏览器之外的任何事情”。Rhino程序能使用Java的Swing框架创建图形UI，而Node上运行的javascript程序可以像shell脚本那样去操作文件。
-
-本章非常简短，仅准备重点介绍在web浏览器之外使用javascript的一些方式；不会尝试全面介绍Rhino和Node，第三部分也不会包涵这里讨论的API；并且不会详细介绍Java平台或POSIX API，接下来关于Rhino的章节假定读者有一定的Java经验，关于Node的章节假定读者有一定的底层Unix API的经验。
-
-**12.1用rhino脚本化java**
-**12.2用node实现异步i/o**
