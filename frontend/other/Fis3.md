@@ -1689,3 +1689,122 @@ fis.match('/images/(*.{png,gif})', {
   _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/static/pic/body-bg_1b8c3e0.png');
 }
 ```
+
+调试
+-----
+
+FIS3 构建后，默认情况下会对资源的 URL 进行修改，改成绝对路径。这时候本地双击打开文件是无法正常工作的。这给开发调试带来了绝大的困惑。
+
+FIS3 内置一个简易 Web Server，可以方便调试构建结果。
+
+**目录**
+
+构建时不指定输出目录，即不指定 -d 参数时，构建结果被发送到内置Web Server的根目录下。此目录可以通过执行以下命令打开。
+```
+fis3 server open
+```
+
+**发布**
+
+```
+fis3 release
+```
+
+**启动**
+
+通过
+
+```
+fis3 server start
+```
+
+来启动本地Web Server，当此Server启动后，会自动浏览器打开http://127.0.0.1:8080，默认监听端口8080
+通过执行以下命令得到更多启动参数，可以设置不同的端口号（当 8080 占用时）
+```
+fis3 server -h
+```
+
+**预览**
+
+启动Web Server以后，会自动打开浏览器，访问http://127.0.0.1:8080 URL，这时即可查看到页面渲染结果。正如所有其他Web Server，FIS3 内置的 Server是常驻的，如果不重启计算机或者调用命令关闭是不会关闭的。
+
+所以后续只需访问对应链接即可，而不需要每次release就启动一次 server。
+
+**文件监听**
+
+为了方便开发，FIS3 支持文件监听，当启动文件监听时，修改文件会构建发布。而且其编译是增量的，编译花费时间少。
+
+FIS3 通过对 release 命令添加 -w 或者 --watch 参数启动文件监听功能。
+```
+fis3 release -w
+```
+
+添加 -w 参数时，程序不会执行终止；停止程序用快捷键 CTRL+c
+
+**浏览器自动刷新**
+
+文件修改自动构建发布后，如果浏览器能自动刷新，这是一个非常好的开发体验。
+
+FIS3支持浏览器自动刷新功能，只需要给 release 命令添加 -L 参数，通常 -w 和 -L 一起使用。
+```
+fis3 release -wL
+```
+
+程序停止用快捷键 CTRL+c
+
+**发布到远端机器**
+
+当我们开发项目后，需要发布到测试机（联调机），一般可以通过如SMB、FTP等上传代码。FIS3默认支持使用HTTP上传代码，首先需要在测试机部署上传接收脚本（或者服务），这个脚本非常简单，现在给出了php的实现版本，可以把它放到测试机上某个Web服务根目录，并且配置一个url能访问到即可。
+
+示例脚本是php脚本，测试机Web需要支持PHP的解析，如果需要其他语言实现，请参考这个php脚本实现，如果嫌麻烦，我们提供了一个node版本的接收端
+
+假定这个 URL 是：http://cq.01.p.p.baidu.com:8888/receiver.php
+
+那么我们只需要在配置文件配置
+```
+fis.match('*', {
+  deploy: fis.plugin('http-push', {
+    receiver: 'http://cq.01.p.p.baidu.com:8888/receiver.php',
+    to: '/home/work/htdocs' // 注意这个是指的是测试机器的路径，而非本地机器
+  })
+})
+```
+
+如果你想通过其他协议上传代码，请参考deploy插件开发实现对应协议插件即可。
+
+当执行 fis3 release 时上传测试机器
+
+可能上传测试机是最后联调时才会有的，更好的做法是设置特定 media。
+```
+// 其他配置
+...
+fis.media('qa').match('*', {
+  deploy: fis.plugin('http-push', {
+    receiver: 'http://cq.01.p.p.baidu.com:8888/receiver.php',
+    to: '/home/work/htdocs' // 注意这个是指的是测试机器的路径，而非本地机器
+  })
+});
+```
+
+fis3 release qa 上传测试机器
+fis3 release 产出到本地测试服务器根目录
+
+**替代内置Server**
+
+FIS3 内置了一个 Web Server 提供给构建后的代码进行调试。如果你自己启动了你自己的 Web Server 依然可以使用它们。
+
+假设你的Web Server的根目录是/Users/my-name/work/htdocs，那么发布时只需要设置产出目录到这个目录即可。
+
+```
+fis3 release -d /Users/my-name/work/htdocs
+```
+
+如果想执行fis3 release直接发布到此目录下，可在配置文件配置；
+```
+fis.match('*', {
+  deploy: fis.plugin('local-deliver', {
+    to: '/Users/my-name/work/htdocs'
+  })
+})
+```
+
