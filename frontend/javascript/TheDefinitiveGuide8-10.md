@@ -810,7 +810,6 @@ if (!Function.prototype.bind) {
             var args = [], i;
             for(i = 1; i < boundArgs.length; i++) args.push(boundArgs[i]);
             for(i = 0; i < arguments.length; i++) args.push(arguments[i]);
-            
             // Now invoke self as a method of o, with those arguments
             // 现在将self作为o的方法来调用，传入这些实参
             return self.apply(o, args);
@@ -2849,8 +2848,8 @@ Object.freeze(enumeration);
 **9.9.1作为私有命名空间的函数**
 
 
-正则表达式的模式匹配
---------------------
+第10章 正则表达式的模式匹配
+---------------------------
 
 正则表达式（regular expression）是一个描述字符模式的对象。JavaScript的RegExp类表示正则表达式，String和RegExp都定义了方法，后者使用正则表达式进行强大的模式匹配和文本检索与替换功能。JavaScript的正则表达式语法是Perl5的正则表达式语法的大型子集，所以对于有Perl编程经验的程序员来说，学习JavaScript中的正则表达式是小菜一碟。
 
@@ -2860,18 +2859,20 @@ Object.freeze(enumeration);
 
 **10.1正则表达式的定义**
 
-javascript中的正则表达式用RegExp对象表示，可以使用RegExp()构造函数来创建RegExp对象，不过RegExp对象更多的是通过一种特殊的直接量语法来创建。就像通过引号包裹字符的方式来定义字符串直接量一样，正则表达式直接量定义为包含在一对斜杠（/）（正斜杠）之间的字符，例如：
+JavaScript中的正则表达式用RegExp对象表示，可以使用RegExp()构造函数来创建RegExp对象，不过RegExp对象更多的是通过一种特殊的直接量语法来创建。就像通过引号包裹字符的方式来定义字符串直接量一样，正则表达式直接量定义为包含在一对斜杠（/）（正斜杠）之间的字符，例如：
+
 ```javascript
 var pattern = /s$/;
 ```
+
 运行这段代码创建一个新的RegExp对象，并将它赋值给变量pattern。这个特殊的RegExp对象用来匹配所有以字母“s”结尾的字符串。
 用构造函数RegExp()也可以定义与之等价的正则表达式，代码如下：
+
 ```javascript
 var pattern = new RegExp("s$");
 ```
 
-RegExp直接量和对象的创建：
-就像字符串和数字一样，程序中每个取值相同的原始类型直接量均表示相同的值。这是显而易见的。程序运行时每次遇到对象直接量（初始化表达式）诸如{}和[]的时候都会创建新对象。比如，如果在循环体中写var a = []，则每次遍历都会创建一个新的空数组。
+RegExp直接量和对象的创建：就像字符串和数字一样，程序中每个取值相同的原始类型直接量均表示相同的值。这是显而易见的。程序运行时每次遇到对象直接量（初始化表达式）诸如{}和[]的时候都会创建新对象。比如，如果在循环体中写var a = []，则每次遍历都会创建一个新的空数组。
 正则表达式直接量则与此不同，ECMAScript3规范规定，一个正则表达式直接量会在执行到它时转换为一个RegExp对象，同一段代码所表示正则表达式直接量的每次运算都返回一个对象。ECMAScript5规范则做了相反的规定，同一段代码所表示的正则表达式直接量的每次运算都返回新对象。IE一直都是按照ECMAScript5规范实现的，多数最新版本的浏览器也开始遵循ECMAScript5，尽管目前该标准并未全面广泛推行。
 
 作者在这里揭示了一种非常容易忽略的情况，比如，这段代码在Firefox3.6和Firefox4+中的运行结果不一致：
@@ -3124,6 +3125,7 @@ RegExp()构造函数非常有用，特别是在需要动态创建正则表达式
 RegExp对象定义了两个用于执行模式匹配操作的方法。它们的行为和上文介绍过的String方法很类似。RegExp最主要的执行模式匹配的方法是exec()，它与10.2节介绍过的String方法match()相似，只是RegExp方法的参数是一个字符串，而String方法的参数是一个RegExp对象。exec()方法对一个指定的字符串执行了一个正则表达式，简言之，就是在一个字符串中执行匹配检索。如果它没有找到任何匹配，它就返回null，但如果它找到了一个匹配，它将返回一个数组，就像match()方法为非全局检索返回的数组一样。这个数组的第一个元素包含的是与正则表达式相匹配的字符串，余下的元素是与圆括号内的子表达式相匹配的子串。属性index包含了发生匹配的字符位置，属性input引用的是正在检索的字符串。
 
 和match()方法不同，不管正则表达式是否具有全局修饰符g，exec()都会返回一样的数组。回忆一下，当match()的参数是一个全局正则表达式时，它返回由匹配结果组成的数组。相比之下，exec()总是返回一个匹配结果，并提供关于本次匹配的完整信息。当调用exec()的正则表达式对象具有修饰符g时，它将把当前正则表达式对象的lastIndex属性设置为紧挨着匹配子串的字符位置，当同一个正则表达式第二次调用exec()时，它将从lastIndex属性所指示的字符处开始检索。如果exec()没有发现任何匹配结果，它会将lastIndex重置为0（在任何时候都可以将lastIndex属性设置为0，每当在字符串中找最后一个匹配项后，在使用这个RegExp对象开始新的字符串查找之前，都应当将lastIndex设置为0）。这种特殊的行为使我们可以在用正则表达式匹配字符串的过程中反复调用exec()，比如：
+
 ```javascript
 var pattern = /Java/g;
 var text = "JavaScript is more fun than Java!";
@@ -3132,11 +3134,14 @@ while((result = pattern.exec(text)) !- null) {
   alert("Matched'" + result[0] + "'" + " at position " + result.index + "; next search begins at " + pattern.lastIndex);
 }
 ```
+
 另外一个RegExp方法是test()，它比exec()更简单一些。它的参数是一个字符串，用test()对某个字符串进行检测，如果包含正则表达式的一个匹配结果，则返回true：
+
 ```javascript
 var pattern = /java/i;
 pattern.test("JavaScript"); //返回 true
 ```
+
 调用test()和调用exec()等价，当exec()的返回结果不是null时，test()返回true。由于这种等价性，当一个全局正则表达式调用方法test()时，它的行为和exec()相同，因为它从lastIndex指定的位置处开始检索某个字符串，如果它找到了一个匹配结果，那么它就立即设置lastIndex为当前匹配子串的结束位置。这样一来，就可以使用test()来遍历字符串，就像用exec()方法一样。
 
 与exec()和test()不同，String方法search()、replace()和match()并不会用到lastIndex属性。实际上，String方法只是简单地将lastIndex属性重置为0。如果让一个带有修饰符g的正则表达式对多个字符串执行exec()或test()，要么在每个字符串中找出所有的匹配以便将lastIndex自动重置为零，要么显式将lastIndex手动设置为0（当最后一次检索失败时需要手动设置lastIndex）。如果忘了手动设置lastIndex的值，那么下一次对新字符串进行检索时，执行检索的起始位置可能就不是字符串的开始位置，而可能是任意位置。当然，如果RegExp不带有修饰符g，则不必担心会发生这种情况。同样要记住，在ECMAScript5中，正则表达式直接量的每次计算都会创建一个新的RegExp对象，每个新RegExp对象具有各自的lastIndex属性，这势必会大大减少“残留”lastIndex对程序造成的意外影响。
