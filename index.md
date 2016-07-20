@@ -60,6 +60,7 @@ L
 [刘子钊](http://lzzone.top/)
 [李宇阳](http://memeda.link/)
 [赖敏材](https://morningsky.github.io/)
+[李昶晰](http://mnichangxin.com/)
 S
 [孙梦茹](http://sevenskey.sinaapp.com/)
 Y
