@@ -45,6 +45,8 @@ wiki
 
 [极客学院Wiki-IT技术图文教程库](http://wiki.jikexueyuan.com/)
 
+[AwesomeTool在线工具集合](http://www.awesometool.org/)
+
 博客
 -----
 
