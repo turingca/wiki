@@ -3078,7 +3078,7 @@ String支持4种使用正则表达式的方法。最简单的是search()。它�
 replace()方法用以执行检索与替换操作。其中第一个参数是一个正则表达式，第二个参数是要进行替换的字符串。这个方法会对调用它的字符串进行检索，使用指定的模式来匹配。如果正则表达式中设置了修饰符g，那么源字符串中所有与模式匹配的子串都将替换成第二个参数指定的字符串；如果不带修饰符g，则只替换所匹配的的第一个子串。如果replace()的第一个参数是字符串而不是正则表达式，则replace()将直接搜索这个字符串，而不是像search()一样首先通过RegExp()将它转换为正则表达式。比如，可以使用下面的方法，利用replace()将文本中的所有javascript（不区分大小写）统一替换为“JavaScript”：
 
 ```javascript
-//将所有不区分大小写的javascript都替换成大小写正确的javascript
+//将所有不区分大小写的javascript都替换成大小写正确的JavaScript
 text.replace(/javascript/gi,"JavaScript");
 ```
 
@@ -3104,7 +3104,7 @@ match()方法是最常用的String正则表达式方法。它的唯一参数就�
 例如，使用如下的代码来解析一个URL：
 
 ```javascript
-var url = /(w+):\/\/([\w.]+)\/(\S*)/;
+var url = /(\w+):\/\/([\w.]+)\/(\S*)/;
 var text = "Visit my blog at http://www.example.com/~david";
 var result = text.match(url);
 if (result!-null) {
@@ -3115,23 +3115,30 @@ if (result!-null) {
 }
 ```
 
-值得注意的是，给字符串的match()方法传入一个非全局的正则表达式，实际上和给这个正则表达式的exec()方法传入的字符串是一模一样的，它返回的数组带有两个属性：
-index和input，接下来对exec()方法的讨论中会提到：
+值得注意的是，给字符串的match()方法传入一个非全局的正则表达式，实际上和给这个正则表达式的exec()方法传入的字符串是一模一样的，它返回的数组带有两个属性：index和input，接下来对exec()方法的讨论中会提到：
+
 String对象的最后一个和正则表达式相关的方法是split()。这个方法用以将调用它的字符串拆分为一个子串组成的数组，使用的分隔符是split()的参数，例如：
+
 ```javascript
 "123,456,789".split(",");//返回["123","456","789"]
 ```
+
 split()方法还有其他一些特性，本书第三部分有关于String.split()更详尽的说明。
 
 **10.3RegExp对象**
 
 正如本章开始所讲到的，正则表达式是通过RegExp对象来表示的。除了RegExp()构造函数之外，RegExp对象还支持三个方法和一些属性。接下来的两节会对RegExp模式匹配方法和属性展开讲述。
 
-RegExp()构造函数非常有用，特别是在需要动态创建正则表达式的时候，这种情况往往没办法通过写死在代码中的正则表达式直接量来实现。例如，如果待检索的字符串是由用户输入的，就必须使用RegExp()构造函数，在程序运行时创建正则表达式。
+RegExp()构造函数带有两个字符串参数，其中第二个参数是可选的，RegExp()用以创建新的RegExp对象。第一个参数包含正则表达式的主体部分，也就是正则表达式直接量中两条斜线之间的文本。需要注意的是，不论是字符串直接量还是正则表达式，都使用“\”字符作为转义字符的前缀，因此当给RegExp()传入一个字符串表述正则表达式时，必须将“\”替换成“\\”。RegExp()的第二个参数是可选的，如果提供第二个参数，它就指定正则表达式的修饰符。不过只能传入修饰符g、i、m或者它们的组合。比如：
+
+//全局匹配字符串中的5个数字，注意这里使用了“\\”，而不是“\”
+var zipcode = new RegExp("\\d{5}", "g");
+
+RegExp()构造函数非常有用，特别是在需要动态创建正则表达式的时候，这种情况往往没办法通过写死在代码中的正则表达式直接量来实现。例如，如果待检索的字符串是由用户输入的，就必须使用RegExp()构造函数，在程序运行时创建正则表达式。其实通过eval()也可以实现运行时动态创建正则表达式，但不推荐使用eval()。
 
 **10.3.1RegExp的属性**
 
-每个RegExp对象都包含5个属性。属性source是一个只读的字符串，包含正则表达式的文本。属性global是一个只读的布尔值，用以说明这个正则表达式是否带有修饰符g。属性ignoreCase也是一个只读的布尔值，用以说明正则表达式是否带有修饰符m。最后一个属性lastIndex，它是一个可读/写的整数。如果匹配模式带有g修饰符，这个属性存储在整个字符串中下一次检索的开始位置，这个属性会被exec()和test()方法用到，下面会讲到。
+每个RegExp对象都包含5个属性。属性source是一个只读的字符串，包含正则表达式的文本。属性global是一个只读的布尔值，用以说明这个正则表达式是否带有修饰符g。属性ignoreCase也是一个只读的布尔值，用以说明正则表达式是否带有修饰符i。属性multiline是一个只读的的布尔值，用以说明正则表达式是否带有修饰符m。最后一个属性lastIndex，它是一个可读/写的整数。如果匹配模式带有g修饰符，这个属性存储在整个字符串中下一次检索的开始位置，这个属性会被exec()和test()方法用到，下面会讲到。
 
 **10.3.2RegExp的方法**
 
@@ -3143,7 +3150,7 @@ RegExp对象定义了两个用于执行模式匹配操作的方法。它们的�
 var pattern = /Java/g;
 var text = "JavaScript is more fun than Java!";
 var result;
-while((result = pattern.exec(text)) !- null) {
+while((result = pattern.exec(text)) != null) {
   alert("Matched'" + result[0] + "'" + " at position " + result.index + "; next search begins at " + pattern.lastIndex);
 }
 ```
@@ -3157,4 +3164,4 @@ pattern.test("JavaScript"); //返回 true
 
 调用test()和调用exec()等价，当exec()的返回结果不是null时，test()返回true。由于这种等价性，当一个全局正则表达式调用方法test()时，它的行为和exec()相同，因为它从lastIndex指定的位置处开始检索某个字符串，如果它找到了一个匹配结果，那么它就立即设置lastIndex为当前匹配子串的结束位置。这样一来，就可以使用test()来遍历字符串，就像用exec()方法一样。
 
-与exec()和test()不同，String方法search()、replace()和match()并不会用到lastIndex属性。实际上，String方法只是简单地将lastIndex属性重置为0。如果让一个带有修饰符g的正则表达式对多个字符串执行exec()或test()，要么在每个字符串中找出所有的匹配以便将lastIndex自动重置为零，要么显式将lastIndex手动设置为0（当最后一次检索失败时需要手动设置lastIndex）。如果忘了手动设置lastIndex的值，那么下一次对新字符串进行检索时，执行检索的起始位置可能就不是字符串的开始位置，而可能是任意位置。当然，如果RegExp不带有修饰符g，则不必担心会发生这种情况。同样要记住，在ECMAScript5中，正则表达式直接量的每次计算都会创建一个新的RegExp对象，每个新RegExp对象具有各自的lastIndex属性，这势必会大大减少“残留”lastIndex对程序造成的意外影响。
+与exec()和test()不同，String方法search()、replace()和match()并不会用到lastIndex属性。实际上，String方法只是简单地将lastIndex属性重置为0。如果让一个带有修饰符g的正则表达式对多个字符串执行exec()或test()，要么在每个字符串中找出所有的匹配以便将lastIndex自动重置为零，要么显式将lastIndex手动设置为0（当最后一次检索失败时需要手动设置lastIndex）。如果忘了手动设置lastIndex的值，那么下一次对新字符串进行检索时，执行检索的起始位置可能就不是字符串的开始位置，而可能是任意位置（这里所说的任意位置实际上是由lastIndex的值决定的，如果lastIndex的值不为0，必定会对新开始的正则表达式匹配检索造成不确定的影响）。当然，如果RegExp不带有修饰符g，则不必担心会发生这种情况。同样要记住，在ECMAScript5中，正则表达式直接量的每次计算都会创建一个新的RegExp对象，每个新RegExp对象具有各自的lastIndex属性，这势必会大大减少“残留”lastIndex对程序造成的意外影响。
