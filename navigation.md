@@ -12,5 +12,6 @@
   * [server](frontend/server.md)
   * [other](frontend/other.md)
  
+[万花筒](link.md)
 
 
