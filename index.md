@@ -42,9 +42,8 @@ wiki
 ----
 
 [WooYun知识库|最严肃的安全原创平台](http://drops.wooyun.org/)
-
+[知识库-你身边的技术百科全书-CSDN](http://lib.csdn.net/)
 [极客学院Wiki-IT技术图文教程库](http://wiki.jikexueyuan.com/)
-
 [AwesomeTool在线工具集合](http://www.awesometool.org/)
 
 博客
