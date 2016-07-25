@@ -92,3 +92,14 @@ apt-get install php5-gd curl libcurl4-openssl-dev php5-curl
 
 LNMP
 -----
+
+linux主机共享文件夹
+---------------------------
+
+windows上的共享文件夹
+
+mount -t cifs -o username=**,password="**" //192.168.1.1/work  /home/fjc/www
+
+mac上的共享文件夹
+
+
