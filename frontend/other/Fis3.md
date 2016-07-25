@@ -1345,8 +1345,305 @@ encoding
 
 
 
-定位资源
+
+
+调试
+-----
+
+FIS3 构建后，默认情况下会对资源的 URL 进行修改，改成绝对路径。这时候本地双击打开文件是无法正常工作的。这给开发调试带来了绝大的困惑。
+
+FIS3 内置一个简易 Web Server，可以方便调试构建结果。
+
+**目录**
+
+构建时不指定输出目录，即不指定 -d 参数时，构建结果被发送到内置Web Server的根目录下。此目录可以通过执行以下命令打开。
+```
+fis3 server open
+```
+
+**发布**
+
+```
+fis3 release
+```
+
+**启动**
+
+通过
+
+```
+fis3 server start
+```
+
+来启动本地Web Server，当此Server启动后，会自动浏览器打开http://127.0.0.1:8080，默认监听端口8080
+通过执行以下命令得到更多启动参数，可以设置不同的端口号（当 8080 占用时）
+```
+fis3 server -h
+```
+
+**预览**
+
+启动Web Server以后，会自动打开浏览器，访问http://127.0.0.1:8080 URL，这时即可查看到页面渲染结果。正如所有其他Web Server，FIS3 内置的 Server是常驻的，如果不重启计算机或者调用命令关闭是不会关闭的。
+
+所以后续只需访问对应链接即可，而不需要每次release就启动一次 server。
+
+**文件监听**
+
+为了方便开发，FIS3 支持文件监听，当启动文件监听时，修改文件会构建发布。而且其编译是增量的，编译花费时间少。
+
+FIS3 通过对 release 命令添加 -w 或者 --watch 参数启动文件监听功能。
+```
+fis3 release -w
+```
+
+添加 -w 参数时，程序不会执行终止；停止程序用快捷键 CTRL+c
+
+**浏览器自动刷新**
+
+文件修改自动构建发布后，如果浏览器能自动刷新，这是一个非常好的开发体验。
+
+FIS3支持浏览器自动刷新功能，只需要给 release 命令添加 -L 参数，通常 -w 和 -L 一起使用。
+```
+fis3 release -wL
+```
+
+程序停止用快捷键 CTRL+c
+
+**发布到远端机器**
+
+当我们开发项目后，需要发布到测试机（联调机），一般可以通过如SMB、FTP等上传代码。FIS3默认支持使用HTTP上传代码，首先需要在测试机部署上传接收脚本（或者服务），这个脚本非常简单，现在给出了php的实现版本，可以把它放到测试机上某个Web服务根目录，并且配置一个url能访问到即可。
+
+示例脚本是php脚本，测试机Web需要支持PHP的解析，如果需要其他语言实现，请参考这个php脚本实现，如果嫌麻烦，我们提供了一个node版本的接收端
+
+假定这个 URL 是：http://cq.01.p.p.baidu.com:8888/receiver.php
+
+那么我们只需要在配置文件配置
+```
+fis.match('*', {
+  deploy: fis.plugin('http-push', {
+    receiver: 'http://cq.01.p.p.baidu.com:8888/receiver.php',
+    to: '/home/work/htdocs' // 注意这个是指的是测试机器的路径，而非本地机器
+  })
+})
+```
+
+如果你想通过其他协议上传代码，请参考deploy插件开发实现对应协议插件即可。
+
+当执行 fis3 release 时上传测试机器
+
+可能上传测试机是最后联调时才会有的，更好的做法是设置特定 media。
+```
+// 其他配置
+...
+fis.media('qa').match('*', {
+  deploy: fis.plugin('http-push', {
+    receiver: 'http://cq.01.p.p.baidu.com:8888/receiver.php',
+    to: '/home/work/htdocs' // 注意这个是指的是测试机器的路径，而非本地机器
+  })
+});
+```
+
+fis3 release qa 上传测试机器
+fis3 release 产出到本地测试服务器根目录
+
+**替代内置Server**
+
+FIS3 内置了一个 Web Server 提供给构建后的代码进行调试。如果你自己启动了你自己的 Web Server 依然可以使用它们。
+
+假设你的Web Server的根目录是/Users/my-name/work/htdocs，那么发布时只需要设置产出目录到这个目录即可。
+
+```
+fis3 release -d /Users/my-name/work/htdocs
+```
+
+如果想执行fis3 release直接发布到此目录下，可在配置文件配置；
+```
+fis.match('*', {
+  deploy: fis.plugin('local-deliver', {
+    to: '/Users/my-name/work/htdocs'
+  })
+})
+```
+
+内置语法
 --------
+
+FIS项目曾经历了很久的“努力做好编译工具”的时代。那段时间里，FIS走了很多弯路，那时我们认为前端领域需要很复杂的编译工具才能很好的处理各种开发需求。2013年初，FIS的编译工具非常庞大复杂，日益暴露出来的问题已经开始不再收敛了，这促使FIS小组重新审视FIS的编译系统：满足前端开发需求的最小编译规则集是什么？
+
+前端编译工具有必要那么复杂么？答案是完全没必要！想象一下尺规作图，一把直尺，一只圆规，就可以做出很多基本几何操作。经过FIS团队不断实践总结，我们发现支持前端开发所需要的编译能力只有三种 ：
+
+* 资源定位：获取任何开发中所使用资源的线上路径；
+* 内容嵌入：把一个文件的内容(文本)或者base64编码(图片)嵌入到另一个文件中；
+* 依赖声明：在一个文本文件内标记对其他资源的依赖关系；
+
+一套前端编译工具，只要实现上述3项编译能力，就可以变得非常易用，代码可维护性瞬间提高很多。
+
+这三种编译能力作为FIS的内置语法提供：
+
+* 资源定位
+* 内容嵌入
+* 依赖声明
+
+内置语法主要针对html、css、js等三种语言提供不同的编译语法。假设遇到后端模板、异构语言、前端模板等如何让内置语法起效呢？
+
+```javascript
+//FIS中前端模板推荐预编译为js，所以应该使用js的内置语法
+fis.match('*.tmpl', {
+  isJsLike: true
+});
+```
+```javascript
+fis.match('*.sass', {
+  isCssLike: true
+});
+```
+```javascript
+fis.match('*.xxhtml', {
+  isHtmlLike: true
+})
+```
+
+**嵌入资源**
+
+嵌入资源即内容嵌入，可以为工程师提供诸如图片base64嵌入到css、js里，前端模板编译到js文件中，将js、css、html拆分成几个文件最后合并到一起的能力。有了这项能力，可以有效的减少http请求数，提升工程的可维护性。
+
+fis不建议用户使用内容嵌入能力作为组件化拆分的手段，因为声明依赖能力会更适合组件化开发。
+
+**在html中嵌入资源**
+
+在html中可以嵌入其他文件内容或者base64编码值，可以在资源定位的基础上，给资源加?__inline参数来标记资源嵌入需求。
+
+**html中嵌入图片base64**
+
+源码
+```
+  <img title="百度logo" src="images/logo.gif?__inline"/>
+```
+
+编译后
+```
+  <img title="百度logo" src="data:image/gif;base64,R0lGODlhDgGBALMAAGBn6eYxLvvy9PnKyfO...Jzna6853wjKc850nPeoYgAgA7"/>
+```
+
+**html中嵌入样式文件**
+
+源码
+```
+  <link rel="stylesheet" type="text/css" href="demo.css?__inline">
+```
+
+编译后
+```
+  <style>img { border: 5px solid #ccc; }</style>
+```
+
+**html中嵌入脚本资源**
+
+源码
+```
+  <script type="text/javascript" src="demo.js?__inline"></script>
+```
+
+编译后
+
+```
+  <script type="text/javascript">console.log('inline file');</script>
+```
+
+**html中嵌入页面文件**
+
+源码（推荐使用）
+```
+  <link rel="import" href="demo.html?__inline">
+```
+编译后
+```
+  <!-- this is the content of demo.html -->
+  <h1>demo.html content</h1>
+```
+
+源码
+```
+（功能同<link ref="import" href="xxx?__inline">语法，此语法为旧语法，不推荐使用 ）
+  <!--inline[demo.html]-->
+```
+
+编译后
+```
+  <!-- this is the content of demo.html -->
+  <h1>demo.html content</h1>
+```
+
+**在js中嵌入资源**
+
+在js中，使用编译函数 __inline()来提供内容嵌入能力。可以利用这个函数嵌入图片的base64编码、嵌入其他js或者前端模板文件的编译内容， 这些处理对html中script标签里的内容同样有效。
+
+**在js中嵌入js文件**
+
+源码
+```
+  __inline('demo.js');
+```
+编译后
+```
+  console.log('demo.js content');
+```
+
+**在js中嵌入图片base64**
+
+源码
+```
+  var img = __inline('images/logo.gif');
+```
+编译后
+```
+  var img = 'data:image/gif;base64,R0lGODlhDgGBALMAAGBn6eYxLvvy9PnKyfO...Jzna6853wjKc850nPeoYgAgA7';
+```
+
+**在js中嵌入其他文本文件**
+
+源码
+```
+  var css = __inline('a.css');
+```
+编译后
+```
+  var css = "body \n{    color: red;\n}";
+```
+
+**在css中嵌入资源**
+
+与html类似，凡是命中了资源定位能力的编译标记，除了src="xxx"之外，都可以通过添加?__inline编译标记都可以把文件内容嵌入进来。src="xxx"被用在ie浏览器支持的filter内，该属性不支持base64字符串，因此未做处理。
+
+**在css文件中嵌入其他css文件**
+
+源码
+```
+  @import url('demo.css?__inline');
+```
+
+编译后
+```
+  img { border: 5px solid #ccc; };
+```
+
+**在css中嵌入图片的base64**
+
+源码
+```
+  .style {
+      background: url(images/logo.gif?__inline);
+  }
+```
+
+编译后
+```
+  .style {
+      background: url(data:image/gif;base64,R0lGODlhDgGBALMAAGBn6eYxLvvy9PnKyfO...Jzna6853wjKc850nPeoYgAgA7);
+  }
+```
+
+**定位资源**
 
 定位资源能力，可以有效地分离开发路径与部署路径之间的关系，工程师不再关心资源部署到线上之后去了哪里，变成了什么名字，这些都可以通过配置来指定。而工程师只需要使用相对路径来定位自己的开发资源即可。这样的好处是：资源可以发布到任何静态资源服务器的任何路径上而不用担心线上运行时找不到它们，而且代码具有很强的可移植性，甚至可以从一个产品线移植到另一个产品线而不用担心线上部署不一致的问题。
 
@@ -1690,121 +1987,267 @@ fis.match('/images/(*.{png,gif})', {
 }
 ```
 
-调试
------
+**声明依赖**
 
-FIS3 构建后，默认情况下会对资源的 URL 进行修改，改成绝对路径。这时候本地双击打开文件是无法正常工作的。这给开发调试带来了绝大的困惑。
+声明依赖能力为工程师提供了声明依赖关系的编译接口。
+FIS3在执行编译的过程中，会扫描这些编译标记，从而建立一张静态资源关系表，资源关系表详细记录了项目内的静态资源id、发布后的线上路径、资源类型以及依赖关系和资源打包等信息。使用FIS3作为编译工具的项目，可以将这张表提交给后端或者前端框架去运行时，根据组件使用情况来按需加载资源或者资源所在的包，从而提升前端页面运行性能。
 
-FIS3 内置一个简易 Web Server，可以方便调试构建结果。
-
-**目录**
-
-构建时不指定输出目录，即不指定 -d 参数时，构建结果被发送到内置Web Server的根目录下。此目录可以通过执行以下命令打开。
-```
-fis3 server open
-```
-
-**发布**
+**在html中声明依赖**
 
 ```
-fis3 release
+用户可以在html的注释中声明依赖关系，这些依赖关系最终会被记录下来，当某个文件中包含字符 __RESOURCE_MAP__那么这个记录会被字符串化后替换 __RESOURCE_MAP__。为了方便描述呈现，我们假定项目根目录下有个文件manifest.json包含此字符，编译后会把表结构替换到这个文件中。
 ```
 
-**启动**
-
-通过
-
+在项目的index.html里使用注释声明依赖关系：
 ```
-fis3 server start
-```
-
-来启动本地Web Server，当此Server启动后，会自动浏览器打开http://127.0.0.1:8080，默认监听端口8080
-通过执行以下命令得到更多启动参数，可以设置不同的端口号（当 8080 占用时）
-```
-fis3 server -h
+<!--
+@require demo.js
+@require "demo.css"
+-->
 ```
 
-**预览**
-
-启动Web Server以后，会自动打开浏览器，访问http://127.0.0.1:8080 URL，这时即可查看到页面渲染结果。正如所有其他Web Server，FIS3 内置的 Server是常驻的，如果不重启计算机或者调用命令关闭是不会关闭的。
-
-所以后续只需访问对应链接即可，而不需要每次release就启动一次 server。
-
-**文件监听**
-
-为了方便开发，FIS3 支持文件监听，当启动文件监听时，修改文件会构建发布。而且其编译是增量的，编译花费时间少。
-
-FIS3 通过对 release 命令添加 -w 或者 --watch 参数启动文件监听功能。
-```
-fis3 release -w
-```
-
-添加 -w 参数时，程序不会执行终止；停止程序用快捷键 CTRL+c
-
-**浏览器自动刷新**
-
-文件修改自动构建发布后，如果浏览器能自动刷新，这是一个非常好的开发体验。
-
-FIS3支持浏览器自动刷新功能，只需要给 release 命令添加 -L 参数，通常 -w 和 -L 一起使用。
-```
-fis3 release -wL
-```
-
-程序停止用快捷键 CTRL+c
-
-**发布到远端机器**
-
-当我们开发项目后，需要发布到测试机（联调机），一般可以通过如SMB、FTP等上传代码。FIS3默认支持使用HTTP上传代码，首先需要在测试机部署上传接收脚本（或者服务），这个脚本非常简单，现在给出了php的实现版本，可以把它放到测试机上某个Web服务根目录，并且配置一个url能访问到即可。
-
-示例脚本是php脚本，测试机Web需要支持PHP的解析，如果需要其他语言实现，请参考这个php脚本实现，如果嫌麻烦，我们提供了一个node版本的接收端
-
-假定这个 URL 是：http://cq.01.p.p.baidu.com:8888/receiver.php
-
-那么我们只需要在配置文件配置
-```
-fis.match('*', {
-  deploy: fis.plugin('http-push', {
-    receiver: 'http://cq.01.p.p.baidu.com:8888/receiver.php',
-    to: '/home/work/htdocs' // 注意这个是指的是测试机器的路径，而非本地机器
-  })
+默认情况下，只有js和css文件会输出到manifest.json表中，如果想将html文件加入表中，需要通过配置useMap让HTML文件加入manifest.json，例如：
+```javascript
+//fis-conf.js
+fis.match('*.html', {
+    useMap: true
 })
 ```
 
-如果你想通过其他协议上传代码，请参考deploy插件开发实现对应协议插件即可。
-
-当执行 fis3 release 时上传测试机器
-
-可能上传测试机是最后联调时才会有的，更好的做法是设置特定 media。
+配置以下内容到配置文件进行编译
 ```
-// 其他配置
-...
-fis.media('qa').match('*', {
-  deploy: fis.plugin('http-push', {
-    receiver: 'http://cq.01.p.p.baidu.com:8888/receiver.php',
-    to: '/home/work/htdocs' // 注意这个是指的是测试机器的路径，而非本地机器
-  })
+// fis-conf.js
+fis.match('*.html', {
+    useMap: true
+});
+fis.match('*.{js,css}', {
+    // 开启 hash
+    useHash: true
 });
 ```
 
-fis3 release qa 上传测试机器
-fis3 release 产出到本地测试服务器根目录
+查看output目录下的manifest.json文件，则可看到：
+```
+{
+  "res" : {
+    "demo.css" : {
+        "uri" : "/static/css/demo_7defa41.css",
+        "type" : "css"
+    },
+    "demo.js" : {
+        "uri" : "/static/js/demo_33c5143.js",
+        "type" : "js",
+        "deps" : [ "demo.css" ]
+    },
+    "index.html" : {
+        "uri" : "/index.html",
+        "type" : "html",
+        "deps" : [ "demo.js", "demo.css" ]
+    }
+  },
+  "pkg" : {}
+}
+```
 
-**替代内置Server**
-
-FIS3 内置了一个 Web Server 提供给构建后的代码进行调试。如果你自己启动了你自己的 Web Server 依然可以使用它们。
-
-假设你的Web Server的根目录是/Users/my-name/work/htdocs，那么发布时只需要设置产出目录到这个目录即可。
+**在js中声明依赖**
 
 ```
-fis3 release -d /Users/my-name/work/htdocs
+fis支持识别js文件中的注释中的@require字段标记的依赖关系，这些分析处理对html的script标签内容同样有效。
 ```
 
-如果想执行fis3 release直接发布到此目录下，可在配置文件配置；
 ```
-fis.match('*', {
-  deploy: fis.plugin('local-deliver', {
-    to: '/Users/my-name/work/htdocs'
-  })
-})
+//demo.js
+/**
+ * @require demo.css
+ * @require list.js
+ */
 ```
+
+经过编译之后，查看产出的manifest.json文件，可以看到：
+```
+{
+  "res" : {
+      ...
+      "demo.js" : {
+          "uri" : "/static/js/demo_33c5143.js",
+          "type" : "js",
+          "deps" : [ "demo.css", "list.js", "jquery" ]
+      },
+      ...
+  },
+  "pkg" : {}
+}
+```
+
+```
+注意，require()不再处理，js中require()留给各种前端模块化方案，假设你选择的是AMD那么就得解析require([])和require()；如果选用的是mod.js 那么就得解析require.async()和require()，其他亦然。
+```
+
+**在css中声明依赖**
+
+```
+fis支持识别css文件注释中的@require字段标记的依赖关系，这些分析处理对html的style标签内容同样有效。
+```
+
+```
+/**
+ * demo.css
+ * @require reset.css
+ */
+ ```
+经过编译之后，查看产出的 manifest.json 文件，可以看到：
+```
+{
+  "res" : {
+    ...
+    "demo.css" : {
+      "uri" : "/static/css/demo_7defa41.css",
+      "type" : "css",
+      "deps" : [ "reset.css" ]
+    },
+    ...
+  },
+  "pkg" : {}
+}
+```
+
+工作原理
+--------
+
+FIS3是基于文件对象进行构建的，每个进入FIS3的文件都会实例化成一个File对象，整个构建过程都对这个对象进行操作完成构建任务。以下通过伪码来阐述FIS3的构建流程。
+
+**构建流程**
+
+```
+fis.release = function (opt) {
+  var src = fis.util.find(fis.project.root);
+  var files = {};
+  src.forEach(function (f) {
+    var file = new File(f);
+    files[file.subpath] = fis.compile(file);
+  });
+  var packager = fis.matchRules('::package');
+  var keys = Object.keys(packager);
+  var ret = {
+    files: files,
+    map: {}
+  };
+  if (packager.indexOf('prepackager') > -1) {
+    pipe('prepackager', ret);
+  }
+  if (packager.indexOf('packager') > -1) {
+    pipe('packager', ret);
+  }
+  files.forEach(function (f) {
+    // 打包阶段产出的 map 表替换到文件
+    if (f._isResourceMap) {
+      f._content = f._content.replace(/\b__RESOURCE_MAP__\b/g, JSON.stringify(ret.map));
+    }
+  });
+  if (packager.indexOf('spriter') > -1) {
+    pipe('spriter', ret);
+  }
+  if (packager.indexOf('postpackager') > -1) {
+    pipe('postpackager', ret);
+  }
+}
+```
+
+如上述代码，整个FIS3的构建流程大体概括分为三个阶段。
+
+1. 扫描项目目录拿到文件并初始化出一个文件对象列表
+2. 对文件对象中每一个文件进行单文件编译
+3. 获取用户设置的package插件，进行打包处理（包括合并图片）
+
+其中打包处理开了四个扩展点，通过用户配置启用某些插件。
+
+* prepackager 打包前处理插件扩展点
+* packager 打包插件扩展点，通过此插件收集文件依赖信息、合并信息产出静态资源映射表
+* spriter 图片合并扩展点，如 csssprites
+* postpackager 打包后处理插件扩展点
+
+**单文件编译流程**
+
+```
+fis.compile = function (file) {
+  if (file.isFile()) {
+    if (exports.useLint && file.lint) {
+      pipe('lint', file);
+    }
+    if (!file.hasCache) {
+      process(file);
+    } else {
+      file.revertCache();
+    }
+  } else {
+    process(file);
+  }
+};
+
+function process(file) {
+  if (file.parser) {
+    pipe('parser', file);
+  }
+  if (file.preprocessor) {
+    pipe('preprocessor', file);
+  }
+  if (file.standard) {
+    standard(file); // 标准化处理
+  }
+  if (file.postprocessor) {
+    pipe('postprocessor', file);
+  }
+  if (file.optimizer) {
+    pipe('optimizer', file);
+  }
+}
+```
+
+其中插件扩展点包括：
+
+* lint：代码校验检查，比较特殊，所以需要 release 命令命令行添加 -l 参数
+* parser：预处理阶段，比如 less、sass、es6、react 前端模板等都在此处预编译处理
+* preprocessor：标准化前处理插件
+* standard：标准化插件，处理内置语法
+* postprocessor：标准化后处理插件
+
+```
+预处理阶段一般是对异构语言等进行预编译，如 less、sass 编译为标准的 css；前端模板被编译为 js 等等
+```
+
+单文件阶段通过读取文件属性，来执行对应扩展点插件。
+
+举个例子：
+```
+fis.match('*.es6', {
+  parser: fis.plugin('babel'),
+  rExt: '.js' // 代码编译产出时，后缀改成 .js
+});
+```
+给后缀是 .es6 的文件配置了一个 parser 属性，属性值是启用了一个叫 babel 的插件，当执行到预处理阶段时，将 es6 编译为 es5，供浏览器执行。
+
+其他插件扩展点亦然。
+
+**File对象**
+
+```
+function File(filepath) {
+  var props = path.info(filepath);
+  merge(props, fis.matchRules(filepath)); // merge 分配到的属性
+  assign(this, props); // merge 属性到对象
+}
+```
+
+当一个文件被实例化为一个File对象后，包括一些文件基本属性，如filename、realpath等等，当这个文件被处理时，FIS3还会把用户自定义的属性merge到文件对象上。
+
+比如
+```
+fis.match('a.js', {
+  myProp: true
+});
+```
+这样a.js处理的时候就会携带这个属性myProp。myProp是一个自定义属性，FIS3默认内置了一些属性配置，来方便控制一个文件的编译流程，可参考配置属性
+
+可能你会问，自定义属性到底有什么用，其实自定义属性可以标注一些文件，提供插件来做一些特定的需求。
+
 
