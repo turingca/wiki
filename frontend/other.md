@@ -8,7 +8,17 @@
 团队
 ----
 
-[Web前端腾讯AlloyTeam,愿景:成为地球卓越的Web团队!|腾讯全端AlloyTeam团队Blog](http://www.alloyteam.com/)
+Web前端腾讯AlloyTeam,愿景:成为地球卓越的Web团队! | 腾讯全端AlloyTeam团队Blog
+
+http://www.alloyteam.com
+
+http://alloyteam.github.io
+
+https://github.com/AlloyTeam
+
+https://github.com/imweb/
+
+http://imweb.io/
 
 工具
 -------
