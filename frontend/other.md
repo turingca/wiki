@@ -5,6 +5,10 @@
 
 [前端主管如何带队](other/Old-Driver-Said-1.md)
 
+团队
+----
+
+[Web前端腾讯AlloyTeam,愿景:成为地球卓越的Web团队!|腾讯全端AlloyTeam团队Blog](http://www.alloyteam.com/)
 
 工具
 -------
