@@ -8,17 +8,25 @@
 团队
 ----
 
-Web前端腾讯AlloyTeam,愿景:成为地球卓越的Web团队! | 腾讯全端AlloyTeam团队Blog
+**腾讯系**
 
-http://www.alloyteam.com
+http://www.alloyteam.com 腾讯Web前端团队
 
 http://alloyteam.github.io
 
 https://github.com/AlloyTeam
 
+http://imweb.io/ 前端社区
+
 https://github.com/imweb/
 
-http://imweb.io/
+http://cdc.tencent.com/ 腾讯CDC，全称“腾讯用户研究与体验设计部
+
+http://isux.tencent.com/ 腾讯社交用户体验设计，简称ISUX (Internet Social User Experience)
+
+http://mxd.tencent.com/ 腾讯移动互联网设计团队
+
+http://tgideas.qq.com/  腾讯游戏官方设计团队
 
 工具
 -------
