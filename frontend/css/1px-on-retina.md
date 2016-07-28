@@ -1,6 +1,12 @@
 前言
 -------
 
+http://alloyteam.github.io/JMUI/demo/base-1px.html
+
+http://jinlong.github.io/2015/05/24/css-retina-hairlines/
+
+http://www.ghugo.com/css-retina-hairline/
+
 原文地址有删改： http://efe.baidu.com/blog/1px-on-retina/
 
 一直以来我们实现边框的方法都是设置
@@ -18,18 +24,6 @@ border: 1px solid #ccc
 
 软图片，即通过CSS渐变模拟，代码如下：
 
-```css
-background-image:
-    -webkit-linear-gradient(270deg, @top, @top 50%, transparent 50%),
-    -webkit-linear-gradient(180deg, @right, @right 50%, transparent 50%),
-    -webkit-linear-gradient(90deg, @bottom, @bottom 50%, transparent 50%),
-    -webkit-linear-gradient(0, @left, @left 50%, transparent 50%);
-background-image:
-    linear-gradient(180deg, @top, @top 50%, transparent 50%),
-    linear-gradient(270deg, @right, @right 50%, transparent 50%),
-    linear-gradient(0deg, @bottom, @bottom 50%, transparent 50%),
-    linear-gradient(90deg, @left, @left 50%, transparent 50%);
-```
 
 
 
