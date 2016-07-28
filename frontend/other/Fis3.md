@@ -2306,3 +2306,279 @@ fis.match('*.less', {
 
 
 
+高级使用
+-------
+
+**静态资源映射表**
+
+记录文件依赖、打包、URL等信息的表结构，在FIS2中统称map.json。在FIS3中默认不产出map.json，FIS3中为了方便各种语言下读取map.json，对产出 map.json 做了优化。
+
+当某个文件包含字符__RESOURCE_MAP__，就会用表结构数据替换此字符。这样的好处是不再固定把表结构写入某一个特定文件，方便定制。
+
+比如在php
+```
+<?php
+$_map = json_decode('__RESOURCE_MAP__', true);
+?>
+```
+js
+```
+var _map = __RESOURCE_MAP__;
+```
+假设上面的php和js为分析静态资源映射表的程序，那么就省去了读map.json的过程。
+
+当然，如果你想继续像FIS2一样的产出 map.json，只需要在模块下新建文件map.json，内容设置为 __RESOURCE_MAP__ 即可。
+
+
+**模块化开发**
+
+模块化开发是工程实践的最佳手段，分而治之维护上带来了很大的益处。说到模块化开发，首先很多人都会想到AMD、CMD，同时会想到require.js、sea.js这样的前端模块化框架。主要给js提供模块化开发的支持，之后也增加了对css、前端模板的支持。这些框架就包含了组件依赖分析、保持加载并保持依赖顺序等功能。但在FIS中，依赖本身在构建过程中就已经分析完成，并记录在静态资源映射表中，那么对于线上运行时，模块化框架就可以省掉依赖分析这个步骤了。
+
+在声明依赖内置语法中提到了几种资源之间标记依赖的语法，这样模板可以依赖js、css，js可以依赖某些css，或者某个类型的组件可以互相依赖。
+
+另外，考虑到js还需要有运行时支持，所以对于不同前端模块化框架，在js代码中FIS编译分析依赖增加了几种依赖函数的解析。这些包括
+
+***AMD***
+
+````
+define()
+require([]);
+require('');
+```
+
+***seajs***
+
+```
+define()
+require('')
+sea.use([])
+```
+
+***mod.js (extends commonjs)***
+
+```
+define()
+require('')
+require.async('')
+require.async([])
+```
+
+考虑到不可能一个框架运用多个模块化框架（因为全都占用同样的全局函数，互斥），所以编译支持这块分成三个插件进行支持。
+
+* fis3-hook-commonjs
+* fis3-hook-amd
+* fis3-hook-cmd
+
+```
+// vi fis-conf.js
+fis.hook('commonjs');
+```
+```
+插件README有详细的使用文档。
+```
+
+如上面说到的，这个编译插件只是对编译工具做一下扩展，支持前端模块化框架中的组件与组件之间依赖的函数，以及入口函数来标记生成到静态资源映射表中；另外一个功能是针对某些前端模块化框架的特性自动添加define。
+
+有了依赖表，但如何把资源加载到页面上，需要额外的FIS构建插件或者方案支持。
+
+假设以纯前端（没有后端模板）的项目为例，对于依赖组件的加载就靠插件fis3-postpackager-loader。其是一种基于构建工具的加载组件的方法，构建出的html已经包含了其使用到的组件以及依赖资源的引用。
+```
+//npm install -g fis3-postpackager-loader
+fis.match('::package', {
+  postpackager: fis.plugin('loader', {})
+});
+```
+为了方便、统一管理组件以及合并时便利，需要把组件统一放到某些文件夹下，并设置此目录下的资源都是组件资源。
+```
+// widget 目录下为组件
+fis.match('/widget/**.js', {
+  isMod: true
+});
+```
+通过以上三步，纯前端的模块化开发就可实现。
+
+总结一下；
+
+* 编译工具扩展：根据不同前端模块化框架，扩展声明依赖能力
+* 静态资源管理：解析静态资源映射表加载页面用到的组件及其组件的依赖
+* 目录规范：设置某个文件夹下资源标记为依赖
+
+工具扩展、目录规范，前后端的前端工程项目都需要，其不同之处就在于静态资源管理这部分。
+
+
+**资源映射表的模块化方案设计**
+
+**解决方案封装**
+
+解决方案：解决一系列特定问题的工具、规范、开发、上线支持的方案，被称为解决方案。前端工程的解决方案一般包括：
+```
+研发规范 + 模块化框架 + 测试套件 + 辅助开发工具
+```
+FIS3中的包装解决方案，就是把这些集成到一个工具中。
+
+一个解决方案就是继承自FIS3并且支持特定模块化开发、特定模板语言、特定处理流程、研发规范的构建工具。
+
+***封装解决方案的必要性***
+  
+* 规范开发，对于特定团队业务，应该有特定的目录规范、模块化框架等
+* FIS3只提供一个方便定制前端工程的构建系统，每个团队需要怎么样去处理工程需要自己定制，定制会引入大量的FIS3插件，解决方案可统一规定引入哪些插件
+* 树立独立技术品牌
+
+***解决方案封装***
+
+准备
+```
+方案名 foo
+构建工具名字 foo
+模板语言 PHP
+模块化框架选择 require.js
+特定目录规范
+```
+
+目录规范
+```
+/static # 静态资源
+/page # 页面
+/widget # 组件
+/fis-conf.js # 配置文件
+```
+
+部署规范
+```
+/template # 所有的PHP模板
+/static  # 所有的静态资源
+```
+
+构建工具
+```
+foo
+foo/bin/foo.js
+foo/index.js
+package.json
+```
+
+* 基于FIS3配置目录规范和部署规范
+
+```
+//vi foo/index.js
+var fis = module.exports = require('fis3');
+fis.require.prefixes.unshift('foo');
+fis.cli.name = 'foo';
+fis.cli.info = require('./package.json');
+
+fis.match('*', {
+  release: '/static/$0' // 所有资源发布时产出到 /static 目录下
+});
+
+fis.match('*.php', {
+  release: '/template/$0' // 所有 PHP 模板产出后放到 /template 目录下
+});
+
+// 所有js, css 加 hash
+fis.match('*.{js,css,less}', {
+  useHash: true
+});
+
+// 所有图片加 hash
+fis.match('image', {
+  useHash: true
+});
+
+// fis-parser-less
+fis.match('*.less', {
+  parser: fis.plugin('less'),
+  rExt: '.css'
+});
+
+fis.match('*.js', {
+  optimizer: fis.plugin('uglify-js')
+});
+
+fis.match('*.{css,less}', {
+  optimizer: fis.plugin('clean-css')
+});
+
+fis.match('*.png', {
+  optimizer: fis.plugin('png-compressor')
+});
+
+fis.match('widget/*.{php,js,css}', {
+  isMod: true
+});
+
+fis.match('::package', {
+  spriter: fis.plugin('csssprites')
+});
+
+//fis3-hook-module
+fis.hook('module', {
+  mode: 'amd' // 模块化支持amd规范，适应require.js
+});
+```
+
+* 实现 /bin/foo.js
+
+```
+#!/usr/bin/env node
+
+// vi foo/bin/foo.js
+
+var Liftoff = require('liftoff');
+var argv = require('minimist')(process.argv.slice(2));
+var path = require('path');
+var cli = new Liftoff({
+  name: 'foo', // 命令名字
+  processTitle: 'foo',
+  moduleName: 'foo',
+  configName: 'fis-conf',
+
+  // only js supported!
+  extensions: {
+    '.js': null
+  }
+});
+
+cli.launch({
+  cwd: argv.r || argv.root,
+  configPath: argv.f || argv.file
+}, function(env) {
+  var fis;
+  if (!env.modulePath) {
+    fis = require('../');
+  } else {
+    fis = require(env.modulePath);
+  }
+  // 配置插件查找路径，优先查找本地项目里面的 node_modules
+  // 然后才是全局环境下面安装的 fis3 目录里面的 node_modules
+  fis.require.paths.unshift(path.join(env.cwd, 'node_modules'));
+  fis.require.paths.push(path.join(path.dirname(__dirname), 'node_modules'));
+  fis.cli.run(argv, env);
+});
+```
+以上代码 copy 过来即可，不需要做大的改动，感兴趣可研究其原理。
+
+* 依赖的NPM包，需要在package.json中加上依赖：
+
+  * fis-parser-less解析less
+  * fis-optimizer-uglify-js 压缩 js，fis3 已内置
+  * fis-optimizer-clean-css 压缩 css，fis3 已内置
+  * fis-optimizer-png-compressor 压缩 png 图片，fis3 已内置
+  * fis3-hook-module 模块化支持插件
+  * fis3 fis3 核心
+  * minimist
+  * liftoff
+
+* package.json 需要添加
+
+```
+"bin": {
+  "foo": "bin/foo.js"
+}
+```
+
+* 发布foo到NPM
+
+通过以上步骤可以简单封装一个解决方案，FIS3提供了大量的插件，已经几乎极其简单的配置方式来搞定研发规范的设置，很轻松即可打造完整的前端集成解决方案。
+
+
+
