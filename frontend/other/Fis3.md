@@ -2250,4 +2250,59 @@ fis.match('a.js', {
 
 可能你会问，自定义属性到底有什么用，其实自定义属性可以标注一些文件，提供插件来做一些特定的需求。
 
+初级使用
+--------
+
+
+**一个复杂一点的例子**
+
+为了尝试更多FIS3提供的特性，我们设计一个比较复杂的例子。这个例子包含
+
+* 两个页面
+* 三个 css 文件，其中俩页面各一个css文件，剩下一个css文件共用
+* 包含一个less文件，并被俩页面同时使用
+* 两个png图片
+* 两个js文件
+
+例子下载地址 [demo-lv1](https://github.com/fex-team/fis3/tree/dev/doc/demo/demo-simple)
+
+**安装一些插件**
+
+FIS3是一个扩展性很强的构建工具，社区也包含很多FIS3的插件。为了展示FIS3的预处理、静态合并js、css能力，需要安装两个插件。
+
+* fis-parser-less：例子引入一个 less 文件，需要 less 预处理插件
+* fis3-postpackager-loader：可对页面散列文件进行合并
+
+FIS3的插件都是以NPM包形式存在的，所以安装FIS3的插件需要使用npm 来安装。
+```
+npm install -g 插件名
+```
+譬如：
+```
+npm install -g fis-parser-less
+npm install -g fis3-postpackager-loader
+```
+
+**预处理**
+
+FIS3提供强大的预处理能力，可以对less、sass等异构语言进行预处理，还可以对模板语言进行预编译。FIS3社区已经提供了绝大多数需要预处理的异构语言。
+
+我们给定的例子中有个less文件，那么需要对less进行预处理，我们已经安装了对应的预处理插件。现在只需要配置启用这个插件就能搞定这个事情。
+```
+fis.match('*.less', {
+  // fis-parser-less 插件进行解析
+  parser: fis.plugin('less'),
+  // .less 文件后缀构建后被改成 .css 文件
+  rExt: '.css'
+})
+```
+如同之前强调的，虽然构建后后缀为.css。但在使用FIS3时，开发者只需要关心源码路径。所以引入一个less文件时，依然是.less后缀。
+
+<link rel="stylesheet" type="text/css" href="./test.less">
+
+
+
+
+
+
 
