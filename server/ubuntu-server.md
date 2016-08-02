@@ -98,7 +98,7 @@ linux主机共享文件夹
 
 windows上的共享文件夹
 
-mount -t cifs -o username=**,password="**" //192.168.1.1/work  /home/fjc/www
+mount -t cifs -o username=,password="" //本机ip/共享目录  /home/fjc/www
 
 mac上的共享文件夹
 
