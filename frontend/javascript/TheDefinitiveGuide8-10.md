@@ -2927,13 +2927,59 @@ Object.freeze(enumeration);
 ```
 需要注意的是，通过在枚举类型中调用Object.freeze()，例9-17中定义的objectId属性之后也无法使用了。这个问题的解决方法是，在枚举类型被“冻结”之前读取一次它的objectId属性（调用潜在的存取器方法并设置内部属性）。
 
-**9.8.5子类和ECMAScript5**
+**9.8.5 子类和ECMAScript5**
 
 例9-22使用ECMAScript5的特性实现子类。这里使用例9-16中的AbstractWritableSet类来做进一步的说明，来定义这个类的子类StringSet。下面这个例子的最大特点是使用Object.create()创建原型对象，这个原型对象继承自父类的原型，同时给新创建的对象定义属性。这种实现方法的困难之处在于，正如上文所提到的，它需要使用难看的属性描述符。
 
-这个例子中另外一个有趣之处在于，使用Object.create()创建对象时传入了参数null，这个创建的对象没有任何继承任何成员。
+这个例子中另外一个有趣之处在于，使用Object.create()创建对象时传入了参数null，这个创建的对象没有任何继承任何成员。这个对象用来存储集合的成员，同时，这个对象没有原型，这样我们就能对它直接使用in运算符，而不须使用hasOwnPropery()方法。
+
+例9-22：StringSet：利用ECMAScript5的特性定义的子类
+function StringSet() {
+    this.set = Object.create(null); //创建一个不包含原型的对象
+    this.n = o;
+    this.add.apply(this, arguments);
+}
+//注意，使用Object.create()可以继承父类的原型
+//而且可以定义单独调用的方法，因为我们没有指定属性的可写性、可枚举性和可配置性
+//因此这些属性特性的默认值都是false
+//只读方法让这个类难于子类化（被继承）
+StringSet.prototype = Object.create(AbstractWritableSet.prototype,{
+    constructor: { value: StringSet },
+    contains: { value: function(x) {return x in this.set;} },
+    size: { value: function(x) { return this.n; } },
+    foreach: { value: function(f, c) { Object.keys(this.set).forEach(f, c); } },
+    add: {
+        value: function(){
+            for (var i = 0; i< arguments.length; i++) {
+                if (!(arguments[i] in this.set)) {
+                    this.set[arguments[i]] = true;
+                    this.n++;
+                }
+            }
+        }
+    },
+    remove: {
+        value: function() {
+            for (var i = 0; i < arguments.length; i++) {
+                if (arguments[i] in this.set) {
+                    delete this.set[arguments[i]];
+                    this.n--
+                }
+            }
+            return this;
+        }
+    }
+});
 
 **9.8.6属性描述符**
+
+6.7节讨论了ECMAScript5中的属性描述符，但没有给出它们的示例代码。本节给出一个例子，用来讲述基于ECMAScript5如何对属性进行各种操作。在例9-23中给Object.prototype添加了properties()方法（这个方法是不可枚举的）。这个方法的返回值是一个对象，用以表示属性的列表，并定义了有用的方法用来输出属性和属性特征（对于调试非常有用），用来获得属性描述符（当复制属性同时复制属性特性时特别有用）以及用来设置属性的特性（是上文定义的hideProps()和freezeProps()函数不错的替代方案。）这个例子展示了ECMAScript5的大多数属性相关的特性，同时使用了一种模块编程技术，这将在下一节讨论。
+```
+例9-23：ECMAScript5 属性操作
+/*
+```
+
+
 
 **9.9模块**
 
@@ -2986,7 +3032,7 @@ var sets = com.davidflanagan.collections.sets;
 
 可以通过将模块（本例中的Set类）定义在某个函数的内部来实现。正如8.5节所描述的一样，在一个函数中定义的变量和函数都属于函数的局部成员  ，在函数的外部是不可见的。实际上，可以将这个函数作用域用做模块的私有命名空间（有时称为“模块函数”）。例9-24展示了如何使用“模块函数”来实现Set类：
 例9-24：模块函数中的Set类
-```
+```javascript
 //声明全局变量Set，使用一个函数的返回值给它赋值
 //函数结束时紧跟的一对圆括号说明这个函数定义后立即执行
 //它的返回值将赋值给Set，而不是将这个函数赋值给Set
@@ -2997,8 +3043,80 @@ var Set = (function invocation(){
         this.n = 0; //集合中值得个数
         this.add.apply(this, arguments); //将所有的参数都添加至集合中
     }
+    //给Set.prototype定义实例方法
+    //这里省略了详细代码
+    Set.prototype.contains = function(value) {
+        //注意我们调用了v2s()，而不是调用带有笨重的前缀的set._v2s()
+        return this.values.hasOwnProperty(v2s(value));
+    };
+    Set.prototype.size = function() { return this.n; };
+    Set.prototype.add = function() {/*...*/};
+    Set.prototype.remove = function() {/*...*/};
+    Set.prototype.foreach = function(f, context) {/*...*/};
+    //这里是上面的方法用到的一些辅助函数和变量
+    //它们不属于模块的公有API，但它们都隐藏在这个函数作用域内
+    //因此我们不必将它们定义为Set的属性或使用下划线作为其前缀
+    function v2s(val) {/*...*/}
+    function objectId(o) {/*...*/}
+    var nextId = 1;
+    //这个模块的共有API是Set()构造函数
+    //我们需要把这个函数从私有命名空间中导出来
+    //以便在外部也可以使用它，在这种情况下，我们通过返回这个构造函数来导出它
+    //它变成第一行代码所指的表达式的值
+    return Set;
+}()); // 定义函数后立即执行
+```
+
+注意，这里使用了立即执行的匿名函数，这在JavaScript中是一种惯用法。如果想让代码在一个私有命名空间中运行，只须给这段代码加上前缀“(function(){”和后缀”}())”。开始的左圆括号确保这是一个函数表达式，而不是函数定义语句，因此可以给该前缀添加一个函数名来让代码变得更加清晰。在例9-24中使用了名字“invocation”，用以强调这个函数应当在定义之后立即执行。名字“namespace”也可以用来强调这个函数被用做命名空间。
+
+一旦将这模块代码封装进一个函数，就需要一些方法导出其公用API，以便在模块函数的外部调用它们。在例9-24中，模块函数返回构造函数，这个构造函数随后赋值给一个全局变量。将值返回已经清楚地表明API已经导出在函数作用域之外。如果模块API包含多个单元，则它可以返回命名空间对象。对于sets模块来说，可以将代码写成这样：
+```javascript
+//创建一个全局变量用来存放集合相关的模块
+var collections;
+if (!collections) collections = {};
+//定义sets模块
+collections.sets = (function namespace() {
+    //在这里定义多种“集合”类，使用局部变量和函数
+    //……这里省略很多代码……
+    //通过返回命名空间对象将API导出
+    return {
+        //导出的属性名：局部变量名字
+        AbstractSet: AbstractSet,
+        NotSet: NotSet,
+        AbstractEnumerableSet: AbstractEnumerableSet,
+        SingletonSet: SingletonSet,
+        AbstractWritableSet: AbstractWritableSet,
+        ArraySet: ArraySet
+    }
+}());
+```
+
+另外一种类似的的技术是将模块函数当做构造函数，通过new来调用，通过将它们赋值给this来将其导出：
+```javascript
+var collections;
+if (!collections) collections = {};
+collections.sets = (new function namespace() {
+    //……这里省略很多代码……
+    //将API导出至this对象
+    this.AbstractSet = AbstractSet;
+    this.NotSet = NotSet; //……
+    //注意，这里没有返回值
 });
 ```
+作为一种替代方案，如果已经定义了全局命名空间对象，这个模块函数可以直接设置那个对象的属性，不用返回任何内容：
+```javascript
+var collections;
+if (!collections) collections = {};
+collections.sets = {};
+(function namespace(){
+//……这里省略很多代码……
+//将共用API导出到上面创建的命名空间对象上
+collections.sets.AbstractSet = AbstractSet;
+collections.sets.NotSet = NotSet; //……
+//导出的操作已经执行了，这里不需要再写return语句了
+}());
+```
+有些框架已经实现了模块加载功能，其中包括其他一些导出模块API的方法。比如，使用provides()函数来注册其API，提供exports对象用以存储模块API。由于JavaScript目前还不具备模块管理的能力，因此应当根据所使用的框架和工具包来选择合适的模块创建和导出API的方式。
 
 第10章 正则表达式的模式匹配
 ---------------------------
