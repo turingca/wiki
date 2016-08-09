@@ -1861,7 +1861,7 @@ Coin.Dime == 10 //=>true 更多转换为数字的例子
 Coin.Dime > Coin.Nickel //=>true 关系运算符正常工作
 String(Coin.Dime)+ ":" + Coin.Dime //=>"Dime:10" 强制转换为字符串
 ```
-这个例子清楚地展示了JavaScript类的灵活性，javascript的类要比C++和java语言中的静态类要更加灵活。
+这个例子清楚地展示了JavaScript类的灵活性，JavaScript的类要比C++和java语言中的静态类要更加灵活。
 
 例9-7 JavaScript中的枚举类型
 ```javascript
@@ -1994,21 +1994,23 @@ var deck = (new Deck()).shuffle();
 var hand = deck.deal(13).sort(Card.orderBySuit);
 ```
 
-**9.6.3 一个例子：标准转换方法**
+**9.6.3 标准转换方法**
 
-3.8.3和6.10节讨论了对象类型转换所用到的重要方法，有一些方法是在需要做类型转换时由javascript解释器自动调用的。不需要为定义的每个类都实现这些方法，但这些方法的确非常重要，如果没有为自定义的类实现这些方法，也应当是有意为之，而不应当因为疏忽而漏掉它们。
+3.8.3和6.10节讨论了对象类型转换所用到的重要方法，有一些方法是在需要做类型转换时由JavaScript解释器自动调用的。不需要为定义的每个类都实现这些方法，但这些方法的确非常重要，如果没有为自定义的类实现这些方法，也应当是有意为之，而不应当因为疏忽而漏掉它们。
 
-最重要的方法首当toString()。这个方法的作用是返回一个可以表示这个对象的字符串。在希望使用字符串的地方用到对象的话（比如将对象用做属性名或使用“+”运算符来进行字符串连接运算），javascript会自动调用这个方法。如果没有实现这个方法，类会默认从Object.prototype中继承toString()方法，这个方法的运算结果是“[Object Object]”，这个字符串用处不大。
+最重要的方法首当toString()。这个方法的作用是返回一个可以表示这个对象的字符串。在希望使用字符串的地方用到对象的话（比如将对象用做属性名或使用“+”运算符来进行字符串连接运算），JavaScript会自动调用这个方法。如果没有实现这个方法，类会默认从Object.prototype中继承toString()方法，这个方法的运算结果是“[Object Object]”，这个字符串用处不大。
 toString()方法应当返回一个可读的字符串，这样最终用户才能将这个输出值利用起来，然而有时候并不一定非要如此，不管怎样，可以返回可读字符串的toString()方法也会让程序调试变得更加轻松。例9-2和例9-3中的Range类和Complex类都定义了toString()方法，例9-7中的枚举类型也定义了toString()。下面我们会给例9-6中的set类也定义toString()方法。
 
 toLocaleString()和toString()极为类似：toLocaleString()是以本地敏感性（locale-sensitive）的方式来将对象转换为字符串。默认情况下，对象所继承的toLocaleString()方法只是简单地调用toString()方法。有一些内置类型包含有用的toLocaleString()方法用以实际上返回本地化相关的字符串。如果需要为对象到字符串的转换定义toString()方法，那么同样需要定义toLocaleString()方法用以处理本地化的对象到字符串的转换。下面的Set类的定义中会有相关的代码。
 
 第三个方法是valueOf()，它用来将对象转换为原始值。比如，当数学运算符（除了“+”运算符）和关系运算符作用于数字文本表示的对象时，会自动调用valueOf()方法。大多数对象都没有合适的原始值来表示它们，也没有定义这个方法。但在例9-7中的枚举类型的实现则说明valueOf()方法是非常重要的。
 
-第四个方法是toJSON()，这个方法是由JSON.stringify()自动调用的。JSON格式用于序列化良好的数据结构，而且可以处理javascript原始值、数组和纯对象。它和类无关，当对一个对象执行序列化操作时，它会忽略对象的原型和构造函数。比如将Range对象或Complex对象作为参数传入JSON.stringify()，将会返回诸如{"from:1", "to":3}或{"r":1, "i":-1}这种字符串。
+第四个方法是toJSON()，这个方法是由JSON.stringify()自动调用的。JSON格式用于序列化良好的数据结构，而且可以处理JavaScript原始值、数组和纯对象。它和类无关，当对一个对象执行序列化操作时，它会忽略对象的原型和构造函数。比如将Range对象或Complex对象作为参数传入JSON.stringify()，将会返回诸如{"from:1", "to":3}或{"r":1, "i":-1}这种字符串。
 如果将这些字符串传入JSON.parse()，则会得到一个和Range对象和Complex对象具有相同属性的纯对象，但这个对象不会包含从Range和Complex继承来的方法。
+
 这种序列化操作非常适用于诸如Range和Complex这种类，但对于其他一些类则必须自定义toJSON()方法来定制个性化的序列化格式。如果一个对象有toJSON()方法，JSON.stringify()并不会对传入的对象做序列化操作，而会调用toJSON()来执行序列化操作（序列化的值可能是原始值也可能是对象）。比如，Date对象的toJSON()方法可以返回一个表示日期的字符串。例9-7中的枚举类型也是如此：它们的toJSON()方法和toString()方法完全一样。如果要模拟一个集合，最接近JSON的表示方法就是数组，因此在下面的例子中将定义toJSON()方法用以将集合对象转换为值数组。
-例9-6中的Set类并没有定义上述方法中的任何一个。javascript中没有哪个原始值可以表示集合，因此也没必要定义valueOf()方法，但该类应当包含toString()、toLocaleString()和toJSON()方法。可以用如下代码来实现。注意extend()函数（例6-2）的用法，这里使用extend()来向Set.prototype来添加方法：
+
+例9-6中的Set类并没有定义上述方法中的任何一个。JavaScript中没有哪个原始值可以表示集合，因此也没必要定义valueOf()方法，但该类应当包含toString()、toLocaleString()和toJSON()方法。可以用如下代码来实现。注意extend()函数（例6-2）的用法，这里使用extend()来向Set.prototype来添加方法：
 ```javascript
 //将这些方法添加至Set类的原型对象中
 extend(Set.prototype,{
@@ -2016,7 +2018,7 @@ extend(Set.prototype,{
     toString: function () {
         var s = "{",
         i = 0;
-        this.foreach(function (v) {s +=((i++>0)? ", " : "") + v;});
+        this.foreach(function (v) {s += ((i++>0)? ", " : "") + v;});
         return s + "}";
     },
     //类似toString，但是对于所有的值都将调用toLocaleString()
@@ -2040,9 +2042,9 @@ Set.prototype.toJSON = Set.prototype.toArray;
 
 **9.6.4 比较方法**
 
-javascript的相等运算符比较对象时，比较的是引用而不是值。也就是说，给定两个对象引用，如果要看它们是否指向同一个对象，不是检查这两个对象是否具有相同的属性名和相同的属性值，而是直接比较这两个单独的对象是否相等，或者比较它们的顺序（就像“<”和“>”运算符进行的比较一样）。如果定义一个类，并且希望比较类的实例，应该定义合适的方法来执行比较操作。
+JavaScript的相等运算符比较对象时，比较的是引用而不是值。也就是说，给定两个对象引用，如果要看它们是否指向同一个对象，不是检查这两个对象是否具有相同的属性名和相同的属性值，而是直接比较这两个单独的对象是否相等，或者比较它们的顺序（就像“<”和“>”运算符进行的比较一样）。如果定义一个类，并且希望比较类的实例，应该定义合适的方法来执行比较操作。
 
-java编程语言有很多用于对象比较的方法，将java中的这些方法借用到javascript中是一个不错的主意。为了能让自定义类的实例具备比较的功能，定义一个名叫equals()实例方法。这个方法只能接收一个参数，如果这个实参和调用此方法的对象相等的话则返回true。当然，这里所说的“相等”的含义是根据类的上下文来决定的。对于简单的类，可以通过简单地比较它们的constructor属性来确保两个对象是相同类型，然后比较两个对象的实例属性以保证它们的值相等。例9-3中的Complex类就实现了这样的equals()方法，我们可以轻易地为Range类也实现类似的方法：
+Java编程语言有很多用于对象比较的方法，将Java中的这些方法借用到JavaScript中是一个不错的主意。为了能让自定义类的实例具备比较的功能，定义一个名叫equals()实例方法。这个方法只能接收一个实参，如果这个实参和调用此方法的对象相等的话则返回true。当然，这里所说的“相等”的含义是根据类的上下文来决定的。对于简单的类，可以通过简单地比较它们的constructor属性来确保两个对象是相同类型，然后比较两个对象的实例属性以保证它们的值相等。例9-3中的Complex类就实现了这样的equals()方法，我们可以轻易地为Range类也实现类似的方法：
 ```javascript
 //Range类重写它的constructor属性，现在将它添加进去
 Range.prototype.constructor = Range;
@@ -2055,6 +2057,7 @@ Range.prototype.equals = function(that) {
     return this.from == that.from && this.to == this.to;
 }
 ```
+
 给Set类定义equals()方法稍微有些复杂。不能简单地比较两个集合的values属性，还要进行更深层次的比较：
 ```javascript
 Set.prototype.equals = function (that) {
@@ -2081,9 +2084,9 @@ Set.prototype.equals = function (that) {
 ```
 按照我们需要的方式比较对象是否相等常常是很有用的。对于某些类来说，往往需要比较一个实例“大于”或者“小于”另外一个示例。比如，你可能会基于Range对象的下边界来定义实例的大小关系。枚举类型可以根据名字的字母表顺序来定义实例的大小，也可以根据它包含的数值（假设它包含的都是数字）来定义大小。另一方面，Set对象其实是无法排序的。
 
-如果将对象用于javascript的关系比较运算符，比如“<”和“<=”，javascript会首先调用对象的valueOf()方法，如果这个方法返回一个原始值，则直接比较原始值。例9-7中由enumeration()方法所返回的枚举类型包含valueOf()方法，因此可以使用关系运算符对它们做有意义的比较。但大多数类并没有valueOf()方法，为了按照显式定义的规则来比较这些类型的对象，可以定义一个名叫copareTo()方法（同样，这里遵循Java中的命名约定）。
+如果将对象用于JavaScript的关系比较运算符，比如“<”和“<=”，JavaScript会首先调用对象的valueOf()方法，如果这个方法返回一个原始值，则直接比较原始值。例9-7中由enumeration()方法所返回的枚举类型包含valueOf()方法，因此可以使用关系运算符对它们做有意义的比较。但大多数类并没有valueOf()方法，为了按照显式定义的规则来比较这些类型的对象，可以定义一个名叫copareTo()方法（同样，这里遵循Java中的命名约定）。
 
-compareTo()方法应当只能接收一个参数，这个方法将这个参数和调用它的对象进行比较。如果this对象小于参数对象，compareTo()迎丹返回比0小的值。如果this对象大于参数对象，应当返回比0大的值。如果两个对象相等，应当返回0。这些关于返回值的约定非常重要，这样我们可以用下面的表达式替换掉关系比较和相等性运算符：
+compareTo()方法应当只能接收一个参数，这个方法将这个参数和调用它的对象进行比较。如果this对象小于参数对象，compareTo()应当返回比0小的值。如果this对象大于参数对象，应当返回比0大的值。如果两个对象相等，应当返回0。这些关于返回值的约定非常重要，这样我们可以用下面的表达式替换掉关系比较和相等性运算符：
 
 |待替换|替换为|
 |------|------|
@@ -2097,7 +2100,7 @@ compareTo()方法应当只能接收一个参数，这个方法将这个参数和
 例9-8中的Card类定义了该类的compareTo()方法，可以给Range类添加一个类似的方法，用以比较它们的下边界：
 ```javascript
 Range.prototype.compareTo = function(that) {
-    return this.from = that.from;
+    return this.from - that.from;
 };
 ```
 需要注意的是，这个方法中的减法操作根据两个Range对象的关系正确地返回了小于0、等于0和大于0的值。例9-8中的Card.Rank枚举值包含valueOf()方法，其实也可以给Card类实现类似的compareTo()方法。
@@ -2118,30 +2121,29 @@ Range.prototype.compareTo = function(that) {
 };
 ```
 给类定义了compareTo()方法，这样就可以对类的实例组成的数组进行排序了。Array.sort()方法可以接收一个可选的参数，这个参数是一个函数，用来比较两个值的大小，这个函数返回值的约定和compareTo()方法保持一致。假定有了上文提到的compareTo()方法，就可以很方便地对Range对象组成的数组进行排序了：
-
-    range.sort(function(a,b) {return a.compareTo(b); });
-    
+```
+ranges.sort(function(a,b) {return a.compareTo(b); });
+``` 
 排序运算非常重要，如果已经为类定义了实例方法compareTo()，还应当参照这个方法定义一个可传入两个参数的比较函数。使用compareTo()方法可以非常轻松地定义这个函数，比如：
-
-    Range.byLowerBound = function(a,b) { return a.compareTo(b); };
-
+```
+Range.byLowerBound = function(a,b) { return a.compareTo(b); };
+```
 使用这个方法可以让数组排序的操作变得非常简单：
-
-    ranges.sort(Range.byLowerBound);
-    
+```
+ranges.sort(Range.byLowerBound);
+```    
 有些类可以有很多方法进行排序。比如Card类，可以定义两个方法分别按照花色排序和按照点数排序。
 
 **9.6.5 方法借用**
 
-javascript中的方法没有什么特别：无非是一些简单的函数，赋值给了对象的属性，可以通过对象来调用它。一个函数可以赋值给两个属性，然后作为两个方法来调用它。比如，我们在Set类中就这样做了，将toArray()方法创建了一个副本，并让它可以和toJSON()方法一样完成同样的功能。
+JavaScript中的方法没有什么特别：无非是一些简单的函数，赋值给了对象的属性，可以通过对象来调用它。一个函数可以赋值给两个属性，然后作为两个方法来调用它。比如，我们在Set类中就这样做了，将toArray()方法创建了一个副本，并让它可以和toJSON()方法一样完成同样的功能。
 
-多个类中的方法可以共用一个单独的函数。比如，Array类通常定义了一些内置方法，如果定义了一个类，它的实例是类数组的对象，则可以从Array.prototype中将函数复制至所定义的类的原型对象中。如果以经典的面向语言的视角来看javascript的话，把一个类的方法用到其他的类中的做法也称做“多重继承”（multiple inheritance）。然而，javascript并不是经典的面向对象语言，我更倾向于将这种方法重用更正式地称为“方法借用”（borrowing）。
+多个类中的方法可以共用一个单独的函数。比如，Array类通常定义了一些内置方法，如果定义了一个类，它的实例是类数组的对象，则可以从Array.prototype中将函数复制至所定义的类的原型对象中。如果以经典的面向语言的视角来看JavaScript的话，把一个类的方法用到其他的类中的做法也称做“多重继承”（multiple inheritance）。然而，JavaScript并不是经典的面向对象语言，我更倾向于将这种方法重用更正式地称为“方法借用”（borrowing）。
 
-不仅Array的方法可以借用，还可以自定义泛型方法（generic method）。
-例9-9定义了泛型方法toString()和equals()，可以被Range、Complex和Card这些简单的类使用。如果Range类没有定义equals()方法，可以这样借用泛型方法equals():
-
-    Range.prototype.equals = generic.equals;
-
+不仅Array的方法可以借用，还可以自定义泛型方法（generic-method）。例9-9定义了泛型方法toString()和equals()，可以被Range、Complex和Card这些简单的类使用。如果Range类没有定义equals()方法，可以这样借用泛型方法equals():
+```javascript
+Range.prototype.equals = generic.equals;
+```
 注意，generic.equals()只会执行浅比较，因此这个方法并不适用于其实例太复杂的类，它们的实例属性通过其equals()方法指代对象。同样需要注意，这个方法包含一些特殊情况的程序逻辑，以处理新增至Set对象中的属性（见例9-6）。
 
 例9-9方法借用的泛型实现
@@ -2199,8 +2201,10 @@ var generic = {
 
 **9.6.6 私有状态**
 
-在经典的面向对象编程中，经常需要将对象的某个状态封装或隐藏在对象内，只有通过对象的方法才能访问这些状态，对外只暴露一些重要的状态变量可以直接读写。为了实现这个目的，类似java的编程语言允许声明类的“私有”实例字段，这些私有实例字段只能被类的实例方法访问，且在类的外部是不可见的。
+在经典的面向对象编程中，经常需要将对象的某个状态封装或隐藏在对象内，只有通过对象的方法才能访问这些状态，对外只暴露一些重要的状态变量可以直接读写。为了实现这个目的，类似Java的编程语言允许声明类的“私有”实例字段，这些私有实例字段只能被类的实例方法访问，且在类的外部是不可见的。
+
 我们可以通过将变量（或参数）闭包在一个构造函数内来模拟实现私有实例字段，调用构造函数会创建一个实例。为了做到这一点，需要在构造函数内部定义一个函数（因此这个函数可以访问构造函数内部的参数和变量），并将这个函数赋值给新创建对象的属性。例9-10展示了对Range类的另一种封装，新版的类的实例包含from()和to()方法用以返回范围的端点，而不是用from和to属性来获取端点。这里的from()和to()方法是定义在每个Range对象上的，而不是从原型中继承来的。其他的Range方法还是和之前一样定义在原型中，但获取端点的方式从之前直接从属性读取变成了通过from()和to()方法来读取。
+
 例9-10 对Range类的读取端点方法的简单封装
 ```javascript
 function Range(from, to) {
@@ -2246,7 +2250,7 @@ function Set() {
     //如果传入一个类数组的对象，将这个元素添加至集合中
     //否则，将所有的参数都添加至集合中
     if (arguments.length == 1 && isArrayLike(arguments[0]))
-        this.add.appley(this, arguments[0]);
+        this.add.apply(this, arguments[0]);
     else if (arguments.length > 0)
         this.add.apply(this, arguments);
 }
@@ -2284,22 +2288,20 @@ s instanceof Set //=>true
 **9.7子类**
 
 在面向对象编程中，类B可以继承自另一个类A。我们将A称为父类（superclass），将B称为子类（subclass）。B的实例从A继承了所有的实例方法。类B可以定义自己的实例方法，有些方法可以重载类A中的同名方法，如果B的方法重载了A中的方法，B中的重载方法可能会调用A中重载方法，这种做法称为“方法链”（method chaining）。同样，子类的构造函数B()有时需要调用父类的构造函数A()，这种做法称为“构造函数链”（constructor chaining）。
-子类还可以有子类，当涉及类的层次结构时，往往需要定义抽象类（abstract class）。
-抽象类中定义的方法没有实现。抽象类中的抽象方法是在抽象类的具体子类中实现的。
+子类还可以有子类，当涉及类的层次结构时，往往需要定义抽象类（abstract-class）。抽象类中定义的方法没有实现。抽象类中的抽象方法是在抽象类的具体子类中实现的。
 
-在javascript中创建子类的关键之处在于，采用合适的方法对原型对象进行初始化。如果类B继承自类A，B.prototype必须是A.prototye的后嗣。B的实例继承自B.prototype，后者同样也继承自A.prototype。
-本节将会对刚才提到的子类相关的术语做一一讲解，还会介绍类继承的替代方案：“组合”（composition）。
+在JavaScript中创建子类的关键之处在于，采用合适的方法对原型对象进行初始化。如果类B继承自类A，B.prototype必须是A.prototye的后嗣。B的实例继承自B.prototype，后者同样也继承自A.prototype。本节将会对刚才提到的子类相关的术语做一一讲解，还会介绍类继承的替代方案：“组合”（composition）。
 
-我们从例9-6中的Set类开始讲解，本节将会讨论如何定义子类，如何实现构造函数链并重载方法，如何使用组合来代替继承，以及最后如何通过抽象类从实现中提炼出接口。本节一个扩展的例子结束，这个例子定义了Set类的层次结构。注意，本节开始的几个例子着重讲述了实现子类的基础技术。其中某些技术有着重要的缺陷，后续几节会讲到。
+我们从例9-6中的Set类开始讲解，本节将会讨论如何定义子类，如何实现构造函数链并重载方法，如何使用组合来代替继承，以及最后如何通过抽象类从实现中提炼出接口。本节以一个扩展的例子结束，这个例子定义了Set类的层次结构。注意，本节开始的几个例子着重讲述了实现子类的基础技术。其中某些技术有着重要的缺陷，后续几节会讲到。
 
 **9.7.1 定义子类**
 
-javascript的对象可以从类的原型对象中继承属性（通常继承的是方法）。如果O是类B的实例，B是A的子类，那么O也一定从A继承了属性。为此，首先要确保B的原型对象继承自A的原型对象。通过inherit()函数（例6-1），可以这样来实现：
+JavaScript的对象可以从类的原型对象中继承属性（通常继承的是方法）。如果O是类B的实例，B是A的子类，那么O也一定从A继承了属性。为此，首先要确保B的原型对象继承自A的原型对象。通过inherit()函数（例6-1），可以这样来实现：
 ```javascript
 B.prototype = inherit(A.prototype); //子类派生自父类
 B.prototype.constructor = B; //重载继承来的constructor属性
 ```
-这两行代码是在javascript中创建子类的关键。如果不这样做，原型对象仅仅是一个普通对象，它只继承自Object.prototype，这意味着你的类和所有的类一样是Object的子类。如果将这两行代码添加至defineClass()函数中（参照9.3节），可以将它变成例9-11中的defineSubclass()函数和Function.prototype.extend()方法：
+这两行代码是在JavaScript中创建子类的关键。如果不这样做，原型对象仅仅是一个普通对象，它只继承自Object.prototype，这意味着你的类和所有的类一样是Object的子类。如果将这两行代码添加至defineClass()函数中（参照9.3节），可以将它变成例9-11中的defineSubclass()函数和Function.prototype.extend()方法：
 例9-11 定义子类
 ```javascript
 // A simple function for creating simple subclasses
