@@ -17,7 +17,7 @@
 
 [大公司是怎样开发和部署前端代码](https://github.com/fouber/blog/issues/6)
 
- 资料
- ----
+资料
+----
  
- [雅虎14条性能优化原则](https://developer.yahoo.com/performance/rules.html)
+[雅虎14条性能优化原则](https://developer.yahoo.com/performance/rules.html)
