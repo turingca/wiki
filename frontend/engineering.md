@@ -19,6 +19,8 @@
 [大公司是怎样开发和部署前端代码](https://github.com/fouber/blog/issues/6)
 
 
+
+
 阿里系文章
 ---------
 
@@ -28,7 +30,17 @@
 
 [我理解的阿里无线前端“架构”（半鸡汤，少干货）](https://github.com/amfe/article/issues/3)
 
-[写给前端面试者](https://github.com/amfe/article/issues/5)
+[写给前端面试者（非技术文）](https://github.com/amfe/article/issues/5)
+
+[手机淘宝这三年（更新PPT同步录音视频）](https://github.com/amfe/article/issues/7)
+
+[手机淘宝前端的图片相关工作流程梳理](https://github.com/amfe/article/issues/8)
+
+[Font Boosting](https://github.com/amfe/article/issues/10)
+
+[15年双11手淘前端技术巡演 - 前言](https://github.com/amfe/article/issues/11)
+
+[对无线电商动态化方案的思考（一）](https://github.com/amfe/article/issues/13)
 
 资料
 ----
