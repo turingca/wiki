@@ -31,6 +31,10 @@ http://tgideas.qq.com/  腾讯游戏官方设计团队
 工具
 -------
 
+[切图](http://www.cutterman.cn/cutterman)
+
+[标注](http://www.cutterman.cn/parker)
+
 [谷歌浏览器](other/Chrome.md)
 
 [抓包Charles](other/Charles.md)
