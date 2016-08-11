@@ -16,6 +16,8 @@
 
 [浅谈前端集成解决方案](https://github.com/fouber/blog/issues/1)
 
+[前端开发体系建设日记](https://github.com/fouber/blog/issues/2)
+
 [大公司是怎样开发和部署前端代码](https://github.com/fouber/blog/issues/6)
 
 
