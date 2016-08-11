@@ -50,6 +50,10 @@
 
 [POPLAYER起来HIGH~~](https://github.com/amfe/article/issues/18)
 
+[双十一敲钟项目总结](https://github.com/amfe/article/issues/19)
+
+[双11密令红包的前端技术方案](https://github.com/amfe/article/issues/20)
+
 资料
 ----
  
