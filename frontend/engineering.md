@@ -20,6 +20,8 @@
 
 [大公司是怎样开发和部署前端代码](https://github.com/fouber/blog/issues/6)
 
+[如何进行前端自动化测试？](https://github.com/fouber/blog/issues/7)
+
 
 
 
