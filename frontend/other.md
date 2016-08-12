@@ -5,9 +5,6 @@
 
 [前端主管如何带队](other/Old-Driver-Said-1.md)
 
-团队
-----
-
 **阿里**
 
 http://www.aliued.com/ 阿里巴巴国际UED团队
