@@ -16,8 +16,7 @@ http://mux.alimama.com/  阿里妈妈体验工作平台
 http://thx.github.io/ THX是一系列前端开发相关的工具，框架和类库的集合，也是阿里集团阿里妈妈、一淘网和无线产品线 以及小微金服部分前端工程师的技术组织名称。THX站点目前由阿里妈妈用户体验中心的前端团队运维。 
 
 
-
-**百度系**
+**百度**
 
 http://efe.baidu.com/ 百度EFE（Excellent-FrontEnd）技术体系，前身是ECOM前端团队，后经过技术的发展，逐渐形成一套完善的前端技术体系。EFE技术体系现由多个遵循该技术体系的前端团队所组成。E(Excellent)代表我们追求卓越的技术态度。
 
@@ -29,7 +28,7 @@ http://h5.baidu.com/ 百度H5页面制作工具
 
 http://sux.baidu.com/#/home 百度搜素用户体验中心
 
-**腾讯系**
+**腾讯**
 
 http://www.alloyteam.com 腾讯Web前端团队
 
