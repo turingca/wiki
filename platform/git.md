@@ -7,7 +7,8 @@ Git有什么特点？简单来说就是：高端大气上档次！
 常用命令
 -------
 
-**操作分支**
+```
+操作分支
 
 git checkout <branch name> 切换分支或创建新分支
 
@@ -21,10 +22,11 @@ git push 推送
 
 git branch -d 删除本地分支 git push origin :<branch name> 利用本地已删除的空分支删除远程分支，git版本大于1.7后可以直接使用git push origin --delete <branch name> 
 
-**操作标签**
+操作标签
 
 git push origin --delete tag <tagname> 删除标签
 
+```
 
 Git的诞生
 --------
