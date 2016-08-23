@@ -26,6 +26,12 @@ git branch -d 删除本地分支 git push origin :<branch name> 利用本地已�
 
 git push origin --delete tag <tagname> 删除标签
 
+对比代码
+
+git diff 此命令比较的是工作目录和暂存区域快照之间的差异，也就是修改之后还没有暂存起来的变化内容。
+
+
+
 ```
 
 Git的诞生
