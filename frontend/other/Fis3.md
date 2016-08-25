@@ -1,7 +1,9 @@
 前言
 ------
 
-[FIS官方](http://fis.baidu.com)
+[FIS](http://fis.baidu.com)
+
+[官方文档](http://fis.baidu.com/fis3/docs/beginning/intro.html)
 
 [Github传送门](https://github.com/fex-team/fis3)
 
@@ -1151,13 +1153,7 @@ fis.match('a.js', {
 
 **一个复杂一点的例子**
 
-为了尝试更多FIS3提供的特性，我们设计一个比较复杂的例子。这个例子包含
-
-* 两个页面
-* 三个 css 文件，其中俩页面各一个css文件，剩下一个css文件共用
-* 包含一个less文件，并被俩页面同时使用
-* 两个png图片
-* 两个js文件
+为了尝试更多FIS3提供的特性，我们设计一个比较复杂的例子。这个例子包含两个页面，三个css文件，其中俩页面各一个css文件，剩下一个css文件共用，包含一个less文件，并被俩页面同时使用，两个png图片，两个js文件。
 
 例子下载地址 [demo-lv1](https://github.com/fex-team/fis3/tree/dev/doc/demo/demo-simple)
 
@@ -1165,10 +1161,10 @@ fis.match('a.js', {
 
 FIS3是一个扩展性很强的构建工具，社区也包含很多FIS3的插件。为了展示FIS3的预处理、静态合并js、css能力，需要安装两个插件。
 
-* fis-parser-less：例子引入一个 less 文件，需要 less 预处理插件
+* fis-parser-less：例子引入一个less文件，需要less预处理插件
 * fis3-postpackager-loader：可对页面散列文件进行合并
 
-FIS3的插件都是以NPM包形式存在的，所以安装FIS3的插件需要使用npm 来安装。
+FIS3的插件都是以NPM包形式存在的，所以安装FIS3的插件需要使用npm来安装。
 ```
 npm install -g 插件名
 ```
@@ -1183,7 +1179,7 @@ npm install -g fis3-postpackager-loader
 FIS3提供强大的预处理能力，可以对less、sass等异构语言进行预处理，还可以对模板语言进行预编译。FIS3社区已经提供了绝大多数需要预处理的异构语言。
 
 我们给定的例子中有个less文件，那么需要对less进行预处理，我们已经安装了对应的预处理插件。现在只需要配置启用这个插件就能搞定这个事情。
-```
+```javascript
 fis.match('*.less', {
   // fis-parser-less 插件进行解析
   parser: fis.plugin('less'),
@@ -1195,10 +1191,231 @@ fis.match('*.less', {
 
 <link rel="stylesheet" type="text/css" href="./test.less">
 
+**简单合并**
 
+在起步中我们阐述了图片合并CssSprite，为了减少请求。现在介绍一种比较简单的打包js、css的方式。 
 
+启用打包后处理插件进行合并：
 
+基于整个项目打包
+```javascript
+fis.match('::package', {
+  postpackager: fis.plugin('loader')
+});
 
+fis.match('*.less', {
+  parser: fis.plugin('less'),
+  rExt: '.css'
+});
+
+fis.match('*.{less,css}', {
+  packTo: '/static/aio.css'
+});
+
+fis.match('*.js', {
+  packTo: '/static/aio.js'
+});
+```
+这样配置打包的结果是：一个页面最终只会引入一个css、js：aio.js和aio.css。 但两个页面的资源都被打包到同一个包里面了。这个可能不是我们想要的结果，我们想一个页面只包含这个页面用过的资源。
+
+基于页面的打包方式
+```javascript
+fis.match('::package', {
+  postpackager: fis.plugin('loader', {
+    allInOne: true
+  })
+});
+
+fis.match('*.less', {
+  parser: fis.plugin('less'),
+  rExt: '.css'
+});
+```
+给loader插件配置allInOne属性，即可对散列的引用链接进行合并，而不需要进行配置packTo指定合并包名。
+
+注意，这个插件只针对纯前端的页面进行比较粗暴的合并，如果使用了后端模板，一般都需要从整站出发配置合并。
+
+**构建调试预览**
+
+进入demo目录，执行命令，构建即发布到本地测试服务根目录下：
+```
+fis3 release
+```
+启动内置服务器进行预览；
+```
+fis3 server start --type node
+```
+
+中级使用
+-------
+
+在初级使用中，为了解析less和进行简单的资源合并，我们安装了两个已经提供好的插件，使用插件完成了我们的工作。假设某些情况下，还没有相关插件，该怎么办？
+
+那么这节讨论一下FIS中插件如何编写。在工作原理中，已经介绍了整个构建的过程，以及说明了FIS与其他构建工具的不同点。
+
+**预处理插件编写**
+
+假设给定项目中要是用es6，线上运行时解析成标准js性能堪忧，想用自动化工具进行预处理转换。如原理介绍parser阶段就是进行归一化的过程，通过预处理阶段，整个文件都会翻译为标准的文件，即浏览器可解析的文件。
+
+这时候我们搜罗开源社区，看转换es6到es5哪个转换工具更好一些，发现babel具有无限的潜能。
+
+任务：预处理es6为es5
+
+前期准备：
+
+* .es6后缀最终变为.js
+* 使用babel进行es6的转换
+* FIS3实现一个parser类型的插件，取名叫translate-es6，插件全名fis3-parser-translate-es6
+
+开发插件：
+
+开发插件文档详细介绍了开发插件的步骤，但为了更友好的进行接下来的工作，我们在这里简述一下整个过程。
+
+FIS3支持local mode加载一个插件。当你调用一个插件的时候，配置如下：
+```javascript
+{
+  parser: fis.plugin('translate-es6')
+}
+```
+如果项目的根目录node_modules下有这个插件，就能挂载起来。
+```
+my-proj/node_modules/fis3-parser-translate-es6
+```
+这样我们就知道，插件逻辑放到什么地方能用fis.plugin接口挂载。
+```
+my-proj/node_modules/fis3-parser-translate-es6/index.js
+```
+```javascript
+// vi index.js
+// babel node.js api 只需要babel-core即可
+var babel = require('babel-core');
+module.exports = function (content, file, options) {
+  var result = babel.transform(content, opts);
+  return result.code; // 处理后的文件内容
+}
+```
+如上我们调用babel-core封装了一个fis3-parser插件。
+
+现在我们要在项目使用它
+```
+my-proj/fis-conf.js # 项目fis3 配置文件
+my-proj/node_modules/fis3-parser-translate-es6/index.js # 插件逻辑
+my-proj/style.es6
+my-proj/index.html
+```
+
+配置使用
+```javascript
+fis.match('*.es6', {
+  parser: fis.plugin('translate-es6'),
+  rExt: '.js' // .es6 最终修改其后缀为 .js
+})
+```
+
+构建
+```
+fis3 release -d ./output
+```
+
+**打包插件编写**
+
+在开始之前，我们需要阐述下打包这个名词，打包在前端工程中有两个方面。
+
+* 收集页面用到的js、css，分别合并这些引用，将资源合并成一个。
+* 打包，对某些资源进行打包，而记录它们打包的信息，譬如某个文件打包到了哪个包文件。
+
+其实一般意义上来说，对于第一种情况收集打包只适合于纯前端页面，并且要求资源都是静态引入的。假设出现这种情况：
+```
+<script type="text/javascript">
+// load common.js and index.js
+F.load([
+  'common',
+  'index'
+]);
+</script>
+```
+需要通过动态脚本去加载的资源，就无法通过工具静态分析来去做合并了。
+
+还有一种情况，如果模板是后端模板，也依然无法做到这一点，因为加载资源只有在运行时、解析时才能确定。
+
+那么对于这类打包合并资源，需要特殊的处理思路。
+
+1. 直接将所有资源合并成一个文件，进行整站（整个项目）合并；
+2. 通过配置文件配置打包，并且合并时记录合并信息，在运行时根据这些打包信息吐给浏览器合适的资源。
+
+第一种，粗暴问题多，并且项目足够大时效率明显不合适。我们主要探讨第二种。
+
+FIS3默认内置了一个打包插件fis3-packager-map，它根据用户的配置信息对资源进行打包。
+```javascript
+//fis-conf.js
+fis.match('/widget/*.js', {
+  packTo: '/static/widget_pkg.js'
+})
+```
+标明/widget目录下的js被合并成一个文件widget_pkg.js
+
+假设
+```
+/widget/a.js
+/widget/b.js
+/widget/c.js
+/map.json
+```
+编译发布后：
+```
+/widget/a.js
+/widget/b.js
+/widget/c.js
+/static/widget_pkg.js
+/map.json
+```
+我们前面说过
+
+当某文件包含字符 __RESOURCE_MAP__ 时，最终静态资源表（资源之间的依赖、合并信息）会替换这个字符。
+构建后，出现一个合并资源以外，还会产出一张某资源合并到什么文件中的关系信息。
+```javascript
+{
+  "res": {
+    "widget/a.js": {
+      "uri": "/widget/a.js",
+      "type": "js",
+      "pkg": "p0"
+    },
+    "widget/b.js": {
+      "uri": "/widget/b.js",
+      "type": "js",
+      "pkg": "p0"
+    },
+    "widget/c.js": {
+      "uri": "/widget/c.js",
+      "type": "js",
+      "pkg": "p0"
+    }    
+  },
+  "pkg": {
+    "p0": {
+      "uri": "/static/widget_pkg.js",
+      "has": [
+        "widget/a.js",
+        "widget/b.js",
+        "widget/c.js"
+      ],
+      "type": "js"
+    }
+  }
+}
+```
+
+**发布插件**
+
+FIS3 的插件都放在 NPM 平台上，把插件发布到其上即可。
+
+参考链接[npm publish](https://docs.npmjs.com/getting-started/publishing-npm-packages)
+
+发布的插件如何使用：
+
+* npm install -g <plugin> 安装插件
+* FIS3 配置文件中按照配置规则进行配置，fis.plugin(<plugin-name>)
 
 
 高级使用
@@ -1217,13 +1434,13 @@ $_map = json_decode('__RESOURCE_MAP__', true);
 ?>
 ```
 js
-```
+```javascript
 var _map = __RESOURCE_MAP__;
 ```
+
 假设上面的php和js为分析静态资源映射表的程序，那么就省去了读map.json的过程。
 
-当然，如果你想继续像FIS2一样的产出 map.json，只需要在模块下新建文件map.json，内容设置为 __RESOURCE_MAP__ 即可。
-
+当然，如果你想继续像FIS2一样的产出map.json，只需要在模块下新建文件map.json，内容设置为 __RESOURCE_MAP__ 即可。
 
 **模块化开发**
 
@@ -1235,7 +1452,7 @@ var _map = __RESOURCE_MAP__;
 
 ***AMD***
 
-````
+````javascript
 define()
 require([]);
 require('');
@@ -1243,7 +1460,7 @@ require('');
 
 ***seajs***
 
-```
+```javascript
 define()
 require('')
 sea.use([])
@@ -1251,7 +1468,7 @@ sea.use([])
 
 ***mod.js (extends commonjs)***
 
-```
+```javascript
 define()
 require('')
 require.async('')
@@ -1264,7 +1481,7 @@ require.async([])
 * fis3-hook-amd
 * fis3-hook-cmd
 
-```
+```javascript
 // vi fis-conf.js
 fis.hook('commonjs');
 ```
@@ -1277,15 +1494,15 @@ fis.hook('commonjs');
 有了依赖表，但如何把资源加载到页面上，需要额外的FIS构建插件或者方案支持。
 
 假设以纯前端（没有后端模板）的项目为例，对于依赖组件的加载就靠插件fis3-postpackager-loader。其是一种基于构建工具的加载组件的方法，构建出的html已经包含了其使用到的组件以及依赖资源的引用。
-```
+```javascript
 //npm install -g fis3-postpackager-loader
 fis.match('::package', {
   postpackager: fis.plugin('loader', {})
 });
 ```
 为了方便、统一管理组件以及合并时便利，需要把组件统一放到某些文件夹下，并设置此目录下的资源都是组件资源。
-```
-// widget 目录下为组件
+```javascript
+// widget目录下为组件
 fis.match('/widget/**.js', {
   isMod: true
 });
@@ -1300,7 +1517,6 @@ fis.match('/widget/**.js', {
 
 工具扩展、目录规范，前后端的前端工程项目都需要，其不同之处就在于静态资源管理这部分。
 
-
 **资源映射表的模块化方案设计**
 
 **解决方案封装**
@@ -1313,13 +1529,13 @@ FIS3中的包装解决方案，就是把这些集成到一个工具中。
 
 一个解决方案就是继承自FIS3并且支持特定模块化开发、特定模板语言、特定处理流程、研发规范的构建工具。
 
-***封装解决方案的必要性***
+**封装解决方案的必要性**
   
 * 规范开发，对于特定团队业务，应该有特定的目录规范、模块化框架等
 * FIS3只提供一个方便定制前端工程的构建系统，每个团队需要怎么样去处理工程需要自己定制，定制会引入大量的FIS3插件，解决方案可统一规定引入哪些插件
 * 树立独立技术品牌
 
-***解决方案封装***
+**解决方案封装**
 
 准备
 ```
@@ -1352,9 +1568,9 @@ foo/index.js
 package.json
 ```
 
-* 基于FIS3配置目录规范和部署规范
+基于FIS3配置目录规范和部署规范
 
-```
+```javascript
 //vi foo/index.js
 var fis = module.exports = require('fis3');
 fis.require.prefixes.unshift('foo');
@@ -1411,9 +1627,9 @@ fis.hook('module', {
 });
 ```
 
-* 实现 /bin/foo.js
+实现/bin/foo.js
 
-```
+```javascript
 #!/usr/bin/env node
 
 // vi foo/bin/foo.js
@@ -1426,7 +1642,6 @@ var cli = new Liftoff({
   processTitle: 'foo',
   moduleName: 'foo',
   configName: 'fis-conf',
-
   // only js supported!
   extensions: {
     '.js': null
@@ -1444,36 +1659,41 @@ cli.launch({
     fis = require(env.modulePath);
   }
   // 配置插件查找路径，优先查找本地项目里面的 node_modules
-  // 然后才是全局环境下面安装的 fis3 目录里面的 node_modules
+  // 然后才是全局环境下面安装的fis3目录里面的 node_modules
   fis.require.paths.unshift(path.join(env.cwd, 'node_modules'));
   fis.require.paths.push(path.join(path.dirname(__dirname), 'node_modules'));
   fis.cli.run(argv, env);
 });
 ```
-以上代码 copy 过来即可，不需要做大的改动，感兴趣可研究其原理。
+以上代码copy过来即可，不需要做大的改动，感兴趣可研究其原理。
 
-* 依赖的NPM包，需要在package.json中加上依赖：
+依赖的NPM包，需要在package.json中加上依赖：
 
-  * fis-parser-less解析less
-  * fis-optimizer-uglify-js 压缩 js，fis3 已内置
-  * fis-optimizer-clean-css 压缩 css，fis3 已内置
-  * fis-optimizer-png-compressor 压缩 png 图片，fis3 已内置
-  * fis3-hook-module 模块化支持插件
-  * fis3 fis3 核心
-  * minimist
-  * liftoff
+* fis-parser-less解析less
+* fis-optimizer-uglify-js 压缩 js，fis3 已内置
+* fis-optimizer-clean-css 压缩 css，fis3 已内置
+* fis-optimizer-png-compressor 压缩 png 图片，fis3 已内置
+* fis3-hook-module 模块化支持插件
+* fis3 fis3 核心
+* minimist
+* liftoff
 
-* package.json 需要添加
-
-```
+package.json需要添加
+```JavaScript
 "bin": {
   "foo": "bin/foo.js"
 }
 ```
 
-* 发布foo到NPM
+发布foo到NPM
 
 通过以上步骤可以简单封装一个解决方案，FIS3提供了大量的插件，已经几乎极其简单的配置方式来搞定研发规范的设置，很轻松即可打造完整的前端集成解决方案。
+
+**基于Smarty的解决方案**
+
+**基于纯PHP的解决方案**
+
+**基于Laravel的解决方案**
 
 
 接口文档
