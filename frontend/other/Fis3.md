@@ -1064,7 +1064,7 @@ fis.release = function (opt) {
 
 **单文件编译流程**
 
-```
+```javascript
 fis.compile = function (file) {
   if (file.isFile()) {
     if (exports.useLint && file.lint) {
@@ -1101,32 +1101,31 @@ function process(file) {
 
 其中插件扩展点包括：
 
-* lint：代码校验检查，比较特殊，所以需要 release 命令命令行添加 -l 参数
-* parser：预处理阶段，比如 less、sass、es6、react 前端模板等都在此处预编译处理
+* lint：代码校验检查，比较特殊，所以需要release命令命令行添加 -l 参数
+* parser：预处理阶段，比如less、sass、es6、react前端模板等都在此处预编译处理
 * preprocessor：标准化前处理插件
 * standard：标准化插件，处理内置语法
 * postprocessor：标准化后处理插件
 
 ```
-预处理阶段一般是对异构语言等进行预编译，如 less、sass 编译为标准的 css；前端模板被编译为 js 等等
+预处理阶段一般是对异构语言等进行预编译，如less、sass编译为标准的css；前端模板被编译为js等等
 ```
 
 单文件阶段通过读取文件属性，来执行对应扩展点插件。
 
 举个例子：
-```
+```javascript
 fis.match('*.es6', {
   parser: fis.plugin('babel'),
   rExt: '.js' // 代码编译产出时，后缀改成 .js
 });
 ```
-给后缀是 .es6 的文件配置了一个 parser 属性，属性值是启用了一个叫 babel 的插件，当执行到预处理阶段时，将 es6 编译为 es5，供浏览器执行。
-
+给后缀是 .es6 的文件配置了一个parser 属性，属性值是启用了一个叫babel 的插件，当执行到预处理阶段时，将es6编译为es5，供浏览器执行。
 其他插件扩展点亦然。
 
 **File对象**
 
-```
+```javascript
 function File(filepath) {
   var props = path.info(filepath);
   merge(props, fis.matchRules(filepath)); // merge 分配到的属性
@@ -1137,18 +1136,18 @@ function File(filepath) {
 当一个文件被实例化为一个File对象后，包括一些文件基本属性，如filename、realpath等等，当这个文件被处理时，FIS3还会把用户自定义的属性merge到文件对象上。
 
 比如
-```
+```javascript
 fis.match('a.js', {
   myProp: true
 });
 ```
+
 这样a.js处理的时候就会携带这个属性myProp。myProp是一个自定义属性，FIS3默认内置了一些属性配置，来方便控制一个文件的编译流程，可参考配置属性
 
 可能你会问，自定义属性到底有什么用，其实自定义属性可以标注一些文件，提供插件来做一些特定的需求。
 
 初级使用
 --------
-
 
 **一个复杂一点的例子**
 
