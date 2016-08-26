@@ -2073,10 +2073,345 @@ fis.match('index.tpl:css', {
 })
 ```
 
+**配置接口**
 
+fis3通过配置来决定代码、资源该如何处理，包括配置、压缩、CDN、合并等；
 
+**配置API**
 
+```
+fis.set()
+```
+设置一些配置，如系统内置属性project、namespace、modules、settings。fis.set设置的值通过fis.get()获取
 
+语法
+```
+fis.set(key, value)
+```
+
+参数key：任意字符串，但系统占用了project、namespace、modules、settings它们在系统中有特殊含义，详见全局属性。
+
+当字符串以.分割的，.字符后的字符将会是字符前字符同名对象的健
+
+value：任意变量
+```javascript
+fis.set('namespace', 'home');
+fis.set('my project namespace', 'common');
+fis.set('a.b.c', 'some value'); // fis.get('a') => {b: {c: 'some value'}}
+```
+
+**fis.get()**
+
+获取已经配置的属性，和fis.set()成对使用
+
+语法
+```
+fis.get(key)
+```
+参数：key 任意字符串
+```javascript
+// fis.set('namespace', 'common')
+var ns = fis.get('namespace');
+// fis.set('a.b.c', 'd')
+fis.get('a'); // => {b:{c: 'd'}}
+fis.get('a.b'); // => {c:'d'}
+fis.get('a.b.c'); // => 'd'
+```
+
+**fis.match()**
+
+给匹配到的文件分配属性，文件属性决定了这个文件进行怎么样的操作；
+
+fis.match模拟一个类似css的覆盖规则，负责给文件分配规则属性，这些规则属性决定了这个文件将会被如何处理；
+
+就像css 的规则一样，后面分配到的规则会覆盖前面的；如
+```
+fis.match('{a,b}.js', {
+    release: '/static/$0'
+});
+fis.match('b.js', {
+    release: '/static/new/$0'
+});
+```
+b.js 最终分配到的规则属性是
+```
+{
+    release: '/static/new/$0'
+}
+```
+那么b.js将会产出到 /static/new 目录下；
+
+语法
+```javascript
+fis.match(selector, props[, important])
+```
+参数：selector（glob或者是任意正则）；props文件属性；important bool 设置了这个属性为true，即表示设置的规则无法被覆盖；具体行为可参考 css !important。
+```javascript
+fis.match('*.js', {
+  useHash: true,
+  release: '/static/$0'
+});
+```
+
+**fis.media()**
+
+fis.media是模仿自css的@media，表示不同的状态。这是fis3中的一个重要概念，其意味着有多份配置，每一份配置都可以让fis3进行不同的编译；
+比如开发时和上线时的配置不同，比如部署测试机时测试机器目录不同，比如测试环境和线上机器的静态资源domain不同，一切这些不同都可以设定特定的fis.media来搞定。
+语法
+```
+fis.media(mode)
+```
+参数：mode（string） mode，设定不同状态，比如 rd、qa、dev、production
+
+返回值：fis对象
+```javascript
+fis.media('dev').match('*.js', {
+    optimizer: null
+});
+fis.media('rd').match('*.js', {
+  domain: 'http://rd-host/static/cdn'
+});
+```
+
+**fis.plugin()**
+
+插件调用接口
+
+语法
+```javascript
+fis.plugin(name [, props [, position]])
+```
+属性：name插件名，插件名需要特殊说明一下，fis3固定了插件扩展点，每一个插件都有个类型，体现在插件发布的npm包名字上；比如fis-parser-less插件，parser指的是在parser扩展点做了个解析.less 的插件。
+
+那么设置插件的时候，插件名less，比如设置一个parser类型的插件是这么设置的；
+```javascript
+  fis.match('*.less', {
+      parser: fis.plugin('less', {}) //属性 parser 表示了插件的类型
+  })
+```
+props：对象，给插件设置用户属性
+```
+fis.match('*.less', {
+   parser: fis.plugin('less', {});
+});
+```
+position：设置插件位置，如果目标文件已经设置了某插件，默认再次设置会覆盖掉。如果希望在已设插件执行之前插入或者之后插入，请传入prepend或者append
+```javascript
+fis.match('*.less', {
+   parser: fis.plugin('another', null, 'append');
+});
+```
+
+配置属性
+-------
+
+**全局属性**
+
+全局属性通过fis.set设置，通过fis.get获取；
+
+**内置的默认配置**
+
+```javascript
+var DEFAULT_SETTINGS = {
+  project: {
+    charset: 'utf8',
+    md5Length: 7,
+    md5Connector: '_',
+    files: ['**'],
+    ignore: ['node_modules/**', 'output/**', '.git/**', 'fis-conf.js']
+  },
+
+  component: {
+    skipRoadmapCheck: true,
+    protocol: 'github',
+    author: 'fis-components'
+  },
+
+  modules: {
+    hook: 'components',
+    packager: 'map'
+  },
+
+  options: {}
+};
+
+```
+
+**project.charset**
+
+解释：指定项目编译后产出文件的编码。
+值类型：string
+默认值：utf8
+用法：在项目的fis-conf.js里可以覆盖为
+```
+  fis.set('project.charset', 'gbk');
+```
+使用charset编码需要使用encoding插件发布编译结果
+
+**project.md5Length**
+
+解释：文件MD5戳长度。
+值类型：number
+默认值：7
+用法：在项目的fis-conf.js里可以修改为
+```
+  fis.set('project.md5Length', 8);
+```
+
+**project.md5Connector**
+
+解释：设置md5与文件的连字符。
+值类型：string
+默认值：_
+用法：在项目的fis-conf.js里可以修改为
+```
+  fis.set('project.md5Connector ', '.');
+```
+
+**project.files**
+
+解释：设置项目源码文件过滤器。
+值类型：Array
+默认值：'**'
+用法：
+```
+  fis.set('project.files', ['*.html']);
+```
+
+**project.ignore**
+
+解释：排除某些文件
+值类型：Array
+默认值：['node_modules/**', 'output/**', 'fis-conf.js']
+用法
+```
+  fis.set('project.ignore', ['*.bak']); // set 为覆盖不是叠加
+```
+
+**project.fileType.text**
+
+解释：追加文本文件后缀列表。
+值类型：Array | string
+默认值：无
+说明：fis系统在编译时会对文本文件和图片类二进制文件做不同的处理，文件分类依据是后缀名。虽然内部已列出一些常见的文本文件后缀，但难保用户有其他的后缀文件，内部已列入文本文件后缀的列表为： [ 'css', 'tpl', 'js', 'php', 'txt', 'json', 'xml', 'htm', 'text', 'xhtml', 'html', 'md', 'conf', 'po', 'config', 'tmpl', 'coffee', 'less', 'sass', 'jsp', 'scss', 'manifest', 'bak', 'asp', 'tmp' ]，用户配置会 追加，而非覆盖内部后缀列表。
+用法：编辑项目的fis-conf.js配置文件
+```
+  fis.set('project.fileType.text', 'tpl, js, css');
+```
+
+**project.fileType.image**
+
+解释：追加图片类二进制文件后缀列表。
+值类型：Array | string
+默认值：无
+说明：fis系统在编译时会对文本文件和图片类二进制文件做不同的处理，文件分类依据是后缀名。虽然内部已列出一些常见的图片类二进制文件后缀，但难保用户有其他的后缀文件，内部已列入文本文件后缀的列表为： [ 'svg', 'tif', 'tiff', 'wbmp', 'png', 'bmp', 'fax', 'gif', 'ico', 'jfif', 'jpe', 'jpeg', 'jpg', 'woff', 'cur' ]，用户配置会追加，而非覆盖内部后缀列表。
+用法：编辑项目的fis-conf.js配置文件
+```
+  fis.set('project.fileType.image', 'swf, cur, ico');
+```
+
+**文件属性**
+
+fis3以文件属性控制文件的编译合并以及各种操作；文件属性包括基本属性和插件属性，插件属性是为了方便在不同的插件扩展点设置插件；
+
+**基本属性**
+
+release、packTo、packOrder、query、id、url、charset、isHtmlLike、isCssLike、isJsLike、useHash、domain、rExt、useMap、isMod、extras、requires、useSameNameRequire、useCache
+
+**release**
+
+解释：设置文件的产出路径。默认是文件相对项目根目录的路径，以/开头。该值可以设置为false，表示为不产出（unreleasable）文件。
+值类型：string
+默认值：无
+```javascript
+  fis.match('/widget/{*,**/*}.js', {
+      isMod: true,
+      release: '/static/$0'
+  });
+```
+
+**packTo**
+
+解释：分配到这个属性的文件将会合并到这个属性配置的文件中
+值类型：string
+默认值：无
+```javascript
+  fis.match('/widget/{*,**/*}.js', {
+      packTo: '/static/pkg_widget.js'
+  })
+```
+widget目录下的所有js文件将会被合并到/static/pkg_widget.js中。packTo设置的是源码路径，也会受到已经设置的fis.match规则的影响，比如可以配置fis.match来更改packTo的产出路径或者url；
+```javascript
+  fis.match('/static/pkg_widget.js', {
+      release: '/static/${namespace}/pkg/widget.js' // fis.set('namespace', 'home'),
+      url: '/static/new/${namespace}/pkg/widget.js'
+  })
+```
+
+**packOrder**
+
+解释：用来控制合并时的顺序，值越小越在前面。配合packTo一起使用。
+值类型：Integer
+默认值：0
+```javascript
+fis.match('/*.js', {
+  packTo: 'pkg/script.js'
+})
+fis.match('/mod.js', {
+  packOrder: -100
+})
+```
+
+**query**
+
+解释：指定文件的资源定位路径之后的query，比如'?t=123124132'。
+值类型：string
+默认值：无
+```javascript
+  fis.set('new date', Date.now());
+  fis.match('*.js', {
+      query: '?=t' + fis.get('new date')
+  });
+```
+
+**id**
+
+解释：指定文件的资源id。默认是namespace + subpath 的值
+值类型：string
+默认值：namespace + subpath
+
+如下方例子，假设 /static/lib/jquery.js 设定了特定的 id jquery, 那么在使用这个组件的时候，可以直接用这个id；
+```javascript
+  fis.match('/static/lib/jquery.js', {
+      id: 'jquery',
+      isMod: true
+  });
+```
+使用
+```javascript
+  var $ = require('jquery');
+```
+
+**moduleId**
+
+解释：指定文件资源的模块id。在插件fis3-hook-module里面自动包裹define的时候会用到，默认是id的值。
+类型：string
+默认值：namespace + subpath
+```javascript
+  fis.match('/static/lib/a.js', {
+      id: 'a',
+      moduleId: 'a'
+      isMod: true
+  });
+```
+编译前
+
+  exports.a = 10
+编译后
+
+  define('a',function(require,exports,module){
+    exports.a = 10
+  })
 
 
 **Fis3常用配置**
