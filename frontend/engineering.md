@@ -60,6 +60,11 @@
 
 [15年双11手淘前端技术巡演 - H5性能最佳实践](https://github.com/amfe/article/issues/21)
 
+腾讯系文章
+---------
+
+[移动H5前端性能优化指南](http://isux.tencent.com/h5-performance.html)
+
 资料
 ----
  
