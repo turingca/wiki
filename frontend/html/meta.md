@@ -1,7 +1,7 @@
 meta设置viewport
 ----------------
 
-```
+```html
 //一、HTML页面结构
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 // width    设置viewport宽度，为一个正整数，或字符串‘device-width’
@@ -30,7 +30,7 @@ if (/Android (\d+\.\d+)/.test(ua)){
 各类meta标签
 ------------
 
-```
+```html
 <!-- 字符集 -->
 <meta charset="UTF-8">
 
@@ -87,5 +87,13 @@ if (/Android (\d+\.\d+)/.test(ua)){
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <!-- 开发调试禁止微信缓存 end -->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+<meta name="format-detection" content="telephone=no" />
+<meta name="full-screen" content="yes">
+<meta name="x5-full-screen" content="true">
+<meta name="browsermode" content="application">
+<meta name="x5-page-mode" content="app">
 
 ```
