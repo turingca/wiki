@@ -15,6 +15,8 @@
 
 [THX](http://thx.github.io/)
 
+[支付宝移动web解决方案](http://am-team.github.io/about/about.html)
+
 
 **百度**
 
