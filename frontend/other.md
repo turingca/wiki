@@ -50,6 +50,8 @@
 
 [腾讯游戏官方设计团队](http://tgideas.qq.com/)
 
+[微信github](https://github.com/weixin)
+
 
 **奇虎**
 
