@@ -95,5 +95,9 @@ if (/Android (\d+\.\d+)/.test(ua)){
 <meta name="x5-full-screen" content="true">
 <meta name="browsermode" content="application">
 <meta name="x5-page-mode" content="app">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui" />
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
 ```
