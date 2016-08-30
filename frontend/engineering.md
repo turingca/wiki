@@ -5,7 +5,7 @@
 前端工程化
 
 
-百度系文章
+百度系
 ---------
 
 [前端工程——基础篇](https://github.com/fouber/blog/issues/10)
@@ -22,10 +22,12 @@
 
 [如何进行前端自动化测试？](https://github.com/fouber/blog/issues/7)
 
+[基于Node.js的前端代码检查工具](http://fecs.baidu.com/)
 
 
 
-阿里系文章
+
+阿里系
 ---------
 
 [阿里无线前端性能优化指南 (Pt.1 加载优化)](https://github.com/amfe/article/issues/1)
@@ -60,7 +62,7 @@
 
 [15年双11手淘前端技术巡演 - H5性能最佳实践](https://github.com/amfe/article/issues/21)
 
-腾讯系文章
+腾讯系
 ---------
 
 [移动H5前端性能优化指南](http://isux.tencent.com/h5-performance.html)
