@@ -7,7 +7,7 @@ Git有什么特点？简单来说就是：高端大气上档次！
 常用命令
 -------
 
-```
+
 操作分支
 
 git checkout <branch name> 切换分支或创建新分支
@@ -26,13 +26,17 @@ git branch -d 删除本地分支 git push origin :<branch name> 利用本地已�
 
 git push origin --delete tag <tagname> 删除标签
 
-对比代码
 
-git diff 此命令比较的是工作目录和暂存区域快照之间的差异，也就是修改之后还没有暂存起来的变化内容。
+git diff
+--------
 
+在git提交环节，存在三大部分：working-tree, index-file, commit
 
+这三大部分中：working-tree就是你所工作在的目录，每当你在代码中进行了修改，working-tree的状态就改变了。index-file是索引文件，它是连接working-tree和commit的桥梁，每当我们使用git-add命令来登记后，index-file的内容就改变了，此时index-file就和working-tree同步了。commit是最后的阶段，只有commit了，我们的代码才真正进入了git仓库。我们使用git-commit就是将index-file里的内容提交到commit中。
 
-```
+git diff：是查看working-tree与index-file的差别的。
+git diff --cached：是查看index-file与commit的差别的。
+git diff HEAD：是查看working-tree和commit的差别的。HEAD代表的是最近的一次commit的信息。
 
 Git的诞生
 --------
