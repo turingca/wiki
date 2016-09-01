@@ -1,0 +1,16 @@
+.htaccess
+---------
+
+URL重定向是.htaccess的重头戏，它可以将长地址转为短地址、将动态地址转为静态地址、重定向丢失的页面、防止盗链、实现自动语言转换等。笔者觉得难点是在正则表达式的运用和理解上。
+
+FollowSymlinks必须启用，这是rewrite引擎的安全需求。通常FollowSymlinks在Apache的主配置文件中就已经启用了，所以通常可以省略。
+RewriteEngine命令用于启用rewrite引擎。
+IfModule命令用于判断Apache是否安装了mod_rewrite模块，加上判断是个好习惯。
+
+```
+<IfModule mod_rewrite.c>
+Options +FollowSymlinks 
+RewriteEngine on
+RewriteRule  ^(.*)\.html$ $1.php [NC]
+</IfModule>
+```
