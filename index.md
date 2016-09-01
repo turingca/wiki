@@ -34,16 +34,16 @@ wiki
 
     房敬超、冯志远……   pull request得到merge，这里会留下你的名字
     
-招聘
+纳新
 -----
 
-需要很多乐于分享，热于整理的才子佳人！
-有意愿奉献请fork本项目，作者会第一时间联系你，讨论如何推进本项目
+需要更多乐于分享，热于整理的才子佳人！
+有意愿奉献请fork本项目，作者会第一时间联系你，讨论如何推进本项目！
 
-其他
+识广
 ----
 
-[WooYun知识库|最严肃的安全原创平台](http://drops.wooyun.org/)
+[WooYun知识库|最严肃的安全原创平台（休整中...）](http://drops.wooyun.org/)
 [知识库-你身边的技术百科全书-CSDN](http://lib.csdn.net/)
 [极客学院Wiki-IT技术图文教程库](http://wiki.jikexueyuan.com/)
 [AwesomeTool在线工具集合](http://www.awesometool.org/)
