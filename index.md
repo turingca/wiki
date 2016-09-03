@@ -28,11 +28,8 @@ wiki
     http://book.haoduoshipin.com/gitbeijing/
     http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/
    
-或者访问本站整理的[git教程](platform/git.md) 
+或者访问本站整理的[git教程](platform/Git.md) 
 
-先后顺序加入的贡献者
-
-    房敬超、冯志远……   pull request得到merge，这里会留下你的名字
     
 纳新
 -----
@@ -44,7 +41,7 @@ wiki
 ----
 
 [WooYun知识库|最严肃的安全原创平台（休整中...）](http://drops.wooyun.org/)
-[知识库-你身边的技术百科全书-CSDN](http://lib.csdn.net/)
+[CSDN知识库-你身边的技术百科全书-CSDN](http://lib.csdn.net/)
 [极客学院Wiki-IT技术图文教程库](http://wiki.jikexueyuan.com/)
-[AwesomeTool在线工具集合](http://www.awesometool.org/)
+[Front-End-Hand-Book](http://www.frontendhandbook.com/)
 
