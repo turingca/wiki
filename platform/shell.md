@@ -1,3 +1,4 @@
+```
 $ cp --h
 Usage: cp [OPTION]... [-T] SOURCE DEST
   or:  cp [OPTION]... SOURCE... DIRECTORY
@@ -79,3 +80,4 @@ GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
 Report cp translation bugs to <http://translationproject.org/team/>
 Full documentation at: <http://www.gnu.org/software/coreutils/cp>
 or available locally via: info '(coreutils) cp invocation'
+```
