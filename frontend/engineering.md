@@ -67,7 +67,9 @@
 
 [移动H5前端性能优化指南](http://isux.tencent.com/h5-performance.html)
 
+[一个高效、强大、跨平台的前端开发工作流工具](https://weflow.io/)
+
 资料
 ----
  
-[雅虎14条性能优化原则](https://developer.yahoo.com/performance/rules.html)
+[雅虎性能优化原则](https://developer.yahoo.com/performance/rules.html)
