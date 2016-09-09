@@ -20,7 +20,7 @@ doT.js的特点是：快、小、无任何依赖。
 * extremely fast 极快
 * custom delimiters 自定义分隔符
 * runtime evaluation 运行时
-* runtime interpolation 运行时插值
+* runtime interpolation 运行时赋值
 * compile-time evaluation 编译时
 * partials support 模块解析支持
 * partials support 条件语句支持
@@ -29,6 +29,12 @@ doT.js的特点是：快、小、无任何依赖。
 * control whitespace - strip or preserve
 * streaming friendly
 * use it as logic-less or with logic, it is up to you
+
+用法
+----
+
+interpolation 赋值
+evaluation 循环
 
 
 
