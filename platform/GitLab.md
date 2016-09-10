@@ -16,6 +16,8 @@ GitLab 是一个用于仓库管理系统的开源项目。使用Git作为代码�
 
 [Ubuntu 14.04下安装GitLab指南](http://www.open-open.com/lib/view/open1433584757328.html)
 
+[清华大学镜像](https://mirror.tuna.tsinghua.edu.cn/help/gitlab-ce/)
+
 系统环境：Ubuntn-14.04
 
 查看[下载安装](https://about.gitlab.com/downloads/)方法，选择相应的系统
