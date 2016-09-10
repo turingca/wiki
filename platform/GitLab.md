@@ -18,6 +18,10 @@ GitLab 是一个用于仓库管理系统的开源项目。使用Git作为代码�
 
 [2](http://sanwen8.cn/p/24ddwHe.html)
 
+https://www.douban.com/note/573320056/
+
+http://www.linuxdiyf.com/linux/19023.html
+
 [清华大学镜像](https://mirror.tuna.tsinghua.edu.cn/help/gitlab-ce/)
 
 系统环境：Ubuntn-14.04
@@ -30,3 +34,5 @@ GitLab 是一个用于仓库管理系统的开源项目。使用Git作为代码�
 http://packages.ubuntu.com/
 
 [postfix的基础介绍和新手指南](http://wiki.ubuntu.org.cn/UbuntuHelp:PostfixBasicSetupHowto/zh)
+
+账号：root 密码：初始会修改
