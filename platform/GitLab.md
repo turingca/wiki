@@ -10,15 +10,9 @@ GitLab 是一个用于仓库管理系统的开源项目。使用Git作为代码�
 安装
 ----
 
-Ubuntu/Debian（推荐这2个系统，也可以安装到CentOS系统中，并且在GitHub上有CentOS的GitLab一键安装脚本）
+[Ubuntu中文wiki](http://wiki.ubuntu.org.cn/)
 
-ruby 1.9.3+
-MySQL
-git
-gitolite
-redis
-
-安装方法：参考GitLab在GitHub上的Wiki页面。
+[GitLab官网安装指南](https://about.gitlab.com/downloads/)
 
 [Ubuntu 14.04下安装GitLab指南](http://www.open-open.com/lib/view/open1433584757328.html)
 
@@ -30,3 +24,5 @@ redis
 
 不知道的包名在这里搜索查看
 http://packages.ubuntu.com/
+
+[postfix的基础介绍和新手指南](http://wiki.ubuntu.org.cn/UbuntuHelp:PostfixBasicSetupHowto/zh)
