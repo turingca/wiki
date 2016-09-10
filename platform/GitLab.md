@@ -22,6 +22,10 @@ https://www.douban.com/note/573320056/
 
 http://www.linuxdiyf.com/linux/19023.html
 
+http://www.linuxidc.com/Linux/2015-12/126876.htm
+
+https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/maintenance/README.md
+
 [清华大学镜像](https://mirror.tuna.tsinghua.edu.cn/help/gitlab-ce/)
 
 系统环境：Ubuntn-14.04
