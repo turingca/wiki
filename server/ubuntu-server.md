@@ -116,10 +116,12 @@ LAMP环境配置-Apache
 
 Apache加载配置时会首先加载apache.conf文件（配置文件的入口）apache.conf文件以include关键字将其他配置文件包含在其中，这有助于修改配置，按照一定的属性分开放置，配置灵活。
 
-核心配置：
+Apache核心配置：
 
 mods-*** 存放Apache模块配置文件
+
 sites-*** 存放虚拟主机的配置文件
+
 关键词available表示可以使用；enabled表示已启用的
 
 enabled通过ln -s命令建立available的软连接
@@ -129,6 +131,12 @@ Apache会在加载配置过程中将所有软连接一次性全部加载，以�
 MySQL核心配置文件：my.cnf
 
 PHP核心配置文件：php.ini
+
+Apache虚拟主机（Virtual-Host）原理
+
+在Apache中配置虚拟主机
+
+sudo service apache restart 完成配置后重启apache
 
 LNMP
 -----
