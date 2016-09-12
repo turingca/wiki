@@ -38,34 +38,45 @@ LAMP工作原理:
 Ubuntu管理员权限解读：
 
 为了安全，Ubuntu官方不推荐使用root账户远程登陆，在系统安装过程中，系统会强制要求设置一个普通用户。
+
 普通账户没有管理员权限。
+
 默认情况下root账户无法登陆，默认密码为空，为空不能登陆。
+
 su（Switch User）切换到超级管理员，当前用户身份完全切换到root账户，使用root账户密码登录，除非执行exit退出登录，否则超级权限将一直有效。
+
 sudo（Switch User and DO）以超级管理员身份执行，当前用户身份没有改变，使用自身密码获取授权，超级权限是临时的。
+
 sudo弥补了su产生的多账户安全问题，使用su命令所有管理员都必须知道root账户的密码，sudo使得普通管理员使用自己的密码也可以获得超级管理员权限。
 
 命令行：用户名@主机名:当前目录 用户类型标记，$表示普通用户，#表示超级管理员
 
 通过passwd命令修改账户密码：sudo passwd root。
+
 Passwd命令必须拥有系统超级权限才可以执行，所以当使用非root账户登录系统时执行passwd命令必须在命令前加上sudo前缀，使用root账户登陆服务器时已经拥有了超级权限，执行passwd命令时无需加sudo前缀。
 
 apt-get 安装软件
 
 apt-get update 更新软件源列表
+
 apt-get install 安装软件
 
 apt-get install apache2 
+
 apache2 -v
 
 apt-get install php5
+
 php5 -v
 
 cat /etc/apache2/mods-enabled/php5.load
+
 出现LoadModule php5_module /usr/lib/apache2/modules/libphp5.so 说明libphp5模块已经被apache加载了
 
 apt-get install mysql-server
 
 cat /etc/php5/conf.d/mysql.ini
+
 cat: /etc/php5/conf.d/mysql.ini: No such file or directory   php安装过程中默认不安装mysql扩展
 
 apt-get install php5-mysql 安装php的mysql扩展
@@ -79,7 +90,8 @@ service mysql restart  重启mysql
 cd /var/www  apache默认根目录
 
 vim info.php 写入如下检测内容
-```
+
+```php
 <?php
 header('Content-type:text/html;charset=utf-8');
 echo mysql_connect('localhost','root','123456')?'数据库连接成功':'数据库连接失败';
@@ -89,6 +101,34 @@ phpinfo();
 给php添加常用扩展：
 
 apt-get install php5-gd curl libcurl4-openssl-dev php5-curl
+
+LAMP环境文件目录
+
+通过apt-get工具安装的软件配置文件均放置在/etc下，并为每个软件建立一个以软件名称为名的文件夹用于区分不同软件的配置文件。
+
+ubuntu通过apt-get安装的目录的配置文件一般都在/etc文件下
+
+系统配置文件目录：/etc
+
+各个组件配置文件目录：Apache——/etc/apache2;MySQL——/etc/mysql;
+
+LAMP环境配置-Apache
+
+Apache加载配置时会首先加载apache.conf文件（配置文件的入口）apache.conf文件以include关键字将其他配置文件包含在其中，这有助于修改配置，按照一定的属性分开放置，配置灵活。
+
+核心配置：
+
+mods-*** 存放Apache模块配置文件
+sites-*** 存放虚拟主机的配置文件
+关键词available表示可以使用；enabled表示已启用的
+
+enabled通过ln -s命令建立available的软连接
+
+Apache会在加载配置过程中将所有软连接一次性全部加载，以方便软连接误删时再次建立软连接启动模块
+
+MySQL核心配置文件：my.cnf
+
+PHP核心配置文件：php.ini
 
 LNMP
 -----
