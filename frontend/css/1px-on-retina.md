@@ -7,6 +7,8 @@ http://jinlong.github.io/2015/05/24/css-retina-hairlines/
 
 http://www.ghugo.com/css-retina-hairline/
 
+http://w3ctrain.com/2016/08/09/absolute-1px/?utm_source=tuicool&utm_medium=referral
+
 原文地址有删改： http://efe.baidu.com/blog/1px-on-retina/
 
 一直以来我们实现边框的方法都是设置
