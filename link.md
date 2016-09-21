@@ -25,3 +25,5 @@ Z
 ----
 
 [w3ctrian前端收藏夹](http://collect.w3ctrain.com/)
+
+[swiper](http://idangero.us/swiper/#.V-JbnfmF7IU)
