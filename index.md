@@ -1,61 +1,53 @@
 wiki
-=====
+====
 
-Thanks for mdwiki!
+理念
+----
 
-项目宗旨
-----------
+不完美中奔跑，拥抱变化，持续学习
 
-1.在不完美中奔跑，年轻就不轻言放弃
-2.拥抱变化，培养编程思想，不变应万变
-3.持续学习，你的修养决定你的高度
+务实、正直、专注、坚持
 
-维护方
-----------
+维护
+----
 
-图灵电脑协会，济南大学优秀社团，致力于大学生技能的学习与拓展。
-
+图灵电脑协会，致力于丰富大学生IT技能的学习与拓展。
+```
     http://www.turingca.com
+```
 
+贡献
+-----
 
-加入贡献
-----------
-
-访问我们在Github上的项目地址参与贡献我们的知识库
-
+在Github上的项目地址贡献我们的知识库
+```
     http://github.com/turingca/wiki
-    
-还不知道怎么使用github？访问下面链接，开始你的fork之旅
-
+```    
+Github？？？访问下面链接，开始你的Git之旅
+```
     http://book.haoduoshipin.com/gitbeijing/
+    http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/
+```   
+或者访问本站整理的[Git教程](platform/Git.md) 
 
-先后顺序加入的贡献者
-
-    房敬超、某某、某某某……
     
-操作规范
-----------
+纳新
+-----
 
-待定
+第一作者属于PHP中偏前端的，所以还有许多未知需要整理和维护！
+需要更多乐于分享，热于整理的才子佳人！
+有意愿奉献请Fork本项目，作者会第一时间联系你，讨论如何推进本项目！
 
-实践中的博客
-------------
+识广
+----
 
-F
-[冯志远](http://vvwall.com)
-[冯少华](http://www.sharefood.space)
-[房敬超](http://jingchaofang.com)
-G
-[管宜尧](http://aicode.cc) 
-J
-[纪笑难](http://isunday.top/)
-L
-[刘子钊](http://lzzone.top/)
-[李宇阳](http://memeda.link/)
-[赖敏材](https://morningsky.github.io/)
-S
-[孙梦茹](http://sevenskey.sinaapp.com/)
-Y
-[于晓杰的博客](http://blog.csdn.net/shield_sky)
-Z
-[赵方舟](http://www.csharpstudy.cn/)
+该翻墙翻墙哈，排名不分先后，都是值得推荐的！
+
+[WooYun知识库|最严肃的安全原创平台（休整中...）](http://drops.wooyun.org/)
+[CSDN知识库-你身边的技术百科全书-CSDN](http://lib.csdn.net/)
+[极客学院Wiki-IT技术图文教程库](http://wiki.jikexueyuan.com/)
+[Front-End-Hand-Book](http://www.frontendhandbook.com/)
+[PHP-The-Right-Way](http://www.phptherightway.com/)
+[菜鸟教程-学的不仅是技术，更是梦想！](http://www.runoob.com/)
+[DevDocs API Documentation](http://devdocs.io/)
+
