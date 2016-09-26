@@ -31,3 +31,25 @@ Z
 [swiper](http://idangero.us/swiper/#.V-JbnfmF7IU)
 
 [css-tricks](https://css-tricks.com/)
+
+[张鑫旭](http://www.zhangxinxu.com/)
+
+[掘金](http://gold.xitu.io)
+
+[div.io](http://div.io/)
+
+[w3cplus](http://w3cplus.com)
+
+[w3cfuns](http://www.w3cfuns.com/)
+
+[segmentfault](https://segmentfault.com/)
+
+[阮一峰](http://www.ruanyifeng.com/blog/)
+
+[iinterest](http://www.iinterest.net/)
+
+[stackoverflow](http://stackoverflow.com/)
+
+[GIT](https://git-scm.com/)
+
+[SublimeText3](https://www.sublimetext.com/)
