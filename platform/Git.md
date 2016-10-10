@@ -7,24 +7,16 @@ Git有什么特点？简单来说就是：高端大气上档次！
 常用命令
 -------
 
-
-操作分支
-
-git checkout <branch name> 切换分支或创建新分支
-
-git checkout <file> 将工作区未add的修改内容丢弃
-
-git chekout -b <branch name> 创建一个新分支 等同于git branch <branch name>   git checkout <branch name> 两步走
-
-git pull 拉取
-
-git push 推送
-
-git branch -d 删除本地分支 git push origin :<branch name> 利用本地已删除的空分支删除远程分支，git版本大于1.7后可以直接使用git push origin --delete <branch name> 
-
-操作标签
-
-git push origin --delete tag <tagname> 删除标签
+|命令|说明|
+|:---|---|
+|git checkout ```<branch name>```|切换分支或创建新分支|
+|git checkout ```<file>```|将工作区未add的修改内容丢弃|
+|git chekout -b ```<branch name>```|创建并切换到新分支，等同于先 git branch ```<branch name>``` 然后 git checkout ```<branch name>```两步走|
+|git pull|拉取|
+|git push|推送|
+|git branch -d  ```<branch name>```| 删除本地分支| 
+|git branch -d ```<branch name>``` git push origin ```<branch name>```|利用本地已删除的空分支删除远程分支，git版本大于1.7后可以直接使用git push origin --delete ```<branch name>``` |
+|git push origin --delete tag ```<tagname>``` |删除标签|
 
 
 git diff
