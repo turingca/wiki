@@ -55,3 +55,7 @@ Z
 [SublimeText3](https://www.sublimetext.com/)
 
 [123.jser.us](http://123.jser.us/)
+
+[阮一峰JavaScript](http://javascript.ruanyifeng.com/)
+
+[廖雪峰](http://www.liaoxuefeng.com/)
