@@ -11,6 +11,8 @@ http://avnpc.com/pages/install-lnmp-on-osx
 
 http://www.tuicool.com/articles/2yM7Z3
 
+https://github.com/Homebrew/homebrew-php
+
 文档
 ----
 
