@@ -3,6 +3,14 @@
 
 [http://brew.sh/](http://brew.sh/)
 
+http://blog.csdn.net/beyond__devil/article/details/52649362
+
+http://blog.csdn.net/iamduoluo/article/details/38346291
+
+http://avnpc.com/pages/install-lnmp-on-osx
+
+http://www.tuicool.com/articles/2yM7Z3
+
 文档
 ----
 
