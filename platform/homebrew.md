@@ -7,7 +7,8 @@
 ----
 
 NAME
-       brew - The missing package manager for OS X
+       brew - The missing package manager for OS X 
+       brew - macOS 不可或缺的套件管理器
 
 SYNOPSIS
        brew --version
