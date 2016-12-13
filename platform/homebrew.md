@@ -13,6 +13,63 @@ http://www.tuicool.com/articles/2yM7Z3
 
 https://github.com/Homebrew/homebrew-php
 
+brew options php56
+------------------
+
+➜  ~ brew options php56
+--with-cgi
+	Enable building of the CGI executable (implies --without-fpm)
+--with-debug
+	Compile with debugging symbols
+--with-enchant
+	Build with enchant support
+--with-gmp
+	Build with gmp support
+--with-homebrew-curl
+	Include Curl support via Homebrew
+--with-homebrew-libressl
+	Include LibreSSL instead of OpenSSL via Homebrew
+--with-homebrew-libxml2
+	Include Libxml2 support via Homebrew
+--with-homebrew-libxslt
+	Include LibXSLT support via Homebrew
+--with-httpd22
+	Enable building of shared Apache 2.2 Handler module
+--with-httpd24
+	Enable building of shared Apache 2.4 Handler module
+--with-imap
+	Include IMAP extension
+--with-libmysql
+	Include (old-style) libmysql support instead of mysqlnd
+--with-mssql
+	Include MSSQL-DB support
+--with-pdo-oci
+	Include Oracle databases (requries ORACLE_HOME be set)
+--with-pear
+	Build with PEAR
+--with-phpdbg
+	Enable building of the phpdbg SAPI executable
+--with-postgresql
+	Build with postgresql support
+--with-thread-safety
+	Build with thread safety
+--without-bz2
+	Build without bz2 support
+--without-fpm
+	Disable building of the fpm SAPI executable
+--without-ldap
+	Build without LDAP support
+--without-legacy-mysql
+	Do not include the deprecated mysql_ functions
+--without-mysql
+	Remove MySQL/MariaDB support
+--without-pcntl
+	Build without Process Control support
+--without-unixodbc
+	Build without unixODBC support
+--HEAD
+	Install HEAD version
+
 文档
 ----
 
