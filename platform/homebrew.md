@@ -15,8 +15,6 @@ https://github.com/Homebrew/homebrew-php
 
 brew options php56
 ------------------
-
-➜  ~ brew options php56
 --with-cgi
 	Enable building of the CGI executable (implies --without-fpm)
 --with-debug
@@ -69,6 +67,7 @@ brew options php56
 	Build without unixODBC support
 --HEAD
 	Install HEAD version
+
 
 文档
 ----
