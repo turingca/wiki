@@ -10,8 +10,6 @@ touchstart和click的触发条件就有区别，对于手持设备的浏览器�
 
 preventDefault()方法，可以阻止后面事件的触发，如在touch事件中即可阻止click和scroll事件。
 
-
-
 #触摸事件
 
 [触摸事件](https://developer.mozilla.org/zh-CN/docs/Web/API/Touch_events)
