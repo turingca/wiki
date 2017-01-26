@@ -79,6 +79,8 @@
 
 [凹凸实验室](https://aotu.io/ )(Aotu.io，英文简称O2)始建于2015年10月，是一个年轻基情的技术团队。O2面向多终端技术体系，致力于构建沉淀与分享包括但不限于交互、页面制作技巧、前端开发、原生APP开发等方面的专业知识及案例。
 
+[o2team github](https://github.com/o2team)
+
 **饿了么**
 
 [ElemeFE](https://github.com/ElemeFE)
