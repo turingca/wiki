@@ -52,6 +52,8 @@
 
 [微信](https://github.com/weixin)
 
+[WechatFE](https://github.com/WechatFE)
+
 [TMT](https://github.com/TmT)
 
 
