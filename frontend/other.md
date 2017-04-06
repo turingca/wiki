@@ -17,6 +17,9 @@
 
 [支付宝移动web解决方案](http://am-team.github.io/about/about.html)
 
+[钉钉前端](https://github.com/dingtalkFE)
+
+[天猫前端团队](https://github.com/tmallfe)
 
 **百度**
 
@@ -88,6 +91,10 @@
 [饿了么大前端](https://fe.ele.me/)
 
 [ElemeFE](https://github.com/ElemeFE)
+
+**我趣旅行**
+
+[WQTeam](https://github.com/WQTeam)
 
 工具
 -------
