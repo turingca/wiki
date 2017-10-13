@@ -33,6 +33,8 @@
 
 [百度搜素用户体验中心](http://sux.baidu.com/#/home)
 
+[百度企业产品前端研发团队](https://github.com/be-fe)
+
 **腾讯**
 
 [腾讯Web前端团队](http://www.alloyteam.com)

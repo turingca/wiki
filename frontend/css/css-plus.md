@@ -1,15 +1,24 @@
+
+http://efe.baidu.com/blog/revisiting-css-preprocessors/
+
 less
 ----
 
-官网 http://lesscss.org/  Github https://github.com/less/less.js
+http://lesscss.org/
 
-中文指南 http://less.bootcss.com/
+https://github.com/less/less.js
+
+http://less.bootcss.com/
 
 https://github.com/weixin/mixins.less/blob/master/mixins-mobile.less#L393
 
 scss
 -----
 
+stylus
+------
 
-后处理
--------
+http://stylus-lang.com/
+
+https://github.com/stylus/stylus/
+
