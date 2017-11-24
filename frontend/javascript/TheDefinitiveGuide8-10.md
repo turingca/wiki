@@ -2936,6 +2936,8 @@ Object.freeze(enumeration);
 这个例子中另外一个有趣之处在于，使用Object.create()创建对象时传入了参数null，这个创建的对象没有任何继承任何成员。这个对象用来存储集合的成员，同时，这个对象没有原型，这样我们就能对它直接使用in运算符，而不须使用hasOwnPropery()方法。
 
 例9-22：StringSet：利用ECMAScript5的特性定义的子类
+
+```javascript
 function StringSet() {
     this.set = Object.create(null); //创建一个不包含原型的对象
     this.n = o;
@@ -2972,6 +2974,7 @@ StringSet.prototype = Object.create(AbstractWritableSet.prototype,{
         }
     }
 });
+```
 
 **9.8.6属性描述符**
 
