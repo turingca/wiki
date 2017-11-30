@@ -3,6 +3,8 @@
 
 [官网](http://olado.github.io/doT/index.html)
 
+[doT](http://olado.github.io/doT/)
+
 [Github](https://github.com/olado/doT)
 
 [中国爱好者](http://dotjs.cn/)
