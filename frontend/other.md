@@ -31,7 +31,9 @@
 
 [百度H5页面制作工具](http://h5.baidu.com/)
 
-[百度搜素用户体验中心](http://sux.baidu.com/#/home)
+[百度搜索用户体验中心](http://sux.baidu.com/#/home)
+
+[百度静态资源公共库](http://cdn.code.baidu.com/)
 
 **腾讯**
 
