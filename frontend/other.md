@@ -35,7 +35,9 @@
 
 [百度H5页面制作工具](http://h5.baidu.com/)
 
-[百度搜素用户体验中心](http://sux.baidu.com/#/home)
+[百度搜索用户体验中心](http://sux.baidu.com/#/home)
+
+[百度静态资源公共库](http://cdn.code.baidu.com/)
 
 [百度企业产品前端研发团队](https://github.com/be-fe)
 
