@@ -5,6 +5,10 @@
 
 [前端主管如何带队](other/Old-Driver-Said-1.md)
 
+[Crockford](http://crockford.com/)
+
+[John Resig](https://johnresig.com/)
+
 **阿里**
 
 [阿里巴巴国际UED团队](http://www.aliued.com/)
@@ -143,3 +147,16 @@
 [书籍](interview/Book.md)
 
 [技能树](interview/SkillTree.md)
+
+翻译
+----
+
+[众成翻译](http://www.zcfy.cc/translate/discovery)
+
+[掘金翻译计划](https://juejin.im/tag/%E6%8E%98%E9%87%91%E7%BF%BB%E8%AF%91%E8%AE%A1%E5%88%92)
+
+[掘金翻译计划Github](https://github.com/xitu/gold-miner)
+
+[伯乐翻译组](http://group.jobbole.com/category/feedback/trans-team/)
+
+[Infoq](http://www.infoq.com/cn/)
