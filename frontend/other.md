@@ -43,6 +43,8 @@
 
 **腾讯**
 
+[Tencent](https://github.com/Tencent)
+
 [腾讯Web前端团队](http://www.alloyteam.com)
 
 [腾讯Web前端团队作品](http://alloyteam.github.io)
