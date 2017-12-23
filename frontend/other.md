@@ -9,6 +9,12 @@
 
 [John Resig](https://johnresig.com/)
 
+**Google**
+
+[Google Github](https://github.com/google)
+
+[Google Codelabs](https://github.com/googlecodelabs)
+
 **阿里**
 
 [阿里巴巴国际UED团队](http://www.aliued.com/)
