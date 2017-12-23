@@ -114,9 +114,9 @@
 
 [WQTeam](https://github.com/WQTeam)
 
-**teambition**
+**Teambition**
 
-[teambition]https://github.com/teambition
+[Teambition Github](https://github.com/teambition)
 
 工具
 -------
