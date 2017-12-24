@@ -72,6 +72,12 @@
 
 [360奇舞团](http://www.75team.com/)
 
+**滴滴**
+
+[DDFE](https://github.com/DDFE)
+
+[didi](https://github.com/didi)
+
 **新浪**
 
 [新浪UED](http://ued.sina.com/)
