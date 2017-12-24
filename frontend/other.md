@@ -9,6 +9,12 @@
 
 [John Resig](https://johnresig.com/)
 
+**Google**
+
+[Google Github](https://github.com/google)
+
+[Google Codelabs](https://github.com/googlecodelabs)
+
 **阿里**
 
 [阿里巴巴国际UED团队](http://www.aliued.com/)
@@ -42,6 +48,8 @@
 [百度企业产品前端研发团队](https://github.com/be-fe)
 
 **腾讯**
+
+[Tencent](https://github.com/Tencent)
 
 [腾讯Web前端团队](http://www.alloyteam.com)
 
@@ -111,6 +119,10 @@
 **我趣旅行**
 
 [WQTeam](https://github.com/WQTeam)
+
+**Teambition**
+
+[Teambition Github](https://github.com/teambition)
 
 工具
 -------
