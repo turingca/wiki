@@ -19,6 +19,10 @@
 
 [eBay](https://github.com/eBay)
 
+**Samsung**
+
+[Samsung](https://github.com/Samsung)
+
 **阿里**
 
 [阿里巴巴国际UED团队](http://www.aliued.com/)
@@ -79,10 +83,15 @@
 
 [TMT](https://github.com/TmT)
 
-
 **奇虎**
 
 [360奇舞团](http://www.75team.com/)
+
+**滴滴**
+
+[DDFE](https://github.com/DDFE)
+
+[didi](https://github.com/didi)
 
 **新浪**
 
