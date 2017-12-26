@@ -49,9 +49,10 @@ Github？？？访问下面链接，开始你的Git之旅
 需要更多乐于分享，热于整理的才子佳人！
 有意愿奉献请Fork本项目，作者会第一时间联系你，讨论如何推进本项目！
 
-识广
+链接
 ----
 
+[w3c](https://www.w3.org/)
 [https://developers.google.com/web/](https://developers.google.com/web/)
 [https://developer.apple.com/](https://developer.apple.com/)
 [https://www.ibm.com/developerworks/cn/web/](https://www.ibm.com/developerworks/cn/web/)
