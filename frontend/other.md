@@ -133,6 +133,12 @@
 
 [Teambition Github](https://github.com/teambition)
 
+**美团点评**
+
+[meituan-dianping](https://github.com/meituan-dianping)
+
+[tech.meituan.com](https://tech.meituan.com/)
+
 工具
 -------
 
