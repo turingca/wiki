@@ -227,11 +227,277 @@
 第22章 高级技巧
 ---------------
 
+本章内容
+- 使用高级函数
+- 防篡改对象
+- Yielding Timers
+
+JavaScript是一种极其灵活的语言，具有多种使用风格。一般来说，编写JavaScript要么使用过程方式，要么使用面向对象方式。然而，由于它天生的动态属性，这种语言还能使用更为复杂和有趣的模式。这些技巧要利用ECMAScript的语言特点、BOM扩展和DOM功能来获得强大的效果。
+
 **22.1 高级函数**
+
+函数是JavaScript中最有趣的部分之一。它们本质上是十分简单和过程化的，但也可以是非常复杂和动态的。一些额外的功能可以通过使用闭包来实现。此外，由于所有的函数都是对象，所以使用函数指针非常简单。这些令JavaScript函数不仅有趣而且强大。以下几节描绘了几种在JavaScript中使用函数的高级方法。
+
 **22.1.1 安全的类型检测**
+
+JavaScript内置的类型检测机制并非完全可靠。事实上，发生错误否定及错误肯定的情况也不在少数。比如说typeof操作符吧，由于它有一些无法预知的行为，经常会导致检测数据类型时得到不靠谱的结果。Safari（直至第4版）在对正则表达式应用typeof操作符时会返回"function"，因此很难确定某个值到底是不是函数。
+
+再比如，instanceof操作符在存在多个全局作用域（像一个页面包含多个frame）的情况下，也是问题多多。一个经典的例子（第5章也提到过）就是像下面这样将对象标识为数组。
+```
+var isArray = value instanceof Array;
+```
+以上代码要返回true，value必须是一个数组，而且还必须与Array构造函数在同个全局作用域中。（别忘了，Array是window的属性。）如果value是在另个frame中定义的数组，那么以上代码就会返回false。
+
+在检测某个对象到底是原生对象还是开发人员自定义的对象的时候，也会有问题。出现这个问题的原因是浏览器开始原生支持JSON对象了。因为很多人一直在使用Douglas Crockford的JSON库，而该库定义了一个全局JSON对象。于是开发人员很难确定页面中的JSON对象到底是不是原生的。
+
+解决上述问题的办法都一样。大家知道，在任何值上调用Object原生的toString()方法，都会返回一个[object NativeConstructorName]格式的字符串。每个类在内部都有一个`[[Class]]`属性，这个属性中就指定了上述字符串中的构造函数名。举个例子吧。
+```
+alert(Object.prototype.toString.call(value));    //"[object Array]" 
+```
+由于原生数组的构造函数名与全局作用域无关，因此使用toString()就能保证返回一致的值。利用这一点，可以创建如下函数：
+```
+function isArray(value) {
+    return Object.prototype.toString.call(value) == "[object Array]"; 
+}
+```
+
+同样，也可以基于这一思路来测试某个值是不是原生函数或正则表达式：
+```
+function isFunction(value) {
+    return Object.prototype.toString.call(value) == "[object Function]"; 
+}
+function isRegExp(value) {
+    return Object.prototype.toString.call(value) == "[object RegExp]";
+}
+```
+
+不过要注意，对于在IE中以COM对象形式实现的任何函数，isFunction()都将返回false（因为它们并非原生的JavaScript函数，请参考第10章中更详细的介绍）。
+
+这一技巧也广泛应用于检测原生JSON对象。Object的toString()方法不能检测非原生构造函数的构造函数名。因此，开发人员定义的任何构造函数都将返回`[object  Object]`。有些JavaScript库会包含与下面类似的代码。
+```
+var isNativeJSON = window.JSON && Object.prototype.toString.call(JSON) == "[object JSON]";
+```
+
+在Web开发中能够区分原生与非原生JavaScript对象非常重要。只有这样才能确切知道某个对象到底有哪些功能。这个技巧可以对任何对象给出正确的结论。
+
+请注意，Object.prototpye.toString()本身也可能会被修改。本节讨论的技巧假设Object.prototpye.toString()是未被修改过的原生版本。
+
 **22.1.2 作用域安全的构造函数**
+
+第6章讲述了用于自定义对象的构造函数的定义和用法。你应该还记得，构造函数其实就是一个使用new操作符调用的函数。当使用new调用时，构造函数内用到的this对象会指向新创建的对象实例，如下面的例子所示：
+```
+function Person(name, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+}
+var person = new Person("Nicholas", 29, "Software Engineer");
+```
+
+上面这个例子中，Person构造函数使用this对象给三个属性赋值：name、age和job。当和new操作符连用时，则会创建一个新的Person对象，同时会给它分配这些属性。问题出在当没有使用new操作符来调用该构造函数的情况上。由于该this对象是在运行时绑定的，所以直接调用Person()，this会映射到全局对象window上，导致错误对象属性的意外增加。例如：
+```
+var person = Person("Nicholas", 29, "Software Engineer");
+alert(window.name);  //"Nicholas"
+alert(window.age);   //29
+alert(window.job);   //"Software Engineer"
+```
+
+这里，原本针对Person实例的三个属性被加到window对象上，因为构造函数是作为普通函数调用的，忽略了new操作符。这个问题是由this对象的晚绑定造成的，在这里this被解析成了window对象。由于window的name属性是用于识别链接目标和frame的，所以这里对该属性的偶然覆盖可能会导致该页面上出现其他错误。这个问题的解决方法就是创建一个作用域安全的构造函数。作用域安全的构造函数在进行任何更改前，首先确认this对象是正确类型的实例。如果不是，那么会创建新的实例并返回。请看以下例子：
+```
+function Person(name, age, job) {
+    if (this instanceof Person) {
+        this.name = name;
+        this.age = age;
+        this.job = job;
+    } else { 
+        return new Person(name, age, job);
+    }
+}
+var person1 = Person("Nicholas", 29, "Software Engineer");
+alert(window.name); //""
+alert(person1.name);//"Nicholas"
+var person2 = new Person("Shelby", 34, "Ergonomist");
+alert(person2.name);//"Shelby"
+```
+
+这段代码中的Person构造函数添加了一个检查并确保this对象是Person实例的if语句，它表示要么使用new操作符，要么在现有的Person实例环境中调用构造函数。任何一种情况下，对象初始化都能正常进行。如果this并非Person的实例，那么会再次使用new操作符调用构造函数并返回结果。最后的结果是，调用Person构造函数时无论是否使用new操作符，都会返回一个Person的新实例，这就避免了在全局对象上意外设置属性。
+
+关于作用域安全的构造函数的贴心提示。实现这个模式后，你就锁定了可以调用构造函数的环境。如果你使用构造函数窃取模式的继承且不使用原型链，那么这个继承很可能被破坏。这里有个例子：
+```
+function Polygon(sides) {
+    if (this instanceof Polygon) {
+        this.sides = sides;
+        this.getArea = function() {
+            return 0;
+        };
+    } else {
+        return new Polygon(sides);
+    }
+}
+function Rectangle(width, height) {
+    Polygon.call(this, 2);
+    this.width = width;
+    this.height = height;
+    this.getArea = function() {
+        return this.width * this.height;
+    };
+}
+var rect = new Rectangle(5, 10);
+alert(rect.sides); //undefined
+```
+
+在这段代码中，Polygon构造函数是作用域安全的，然而Rectangle构造函数则不是。新创建一个Rectangle实例之后，这个实例应该通过Polygon.call()来继承Polygon的sides属性。但是，由于Polygon构造函数是作用域安全的，this对象并非Polygon的实例，所以会创建并返回一个新的Polygon对象。Rectangle构造函数中的this对象并没有得到增长，同时Polygon.call()返回的值也没有用到，所以Rectangle实例中就不会有sides属性。如果构造函数窃取结合使用原型链或者寄生组合则可以解决这个问题。考虑以下例子：
+```
+function Polygon(sides) {
+    if (this instanceof Polygon) {
+        this.sides = sides;
+        this.getArea = function() {
+            return 0;
+        };
+    } else {
+        return new Polygon(sides);
+    }
+}
+function Rectangle(width, height) {
+    Polygon.call(this, 2);
+    this.width = width;
+    this.height = height;
+    this.getArea = function() {
+        return this.width * this.height;
+    };
+}
+Rectangle.prototype = new Polygon();
+var rect = new Rectangle(5, 10);
+alert(rect.sides); //2
+```
+
+上面这段重写的代码中，一个Rectangle实例也同时是一个Polygon实例，所以Polygon.call()会照原意执行，最终为Rectangle实例添加了sides属性。多个程序员在同一个页面上写JavaScript代码的环境中，作用域安全构造函数就很有用了。届时，对全局对象意外的更改可能会导致一些常常难以追踪的错误。除非你单纯基于构造函数窃取来实现继承，推荐作用域安全的构造函数作为最佳实践。
+
 **22.1.3 惰性载入函数**
+
+因为浏览器之间行为的差异，多数JavaScript代码包含了大量的if语句，将执行引导到正确的代码中。看看下面来自上一章的createXHR()函数。
+```
+function createXHR() {
+    if (typeof XMLHttpRequest != "undefined") {
+        return new XMLHttpRequest();
+    } else if (typeof ActiveXObject != "undefined") {
+        if (typeof arguments.callee.activeXString != "string") {
+            var versions = ["MSXML2.XMLHttp.6.0",
+                           "MSXML2.XMLHttp.3.0",                             "MSXML2.XMLHttp"],
+                           i,
+                           len;
+            for (i=0, len=versions.length; i < len; i++) {
+                try {
+                    new ActiveXObject(versions[i]);
+                    arguments.callee.activeXString = versions[i];
+                    break;
+                } catch (ex) {
+                    //跳过
+                }
+            }
+        }
+        return new ActiveXObject(arguments.callee.activeXString);
+    } else {
+        throw new Error("No XHR object available.");
+    }
+}
+```
+
+每次调用createXHR()的时候，它都要对浏览器所支持的能力仔细检查。首先检查内置的XHR，然后测试有没有基于ActiveX的XHR，最后如果都没有发现的话就抛出一个错误。每次调用该函数都是这样，即使每次调用时分支的结果都不变：如果浏览器支持内置XHR，那么它就一直支持了，那么这种测试就变得没必要了。即使只有一个if语句的代码，也肯定要比没有if语句的慢，所以如果if语句不必每次执行，那么代码可以运行地更快一些。解决方案就是称之为惰性载入的技巧。惰性载入表示函数执行的分支仅会发生一次。有两种实现惰性载入的方式，第一种就是在函数被调用时再处理函数。在第一次调用的过程中，该函数会被覆盖为另外一个按合适方式执行的函数，这样任何对原函数的调用都不用再经过执行的分支了。例如，可以用下面的方式使用惰性载入重写createXHR()。
+
+```
+function createXHR(){
+    if (typeof XMLHttpRequest != "undefined") {
+        createXHR = function(){
+            return new XMLHttpRequest();
+        };
+    } else if (typeof ActiveXObject != "undefined") {
+        createXHR = function() {
+            if (typeof arguments.callee.activeXString != "string") {
+                var versions = ["MSXML2.XMLHttp.6.0",
+                "MSXML2.XMLHttp.3.0",
+                "MSXML2.XMLHttp"],
+                i,
+                len;
+                for (i=0, len=versions.length; i < len; i++) {
+                    try {
+                        new ActiveXObject(versions[i]);    arguments.callee.activeXString = versions[i];
+                        break;
+                    } catch (ex){
+                        //skip
+                    }
+                }
+            }
+            return new ActiveXObject(arguments.callee.activeXString);
+        };
+    } else {
+        createXHR = function() {
+            throw new Error("No XHR object available.");
+        };
+    }
+    return createXHR();
+}
+```
+
+在这个惰性载入的createXHR()中，if语句的每一个分支都会为createXHR变量赋值，有效覆盖了原有的函数。最后一步便是调用新赋的函数。下一次调用createXHR()的时候，就会直接调用被分配的函数，这样就不用再次执行if语句了。第二种实现惰性载入的方式是在声明函数时就指定适当的函数。这样，第一次调用函数时就不会损失性能了，而在代码首次加载时会损失一点性能。以下就是按照这一思路重写前面例子的结果。
+```
+var createXHR = (function(){
+    if (typeof XMLHttpRequest != "undefined") {
+        return function() {
+            return new XMLHttpRequest();
+        };
+    } else if (typeof ActiveXObject != "undefined") {
+        return function() {
+            if (typeof arguments.callee.activeXString != "string") {
+                var versions = ["MSXML2.XMLHttp.6.0",
+                "MSXML2.XMLHttp.3.0",
+                "MSXML2.XMLHttp"],
+                i,
+                len;
+                for (i=0, len=versions.length; i < len; i++) {
+                    try {
+                        new ActiveXObject(versions[i]);
+                        arguments.callee.activeXString = versions[i]; break;
+                    } catch (ex){
+                        //skip
+                    }
+                }
+            }
+            return new ActiveXObject(arguments.callee.activeXString);
+        };
+    } else {
+        return function() {
+            throw new Error("No XHR object available.");
+        };
+    }
+})();
+```
+
+这个例子中使用的技巧是创建一个匿名、自执行的函数，用以确定应该使用哪一个函数实现。实际的逻辑都一样。不一样的地方就是第一行代码（使用var定义函数）、新增了自执行的匿名函数，另外每个分支都返回正确的函数定义，以便立即将其赋值给createXHR()。惰性载入函数的优点是只在执行分支代码时牺牲一点儿性能。至于哪种方式更合适，就要看你的具体需求而定了。不过这两种方式都能避免执行不必要的代码。
+
+
 **22.1.4 函数绑定**
+
+另一个日益流行的高级技巧叫做函数绑定。函数绑定要创建一个函数，可以在特定的this环境中以指定参数调用另一个函数。该技巧常常和回调函数与事件处理程序一起使用，以便在将函数作为变量传递的同时保留代码执行环境。请看以下例子：
+```
+var handler = {
+    message: "Event handled",
+    handleClick: function(event) {
+        alert(this.message); 
+    } }; var btn = document.getElementById("my-btn"); EventUtil.addHandler(btn, "click", handler.handleClick); 在上面这个例子中，创建了一个叫做handler的对象。handler.handleClick()方法被分配为一个DOM按钮的事件处理程序。当按下该按钮时，就调用该函数，显示一个警告框。虽然貌似警告框应该显示Event  handled，然而实际上显示的是undefiend。这个问题在于没有保存handler.handleClick()的环境，所以this对象最后是指向了DOM按钮而非handler（在IE8中，this指向window。）可以如下面例子所示，使用一个闭包来修正这个问题。var handler = {     message: "Event handled",     handleClick: function(event){         alert(this.message);     } }; var btn = document.getElementById("my-btn"); EventUtil.addHandler(btn, "click", function(event){     handler.handleClick(event); });
+
+这个解决方案在onclick事件处理程序内使用了一个闭包直接调用handler.handleClick()。当然，这是特定于这段代码的解决方案。创建多个闭包可能会令代码变得难于理解和调试。因此，很多JavaScript库实现了一个可以将函数绑定到指定环境的函数。这个函数一般都叫bind()。一个简单的bind()函数接受一个函数和一个环境，并返回一个在给定环境中调用给定函数的函数，并且将所有参数原封不动传递过去。语法如下：function bind(fn, context){     return function(){         return fn.apply(context, arguments);     }; }
+
+这个函数似乎简单，但其功能是非常强大的。在bind()中创建了一个闭包，闭包使用apply()调用传入的函数，并给apply()传递context对象和参数。注意这里使用的arguments对象是内部函数的，而非bind()的。当调用返回的函数时，它会在给定环境中执行被传入的函数并给出所有参数。bind()函数按如下方式使用：var handler = {     message: "Event handled",     handleClick: function(event){         alert(this.message);     } }; var btn = document.getElementById("my-btn"); EventUtil.addHandler(btn, "click", bind(handler.handleClick, handler));
+
+在这个例子中，我们用bind()函数创建了一个保持了执行环境的函数，并将其传给EventUtil. addHandler()。event对象也被传给了该函数，如下所示：var handler = {     message: "Event handled",     handleClick: function(event){         alert(this.message + ":" + event.type);     } }; var btn = document.getElementById("my-btn"); EventUtil.addHandler(btn, "click", bind(handler.handleClick, handler));
+
+handler.handleClick()方法和平时一样获得了event对象，因为所有的参数都通过被绑定的函数直接传给了它。ECMAScript 5为所有函数定义了一个原生的bind()方法，进一步简单了操作。换句话说，你不用再自己定义bind()函数了，而是可以直接在函数上调用这个方法。例如：
+
+var handler = {     message: "Event handled",     handleClick: function(event){ alert(this.message + ":" + event.type);     } }; var btn = document.getElementById("my-btn"); EventUtil.addHandler(btn, "click", handler.handleClick.bind(handler));
+
+原生的bind()方法与前面介绍的自定义bind()方法类似，都是要传入作为this值的对象。支持原生bind()方法的浏览器有IE9+、Firefox 4+和Chrome。只要是将某个函数指针以值的形式进行传递，同时该函数必须在特定环境中执行，被绑定函数的效用就突显出来了。它们主要用于事件处理程序以及 setTimeout()和 setInterval()。然而，被绑定函数与普通函数相比有更多的开销，它们需要更多内存，同时也因为多重函数调用稍微慢一点，所以最好只在必要时使用。
+
 **22.1.5 函数柯里化**
 **22.2 防篡改对象**
 **22.2.1 不可扩展对象**
