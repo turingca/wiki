@@ -1,15 +1,270 @@
 第13章 事件
 ----------
 
+本章内容
+- 理解事件流
+- 使用事件处理程序
+- 不同的事件类型
+
+JavaScript与HTML之间的交互是通过事件实现的。事件，就是文档或浏览器窗口中发生的一些特定的交互瞬间。可以使用侦听器（或处理程序）来预订事件，以便事件发生时执行相应的代码。这种在传统软件工程中被称为观察员模式的模型，支持页面的行为（JavaScript代码）与页面的外观（HTML和CSS代码）之间的松散耦合。事件最早是在IE3和NetscapeNavigator2中出现的，当时是作为分担服务器运算负载的一种手段。在IE4和Navigator4发布时，这两种浏览器都提供了相似但不相同的API，这些API并存经过了好几个主要版本。DOM2级规范开始尝试以一种符合逻辑的方式来标准化DOM事件。IE9、Firefox、Opera、Safari和Chrome全都已经实现了“DOM2级事件”模块的核心部分。IE8是最后一个仍然使用其专有事件系统的主要浏览器。浏览器的事件系统相对比较复杂。尽管所有主要浏览器已经实现了“DOM2级事件”，但这个规范本身并没有涵盖所有事件类型。浏览器对象模型（BOM）也支持一些事件，这些事件与文档对象模型（DOM）事件之间的关系并不十分清晰，因为BOM事件长期没有规范可以遵循（HTML5后来给出了详细的说明）。随着DOM3级的出现，增强后的DOM事件API变得更加繁琐。使用事件有时相对简单，有时则非常复杂，难易程度会因你的需求而不同。不过，有关事件的一些核心概念是一定要理解的。
+
 **13.1 事件流**
+
+当浏览器发展到第四代时（IE4及Netscape Communicator 4），浏览器开发团队遇到了一个很有意思的问题：页面的哪一部分会拥有某个特定的事件？要明白这个问题问的是什么，可以想象画在一张纸上的一组同心圆。如果你把手指放在圆心上，那么你的手指指向的不是一个圆，而是纸上的所有圆。两家公司的浏览器开发团队在看待浏览器事件方面还是一致的。如果你单击了某个按钮，他们都认为单击事件不仅仅发生在按钮上。换句话说，在单击按钮的同时，你也单击了按钮的容器元素，甚至也单击了整个页面。事件流描述的是从页面中接收事件的顺序。但有意思的是，IE和Netscape开发团队居然提出了差不多是完全相反的事件流的概念。IE的事件流是事件冒泡流，而NetscapeCommunicator的事件流是事件捕获流。
+
 **13.1.1 事件冒泡**
+
+IE的事件流叫做事件冒泡（event  bubbling），即事件开始时由最具体的元素（文档中嵌套层次最深的那个节点）接收，然后逐级向上传播到较为不具体的节点（文档）。以下面的HTML页面为例：
+```
+<!DOCTYPE html>
+<html>
+<head><title>Event Bubbling Example</title>
+</head>
+<body>
+<div id="myDiv">Click Me</div>
+</body>
+</html>
+```
+
+如果你单击了页面中的`<div>`元素，那么这个click事件会按照如下顺序传播：
+1. `<div>`
+2. `<body>`
+3. `<html>`
+4. `document`
+
+也就是说，click事件首先在`<div>`元素上发生，而这个元素就是我们单击的元素。然后，click事件沿DOM树向上传播，在每一级节点上都会发生，直至传播到document对象。图13-1展示了事件冒泡的过程。
+
+所有现代浏览器都支持事件冒泡，但在具体实现上还是有一些差别。IE5.5及更早版本中的事件冒泡会跳过`<html>`元素（从`<body>`直接跳到`document`）。IE9、Firefox、Chrome和Safari则将事件一直冒泡到window对象。
+
 **13.1.2 事件捕获**
+
+Netscape Communicator团队提出的另一种事件流叫做事件捕获（event capturing）。事件捕获的思想是不太具体的节点应该更早接收到事件，而最具体的节点应该最后接收到事件。事件捕获的用意在于在事件到达预定目标之前捕获它。如果仍以前面的HTML页面作为演示事件捕获的例子，那么单击`<div>`元素就会以下列顺序触发click事件。
+1. document
+2. html
+3. body
+4. div
+
+在事件捕获过程中，document对象首先接收到click事件，然后事件沿DOM树依次向下，一直传播到事件的实际目标，即`<div>`元素。图13-2展示了事件捕获的过程。
+
+虽然事件捕获是NetscapeCommunicator唯一支持的事件流模型，但IE9、Safari、Chrome、Opera和Firefox目前也都支持这种事件流模型。尽管“DOM2级事件”规范要求事件应该从document对象开始传播，但这些浏览器都是从window对象开始捕获事件的。由于老版本的浏览器不支持，因此很少有人使用事件捕获。我们也建议读者放心地使用事件冒泡，在有特殊需要时再使用事件捕获。
+
 **13.1.3 DOM事件流**
+
+DOM2级事件规定的事件流包括三个阶段：事件捕获阶段、处于目标阶段和事件冒泡阶段。首先发生的是事件捕获，为截获事件提供了机会。然后是实际的目标接收到事件。最后一个阶段是冒泡阶段，可以在这个阶段对事件做出响应。以前面简单的HTML页面为例，单击`<div>`元素会按照图13-3所示顺序触发事件。
+
+在DOM事件流中，实际的目标（`<div>`元素）在捕获阶段不会接收到事件。这意味着在捕获阶段，事件从document到`<html>`再到`<body>`后就停止了。下一个阶段是“处于目标”阶段， 于是事件在`<div>`上发生，并在事件处理（后面将会讨论这个概念）中被看成冒泡阶段的一部分。然后，冒泡阶段发生，事件又传播回文档。
+
+多数支持DOM事件流的浏览器都实现了一种特定的行为；即使“DOM2级事件”规范明确要求捕获阶段不会涉及事件目标，但IE9、Safari、Chrome、Firefox和Opera9.5及更高版本都会在捕获阶段触发事件对象上的事件。结果，就是有两个机会在目标对象上面操作事件。
+
+IE9、Opera、Firefox、Chrome和Safari都支持DOM事件流；IE8及更早版本不支持DOM事件流。
+
 **13.2 事件处理程序**
+
+事件就是用户或浏览器自身执行的某种动作。诸如click、load和mouseover，都是事件的名字。而响应某个事件的函数就叫做事件处理程序（或事件侦听器）。事件处理程序的名字以"on"开头，因此click事件的事件处理程序就是onclick，load事件的事件处理程序就是onload。为事件指定处理程序的方式有好几种。
+
 **13.2.1 HTML事件处理程序**
+
+某个元素支持的每种事件，都可以使用一个与相应事件处理程序同名的HTML特性来指定。这个特性的值应该是能够执行的JavaScript代码。例如，要在按钮被单击时执行一些JavaScript，可以像下面这样编写代码：
+```
+<input type="button" value="Click Me" onclick="alert('Clicked')" />
+```
+
+当单击这个按钮时，就会显示一个警告框。这个操作是通过指定onclick特性并将一些JavaScript代码作为它的值来定义的。由于这个值是JavaScript，因此不能在其中使用未经转义的HTML语法字符，例如和号`&`、双引号`""`、小于号`<`或大于号`>`。
+
+为了避免使用HTML实体，这里使用了单引号。如果想要使用双引号，那么就要将代码改写成如下所示：
+```
+<input type="button" value="Click Me" onclick="alert(&quot;Clicked&quot;)" />
+```
+
+在HTML中定义的事件处理程序可以包含要执行的具体动作，也可以调用在页面其他地方定义的脚本，如下面的例子所示：
+
+```
+<script type="text/javascript">
+    function showMessage() {
+        alert("Hello world!");
+    }
+</script>
+<input type="button" value="Click Me" onclick="showMessage()" /> 
+```
+
+在这个例子中，单击按钮就会调用showMessage()函数。这个函数是在一个独立的`<script>`元素中定义的，当然也可以被包含在一个外部文件中。事件处理程序中的代码在执行时，有权访问全局作用域中的任何代码。这样指定事件处理程序具有一些独到之处。首先，这样会创建一个封装着元素属性值的函数。这个函数中有一个局部变量event，也就是事件对象（本章稍后讨论）：
+
+```
+<!-- 输出 "click" -->
+<input type="button" value="Click Me" onclick="alert(event.type)">
+```
+
+通过event变量，可以直接访问事件对象，你不用自己定义它，也不用从函数的参数列表中读取。在这个函数内部，this值等于事件的目标元素，例如：
+
+```
+<!-- 输出 "Click Me" -->
+<input type="button" value="Click Me" onclick="alert(this.value)">
+```
+
+关于这个动态创建的函数，另一个有意思的地方是它扩展作用域的方式。在这个函数内部，可以像访问局部变量一样访问document及该元素本身的成员。这个函数使用with像下面这样扩展作用域：
+
+```
+function() {
+    with(document) {
+        with(this) {
+            //元素属性值
+        }
+    }
+}
+```
+
+如此一来，事件处理程序要访问自己的属性就简单多了。下面这行代码与前面的例子效果相同：
+
+```
+<!-- 输出 "Click Me" -->
+<input type="button" value="Click Me" onclick="alert(value)">
+```
+
+如果当前元素是一个表单输入元素，则作用域中还会包含访问表单元素（父元素）的入口，这个函数就变成了如下所示：
+```
+function() {
+    with(document) {
+        with(this.form) {
+            with(this) {
+                //元素属性值
+            }
+        }
+    }
+}
+```
+
+实际上，这样扩展作用域的方式，无非就是想让事件处理程序无需引用表单元素就能访问其他表单字段。例如
+：
+```
+<form method="post">
+<input type="text" name="username" value="">
+<input type="button" value="Echo Username" onclick="alert(username.value)"> 
+</form>
+```
+
+在这个例子中，单击按钮会显示文本框中的文本。值得注意的是，这里直接引用了username元素。
+
+不过，在HTML中指定事件处理程序有两个缺点。首先，存在一个时差问题。因为用户可能会在HTML元素一出现在页面上就触发相应的事件，但当时的事件处理程序有可能尚不具备执行条件。以前面的例子来说明，假设showMessage()函数是在按钮下方、页面的最底部定义的。如果用户在页面解析showMessage()函数之前就单击了按钮，就会引发错误。为此，很多HTML事件处理程序都会被封装在一个try-catch块中，以便错误不会浮出水面，如下面的例子所示：
+```
+<input type="button" value="Click Me" onclick="try{showMessage();}catch(ex){}">
+```
+
+这样，如果在showMessage()函数有定义之前单击了按钮，用户将不会看到JavaScript错误，因为在浏览器有机会处理错误之前，错误就被捕获了。另一个缺点是，这样扩展事件处理程序的作用域链在不同浏览器中会导致不同结果。不同JavaScript引擎遵循的标识符解析规则略有差异，很可能会在访问非限定对象成员时出错。通过HTML指定事件处理程序的最后一个缺点是HTML与JavaScript代码紧密耦合。如果要更换事件处理程序，就要改动两个地方：HTML代码和JavaScript代码。而这正是许多开发人员摒弃HTML事件处理程序，转而使用JavaScript指定事件处理程序的原因所在。
+
+要了解关于HTML事件处理程序缺点的更多信息，请参考Garrett  Smith的文章[“Event Handler Scope”](www.jibbering.com/faq/names/event_handler.html)。
+
 **13.2.2 DOM0级事件处理程序**
+
+通过JavaScript指定事件处理程序的传统方式，就是将一个函数赋值给一个事件处理程序属性。这种为事件处理程序赋值的方法是在第四代Web浏览器中出现的，而且至今仍然为所有现代浏览器所支持。原因一是简单，二是具有跨浏览器的优势。要使用JavaScript指定事件处理程序，首先必须取得一个要操作的对象的引用。每个元素（包括window和document）都有自己的事件处理程序属性，这些属性通常全部小写，例如onclick。将这种属性的值设置为一个函数，就可以指定事件处理程序，如下所示：
+```
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+    alert("Clicked");
+};
+```
+
+在此，我们通过文档对象取得了一个按钮的引用，然后为它指定了onclick事件处理程序。但要注意，在这些代码运行以前不会指定事件处理程序，因此如果这些代码在页面中位于按钮后面，就有可能在一段时间内怎么单击都没有反应。使用DOM0级方法指定的事件处理程序被认为是元素的方法。因此，这时候的事件处理程序是在元素的作用域中运行；换句话说，程序中的this引用当前元素。来看一个例子。
+```
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+    alert(this.id);//"myBtn"
+};
+```
+
+单击按钮显示的是元素的ID，这个ID是通过this.id取得的。不仅仅是ID，实际上可以在事件处理程序中通过this访问元素的任何属性和方法。以这种方式添加的事件处理程序会在事件流的冒泡阶段被处理。也可以删除通过DOM0级方法指定的事件处理程序，只要像下面这样将事件处理程序属性的值设置为null即可：
+
+```
+btn.onclick = null;     //删除事件处理程序
+```
+
+将事件处理程序设置为null之后，再单击按钮将不会有任何动作发生。
+
+如果你使用HTML指定事件处理程序，那么onclick属性的值就是一个包含着在同名HTML特性中指定的代码的函数。而将相应的属性设置为null，也可以删除以这种方式指定的事件处理程序。
+
 **13.2.3 DOM2级事件处理程序**
+
+DOM2级事件定义了两个方法，用于处理指定和删除事件处理程序的操作：`addEventListener()`和`removeEventListener()`。所有DOM节点中都包含这两个方法，并且它们都接受3个参数：要处理的事件名、作为事件处理程序的函数和一个布尔值。最后这个布尔值参数如果是true，表示在捕获阶段调用事件处理程序；如果是false，表示在冒泡阶段调用事件处理程序。
+
+要在按钮上为click事件添加事件处理程序，可以使用下列代码：
+
+```
+var btn = document.getElementById("myBtn");
+btn.addEventListener("click", function() {
+    alert(this.id);
+}, false);
+```
+    
+上面的代码为一个按钮添加了onclick事件处理程序，而且该事件会在冒泡阶段被触发（因为最后一个参数是false）。与DOM0级方法一样，这里添加的事件处理程序也是在其依附的元素的作用域中运行。使用DOM2级方法添加事件处理程序的主要好处是可以添加多个事件处理程序。来看下面的例子。
+
+```
+var btn = document.getElementById("myBtn");
+btn.addEventListener("click", function() {
+    alert(this.id);
+}, false);
+btn.addEventListener("click", function() {
+    alert("Hello world!");
+}, false);
+```
+
+这里为按钮添加了两个事件处理程序。这两个事件处理程序会按照添加它们的顺序触发，因此首先会显示元素的ID，其次会显示"Hello world!"消息。通过addEventListener()添加的事件处理程序只能使用removeEventListener()来移除；移除时传入的参数与添加处理程序时使用的参数相同。这也意味着通过addEventListener()添加的匿名函数将无法移除，如下面的例子所示。
+
+```
+var btn = document.getElementById("myBtn");
+btn.addEventListener("click", function() {
+    alert(this.id);
+}, false);
+//这里省略了其他代码
+btn.removeEventListener("click", function(){
+    //没有用！
+    alert(this.id);
+}, false);
+```
+
+在这个例子中，我们使用addEventListener()添加了一个事件处理程序。虽然调用remove- EventListener()时看似使用了相同的参数，但实际上，第二个参数与传入addEventListener()中的那一个是完全不同的函数。而传入removeEventListener()中的事件处理程序函数必须与传入addEventListener()中的相同，如下面的例子所示。
+
+```
+var btn = document.getElementById("myBtn");
+var handler = function() {
+    alert(this.id);
+};
+btn.addEventListener("click", handler, false);
+//这里省略了其他代码
+btn.removeEventListener("click", handler, false); //有效！
+```
+
+重写后的这个例子没有问题，是因为在addEventListener()和removeEventListener()中使用了相同的函数。
+
+大多数情况下，都是将事件处理程序添加到事件流的冒泡阶段，这样可以最大限度地兼容各种浏览器。最好只在需要在事件到达目标之前截获它的时候将事件处理程序添加到捕获阶段。如果不是特别需要，我们不建议在事件捕获阶段注册事件处理程序。
+
+IE9、Firefox、Safari、Chrome和Opera支持DOM2级事件处理程序。
+
 **13.2.4 IE事件处理程序**
+
+IE实现了与DOM中类似的两个方法：attachEvent()和detachEvent()。这两个方法接受相同的两个参数：事件处理程序名称与事件处理程序函数。由于IE8及更早版本只支持事件冒泡，所以通过attachEvent()添加的事件处理程序都会被添加到冒泡阶段。要使用attachEvent()为按钮添加一个事件处理程序，可以使用以下代码。
+
+```
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function() {
+    alert("Clicked");
+});
+```
+
+注意，attachEvent()的第一个参数是"onclick"，而非DOM的addEventListener()方法中的"click"。
+
+在IE中使用attachEvent()与使用DOM0级方法的主要区别在于事件处理程序的作用域。在使用DOM0级方法的情况下，事件处理程序会在其所属元素的作用域内运行；在使用attachEvent()方法的情况下，事件处理程序会在全局作用域中运行，因此this等于window。来看下面的例子。
+
+```
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function() {
+    alert(this === window); //true
+});
+```
+
+在编写跨浏览器的代码时，牢记这一区别非常重要。与addEventListener()类似，attachEvent()方法也可以用来为一个元素添加多个事件处理程序。来看下面的例子。
+```
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function() { alert("Clicked"); }); btn.attachEvent("onclick", function(){     alert("Hello world!"); });
+
 **13.2.5 跨浏览器的事件处理程序**
 
 **13.3 事件对象**
@@ -803,6 +1058,7 @@ Comet是Alex Russell①发明的一个词儿，指的是一种更高级的Ajax�
 无论是短轮询还是长轮询，浏览器都要在接收数据之前，先发起对服务器的连接。两者最大的区别在于服务器如何发送数据。短轮询是服务器立即发送响应，无论数据是否有效，而长轮询是等待发送响应。轮询的优势是所有浏览器都支持，因为使用XHR对象和setTimeout()就能实现。而你要做的就是决定什么时候发送请求。
 
 第二种流行的Comet实现是HTTP流。流不同于上述两种轮询，因为它在页面的整个生命周期内只使用一个HTTP连接。具体来说，就是浏览器向服务器发送一个请求，而服务器保持连接打开，然后周期性地向浏览器发送数据。比如，下面这段PHP脚本就是采用流实现的服务器中常见的形式。
+
 ```
 <?php
     $i = 0;
