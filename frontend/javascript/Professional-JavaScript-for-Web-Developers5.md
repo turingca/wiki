@@ -315,6 +315,7 @@ var EventUtil = {
 ```
 
 这两个方法首先都会检测传入的元素中是否存在DOM2级方法。如果存在DOM2级方法，则使用该方法：传入事件类型、事件处理程序函数和第三个参数false（表示冒泡阶段）。如果存在的是IE的方法，则采取第二种方案。注意，为了在IE8及更早版本中运行，此时的事件类型必须加上"on"前缀。最后一种可能就是使用DOM0级方法（在现代浏览器中，应该不会执行这里的代码）。此时，我们使用的是方括号语法来将属性名指定为事件处理程序，或者将属性设置为null。可以像下面这样使用EventUtil对象：
+
 ```
 var btn = document.getElementById("myBtn");
 var handler = function() {
@@ -334,6 +335,7 @@ addHandler()和removeHandler()没有考虑到所有的浏览器问题，例如�
 **13.3.1 DOM中的事件对象**
 
 兼容DOM的浏览器会将一个event对象传入到事件处理程序中。无论指定事件处理程序时使用什么方法（DOM0级或DOM2级），都会传入event对象。来看下面的例子。
+
 ```
 var btn = document.getElementById("myBtn");
 btn.onclick = function(event) {
@@ -418,24 +420,233 @@ link.onclick = function(event) {
 };
 ```
 
-只有cancelable属性设置为true的事件，才可以使用preventDefault()来取消其默认行为。另外，stopPropagation()方法用于立即停止事件在DOM层次中的传播，即取消进一步的事件捕获或冒泡。例如，直接添加到一个按钮的事件处理程序可以调用stopPropagation()，从而避免触发注册在document.body上面的事件处理程序，如下面的例子所示。var btn = document.getElementById("myBtn"); btn.onclick = function(event){     alert("Clicked");     event.stopPropagation(); }; document.body.onclick = function(event){     alert("Body clicked"); }; 
+只有cancelable属性设置为true的事件，才可以使用preventDefault()来取消其默认行为。另外，stopPropagation()方法用于立即停止事件在DOM层次中的传播，即取消进一步的事件捕获或冒泡。例如，直接添加到一个按钮的事件处理程序可以调用stopPropagation()，从而避免触发注册在document.body上面的事件处理程序，如下面的例子所示。
+```
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+    alert("Clicked");
+    event.stopPropagation();
+};
+document.body.onclick = function(event) {
+    alert("Body clicked");
+}; 
+```
 
-对于这个例子而言，如果不调用stopPropagation()，就会在单击按钮时出现两个警告框。可是，由于click事件根本不会传播到document.body，因此就不会触发注册在这个元素上的onclick事件处理程序。事件对象的eventPhase属性，可以用来确定事件当前正位于事件流的哪个阶段。如果是在捕获阶段调用的事件处理程序，那么eventPhase等于1；如果事件处理程序处于目标对象上，则event- Phase等于2；如果是在冒泡阶段调用的事件处理程序，eventPhase等于3。这里要注意的是，尽管“处于目标”发生在冒泡阶段，但eventPhase仍然一直等于2。来看下面的例子。var btn = document.getElementById("myBtn"); btn.onclick = function(event){     alert(event.eventPhase); //2 }; document.body.addEventListener("click", function(event){     alert(event.eventPhase); //1 }, true); document.body.onclick = function(event){     alert(event.eventPhase); //3 };
+对于这个例子而言，如果不调用stopPropagation()，就会在单击按钮时出现两个警告框。可是，由于click事件根本不会传播到document.body，因此就不会触发注册在这个元素上的onclick事件处理程序。事件对象的eventPhase属性，可以用来确定事件当前正位于事件流的哪个阶段。如果是在捕获阶段调用的事件处理程序，那么eventPhase等于1；如果事件处理程序处于目标对象上，则eventPhase等于2；如果是在冒泡阶段调用的事件处理程序，eventPhase等于3。这里要注意的是，尽管“处于目标”发生在冒泡阶段，但eventPhase仍然一直等于2。来看下面的例子。
+
+```
+var btn = document.getElementById("myBtn");
+btn.onclick = function(event) {
+    alert(event.eventPhase); //2
+};
+document.body.addEventListener("click", function(event) {
+    alert(event.eventPhase); //1
+}, true);
+document.body.onclick = function(event) {
+    alert(event.eventPhase); //3
+};
+```
 
 当单击这个例子中的按钮时，首先执行的事件处理程序是在捕获阶段触发的添加到document.body中的那一个，结果会弹出一个警告框显示表示eventPhase的1。接着，会触发在按钮上注册的事件处理程序，此时的eventPhase值为2。最后一个被触发的事件处理程序，是在冒泡阶段执行的添加到document.body上的那一个，显示eventPhase的值为3。而当eventPhase等于2时，this、target和currentTarget始终都是相等的。
 
 只有在事件处理程序执行期间，event对象才会存在；一旦事件处理程序执行完成，event对象就会被销毁。
 
 **13.3.2 IE中的事件对象**
+
+与访问DOM中的event对象不同，要访问IE中的event对象有几种不同的方式，取决于指定事件处理程序的方法。在使用DOM0级方法添加事件处理程序时，event对象作为window对象的一个属性存在。来看下面的例子。
+
+```
+var btn = document.getElementById("myBtn");
+btn.onclick = function() {
+    var event = window.event;
+    alert(event.type); //"click"
+};
+```
+
+在此，我们通过window.event取得了event对象，并检测了被触发事件的类型（IE中的type属性与DOM中的type属性是相同的）。可是，如果事件处理程序是使用attachEvent()添加的，那么就会有一个event对象作为参数被传入事件处理程序函数中，如下所示。
+
+```
+var btn = document.getElementById("myBtn");
+btn.attachEvent("onclick", function(event) {
+    alert(event.type);//"click"
+});
+```
+
+在像这样使用attachEvent()的情况下，也可以通过window对象来访问event对象，就像使用DOM0级方法时一样。不过为方便起见，同一个对象也会作为参数传递。如果是通过HTML特性指定的事件处理程序，那么还可以通过一个名叫event的变量来访问event对象（与DOM中的事件模型相同）。再看一个例子。
+
+```
+<input type="button" value="Click Me" onclick="alert(event.type)">
+```
+
+IE的event对象同样也包含与创建它的事件相关的属性和方法。其中很多属性和方法都有对应的或者相关的DOM属性和方法。与DOM的event对象一样，这些属性和方法也会因为事件类型的不同而不同，但所有事件对象都会包含下表所列的属性和方法。
+
+|属性/方法|类型|读/写|说明|
+|:---|:---|:---|:---|
+|cancelBubble|Boolean|读/写|默认值为false，但将其设置为true就可以取消事件冒泡（与DOM中的stopPropagation()方法的作用相同）|
+|returnValue|Boolean|读/写|默认值为true，但将其设置为false就可以取消事件的默认行为（与DOM中的preventDefault()方法的作用相同）|
+|srcElement|Element|只读|事件的目标（与DOM中的target属性相同）|
+|type|String|只读|被触发的事件的类型|
+
+
+因为事件处理程序的作用域是根据指定它的方式来确定的，所以不能认为this会始终等于事件目标。故而，最好还是使用event.srcElement比较保险。例如：var btn = document.getElementById("myBtn"); btn.onclick = function(){     alert(window.event.srcElement === this);    //true }; btn.attachEvent("onclick", function(event){     alert(event.srcElement === this);           //false });\
+
+在第一个事件处理程序中（使用DOM0级方法指定的），srcElement属性等于this，但在第二个事件处理程序中，这两者的值不相同。如前所述，returnValue属性相当于DOM中的preventDefault()方法，它们的作用都是取消给定事件的默认行为。只要将returnValue设置为false，就可以阻止默认行为。来看下面的例子。var link = document.getElementById("myLink"); link.onclick = function(){     window.event.returnValue = false; };
+
+这个例子在onclick事件处理程序中使用returnValue达到了阻止链接默认行为的目的。与DOM不同的是，在此没有办法确定事件是否能被取消。相应地，cancelBubble属性与DOM中的stopPropagation()方法作用相同，都是用来停止事件冒泡的。由于IE不支持事件捕获，因而只能取消事件冒泡；但stopPropagatioin()可以同时取消事件捕获和冒泡。例如：var btn = document.getElementById("myBtn"); btn.onclick = function(){     alert("Clicked");     window.event.cancelBubble = true; }; document.body.onclick = function(){     alert("Body clicked"); };
+
+通过在onclick事件处理程序中将cancelBubble设置为true，就可阻止事件通过冒泡而触发document.body中注册的事件处理程序。结果，在单击按钮之后，只会显示一个警告框。
+
+
 **13.3.3 跨浏览器的事件对象**
 
+虽然DOM和IE中的event对象不同，但基于它们之间的相似性依旧可以拿出跨浏览器的方案来。IE中event对象的全部信息和方法DOM对象中都有，只不过实现方式不一样。不过，这种对应关系让实现两种事件模型之间的映射非常容易。可以对前面介绍的EventUtil对象加以增强，添加如下方法以求同存异。var EventUtil = {     addHandler: function(element, type, handler){         //省略的代码    },     getEvent: function(event){         return event ? event : window.event;     },     getTarget: function(event){         return event.target || event.srcElement;     },     preventDefault: function(event){         if (event.preventDefault){             event.preventDefault();         } else {             event.returnValue = false;         }     },     removeHandler: function(element, type, handler){         //省略的代码    },     stopPropagation: function(event){if (event.stopPropagation){             event.stopPropagation();         } else {             event.cancelBubble = true;         }     } }; 
+
+以上代码显示，我们为EventUtil添加了4个新方法。第一个是getEvent()，它返回对event对象的引用。考虑到IE中事件对象的位置不同，可以使用这个方法来取得event对象，而不必担心指定事件处理程序的方式。在使用这个方法时，必须假设有一个事件对象传入到事件处理程序中，而且要把该变量传给这个方法，如下所示。btn.onclick = function(event){     event = EventUtil.getEvent(event); };
+
+在兼容DOM的浏览器中，event变量只是简单地传入和返回。而在IE中，event参数是未定义的（undefined），因此就会返回window.event。将这一行代码添加到事件处理程序的开头，就可以确保随时都能使用event对象，而不必担心用户使用的是什么浏览器。第二个方法是getTarget()，它返回事件的目标。在这个方法内部，会检测event对象的target属性，如果存在则返回该属性的值；否则，返回srcElement属性的值。可以像下面这样使用这个方法。btn.onclick = function(event){     event = EventUtil.getEvent(event);     var target = EventUtil.getTarget(event); };
+
+第三个方法是preventDefault()，用于取消事件的默认行为。在传入event对象后，这个方法会检查是否存在preventDefault()方法，如果存在则调用该方法。如果preventDefault()方法不存在，则将returnValue设置为false。下面是使用这个方法的例子。var link = document.getElementById("myLink"); link.onclick = function(event){     event = EventUtil.getEvent(event);     EventUtil.preventDefault(event); };
+
+以上代码可以确保在所有浏览器中单击该链接都不会打开另一个页面。首先，使用EventUtil. getEvent()取得event对象，然后将其传入到EventUtil.preventDefault()以取消默认行为。第四个方法是stopPropagation()，其实现方式类似。首先尝试使用DOM方法阻止事件流，否则就使用cancelBubble属性。下面看一个例子。
+
+var btn = document.getElementById("myBtn"); btn.onclick = function(event){     alert("Clicked");     event = EventUtil.getEvent(event);     EventUtil.stopPropagation(event); }; document.body.onclick = function(event){     alert("Body clicked"); };
+
+在此，首先使用EventUtil.getEvent()取得了event对象，然后又将其传入到EventUtil. stopPropagation()。别忘了由于IE不支持事件捕获，因此这个方法在跨浏览器的情况下，也只能用来阻止事件冒泡。
+
 **13.4 事件类型**
+
+Web浏览器中可能发生的事件有很多类型。如前所述，不同的事件类型具有不同的信息，而“DOM3级事件”规定了以下几类事件。
+- UI（User Interface，用户界面）事件，当用户与页面上的元素交互时触发；
+- 焦点事件，当元素获得或失去焦点时触发；
+- 鼠标事件，当用户通过鼠标在页面上执行操作时触发；
+- 滚轮事件，当使用鼠标滚轮（或类似设备）时触发；
+- 文本事件，当在文档中输入文本时触发；
+- 键盘事件，当用户通过键盘在页面上执行操作时触发；
+- 合成事件，当为IME（Input Method Editor，输入法编辑器）输入字符时触发；
+- 变动（mutation）事件，当底层DOM结构发生变化时触发。
+- 变动名称事件，当元素或属性名变动时触发。此类事件已经被废弃，没有任何浏览器实现它们，因此本章不做介绍。
+ 
+除了这几类事件之外，HTML5也定义了一组事件，而有些浏览器还会在DOM和BOM中实现其他专有事件。这些专有的事件一般都是根据开发人员需求定制的，没有什么规范，因此不同浏览器的实现有可能不一致。DOM3级事件模块在DOM2级事件模块基础上重新定义了这些事件，也添加了一些新事件。包括IE9在内的所有主流浏览器都支持DOM2级事件。IE9也支持DOM3级事件。
+
 **13.4.1 UI事件**
+
+UI事件指的是那些不一定与用户操作有关的事件。这些事件在DOM规范出现之前，都是以这种或那种形式存在的，而在DOM规范中保留是为了向后兼容。现有的UI事件如下。
+- DOMActivate：表示元素已经被用户操作（通过鼠标或键盘）激活。这个事件在DOM3级事件中被废弃，但Firefox 2+和Chrome支持它。考虑到不同浏览器实现的差异，不建议使用这个事件。
+- load：当页面完全加载后在window上面触发，当所有框架都加载完毕时在框架集上面触发，当图像加载完毕时在img元素上面触发，或者当嵌入的内容加载完毕时在object元素上面触发。
+- unload：当页面完全卸载后在window上面触发，当所有框架都卸载后在框架集上面触发，或者当嵌入的内容卸载完毕后在object元素上面触发。
+- abort：在用户停止下载过程时，如果嵌入的内容没有加载完，则在object元素上面触发。
+- error：当发生JavaScript错误时在window上面触发，当无法加载图像时在img元素上面触发，当无法加载嵌入内容时在object元素上面触发，或者当有一或多个框架无法加载时在框架集上面触发。第17章将继续讨论这个事件。
+- select：当用户选择文本框（input或texterea）中的一或多个字符时触发。第14章将继续讨论这个事件。
+- resize：当窗口或框架的大小变化时在window或框架上面触发。
+- scroll：当用户滚动带滚动条的元素中的内容时，在该元素上面触发。body元素中包含所加载页面的滚动条。
+
+多数这些事件都与window对象或表单控件相关。除了DOMActivate之外，其他事件在DOM2级事件中都归为HTML事件（DOMActivate在DOM2级中仍然属于UI事件）。要确定浏览器是否支持DOM2级事件规定的HTML事件，可以使用如下代码：
+```
+var isSupported = document.implementation.hasFeature("HTMLEvents", "2.0");
+```
+注意，只有根据“DOM2级事件”实现这些事件的浏览器才会返回true。而以非标准方式支持这些事件的浏览器则会返回false。要确定浏览器是否支持“DOM3级事件”定义的事件，可以使用如下代码：
+```
+var isSupported = document.implementation.hasFeature("UIEvent", "3.0"); 
+```
+
 **13.4.2 焦点事件**
+
+焦点事件会在页面元素获得或失去焦点时触发。利用这些事件并与document.hasFocus()方法及document.activeElement属性配合，可以知晓用户在页面上的行踪。有以下6个焦点事件。
+- blur：在元素失去焦点时触发。这个事件不会冒泡；所有浏览器都支持它。
+- DOMFocusIn：在元素获得焦点时触发。这个事件与HTML事件focus等价，但它冒泡。只有Opera支持这个事件。DOM3级事件废弃了DOMFocusIn，选择了focusin。
+- DOMFocusOut：在元素失去焦点时触发。这个事件是HTML事件blur的通用版本。只有Opera支持这个事件。DOM3级事件废弃了DOMFocusOut，选择了focusout。
+- focus：在元素获得焦点时触发。这个事件不会冒泡；所有浏览器都支持它。
+- focusin：在元素获得焦点时触发。这个事件与HTML事件focus等价，但它冒泡。支持这个事件的浏览器有IE5.5+、Safari 5.1+、Opera 11.5+和Chrome。
+- focusout：在元素失去焦点时触发。这个事件是HTML事件blur的通用版本。支持这个事件的浏览器有IE5.5+、Safari 5.1+、Opera 11.5+和Chrome。
+
+这一类事件中最主要的两个是focus和blur，它们都是JavaScript早期就得到所有浏览器支持的事件。这些事件的最大问题是它们不冒泡。因此，IE的focusin和focusout与Opera的DOMFocusIn和DOMFocusOut才会发生重叠。IE的方式最后被DOM3级事件采纳为标准方式。当焦点从页面中的一个元素移动到另一个元素，会依次触发下列事件：
+1. focusout在失去焦点的元素上触发
+2. focusin在获得焦点的元素上触发
+3. blur在失去焦点的元素上触发
+4. DOMFocusOut在失去焦点的元素上触发
+5. focus在获得焦点的元素上触发
+6. DOMFocusIn在获得焦点的元素上触发。
+
+其中，blur、DOMFocusOut和focusout的事件目标是失去焦点的元素；而focus、DOMFocusIn和focusin的事件目标是获得焦点的元素。要确定浏览器是否支持这些事件，可以使用如下代码：
+```
+var isSupported = document.implementation.hasFeature("FocusEvent", "3.0");
+```
+
+即使focus和blur不冒泡，也可以在捕获阶段侦听到它们。Peter-Paul Koch就此写过一篇非常棒的文章：www.quirksmode.org/blog/archives/2008/04/delegating_the.html。
+
 **13.4.3 鼠标与滚轮事件**
 **13.4.4 键盘与文本事件**
 **13.4.5 复合事件**
+
+复合事件（composition event）是DOM3级事件中新添加的一类事件，用于处理IME 的输入序列。IME（Input Method Editor，输入法编辑器）可以让用户输入在物理键盘上找不到的字符。例如，使用拉丁文键盘的用户通过IME照样能输入日文字符。IME通常需要同时按住多个键，但最终只输入一个字符。复合事件就是针对检测和处理这种输入而设计的。有以下三种复合事件。
+- compositionstart：在IME的文本复合系统打开时触发，表示要开始输入了。
+- compositionupdate：在向输入字段中插入新字符时触发。
+- compositionend：在IME的文本复合系统关闭时触发，表示返回正常键盘输入状态。
+ 
+复合事件与文本事件在很多方面都很相似。在触发复合事件时，目标是接收文本的输入字段。但它比文本事件的事件对象多一个属性data，其中包含以下几个值中的一个：
+- 如果在compositionstart事件发生时访问，包含正在编辑的文本（例如，已经选中的需要马上替换的文本）；
+- 如果在compositionupdate事件发生时访问，包含正插入的新字符；
+- 如果在compositionend事件发生时访问，包含此次输入会话中插入的所有字符
+
+与文本事件一样，必要时可以利用复合事件来筛选输入。可以像下面这样使用它们：var textbox = document.getElementById("myText"); EventUtil.addHandler(textbox, "compositionstart", function(event){     event = EventUtil.getEvent(event);     alert(event.data); });  EventUtil.addHandler(textbox, "compositionupdate", function(event){     event = EventUtil.getEvent(event);     alert(event.data); }); EventUtil.addHandler(textbox, "compositionend", function(event){     event = EventUtil.getEvent(event);     alert(event.data); });
+
+IE9+是到2011年唯一支持复合事件的浏览器。由于缺少支持，对于需要开发跨浏览器应用的开发人员，它的用处不大。要确定浏览器是否支持复合事件，可以使用以下代码：var isSupported = document.implementation.hasFeature("CompositionEvent", "3.0");
+
 **13.4.6 变动事件**
+
+DOM2级的变动（mutation）事件能在DOM中的某一部分发生变化时给出提示。变动事件是为XML或HTMLDOM设计的，并不特定于某种语言。DOM2级定义了如下变动事件。
+- DOMSubtreeModified：在DOM结构中发生任何变化时触发。这个事件在其他任何事件触发后都会触发。
+- DOMNodeInserted：在一个节点作为子节点被插入到另一个节点中时触发。
+- DOMNodeRemoved：在节点从其父节点中被移除时触发。
+- DOMNodeInsertedIntoDocument：在一个节点被直接插入文档或通过子树间接插入文档之后触发。这个事件在DOMNodeInserted之后触发。
+- DOMNodeRemovedFromDocument：在一个节点被直接从文档中移除或通过子树间接从文档中移除之前触发。这个事件在DOMNodeRemoved之后触发。
+- DOMAttrModified：在特性被修改之后触发。
+- DOMCharacterDataModified：在文本节点的值发生变化时触发。
+
+使用下列代码可以检测出浏览器是否支持变动事件：
+```
+var isSupported = document.implementation.hasFeature("MutationEvents", "2.0");
+```
+IE8及更早版本不支持任何变动事件。下表列出了不同浏览器对不同变动事件的支持情况。
+
+|事件|Opera 9+|Firefox 3+|Safari 3+及Chrome|IE9+|
+|DOMSubtreeModified|－|支持|支持|支持|
+|DOMNodeInserted|支持|支持|支持|支持|
+|DOMNodeRemoved|支持|支持|支持|支持|
+
+由于DOM3级事件模块作废了很多变动事件，所以本节只介绍那些将来仍然会得到支持的事件。
+
+1. 删除节点
+ 
+在使用removeChild()或replaceChild()从DOM中删除节点时，首先会触发DOMNodeRemoved事件。这个事件的目标（event.target）是被删除的节点，而event.relatedNode属性中包含着对目标节点父节点的引用。在这个事件触发时，节点尚未从其父节点删除，因此其parentNode属性仍然指向父节点（与event.relatedNode相同）。这个事件会冒泡，因而可以在DOM的任何层次上面处理它。
+
+如果被移除的节点包含子节点，那么在其所有子节点以及这个被移除的节点上会相继触发DOMNodeRemovedFromDocument事件。但这个事件不会冒泡，所以只有直接指定给其中一个子节点的事件处理程序才会被调用。这个事件的目标是相应的子节点或者那个被移除的节点，除此之外event对象中不包含其他信息。紧随其后触发的是DOMSubtreeModified事件。这个事件的目标是被移除节点的父节点；此时的event对象也不会提供与事件相关的其他信息。
+
+为了理解上述事件的触发过程，下面我们就以一个简单的HTML页面为例。
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+<title>Node Removal Events Example</title>
+</head>
+<body>
+<ul id="myList">
+<li>Item 1</li>
+<li>Item 2</li>
+<li>Item 3</li>
+</ul>
+</body>
+</html>
+```
+在这个例子中，我们假设要移除ul元素。此时，就会依次触发以下事件。
+1. 在ul元素上触发DOMNodeRemoved事件。relatedNode属性等于document.body。
+2. 在ul元素上触发DOMNodeRemovedFromDocument事件。
+3. 在身为ul元素子节点的每个li元素及文本节点上触发DOMNodeRemovedFromDocument事件。
+4. 在document.body上触发DOMSubtreeModified事件，因为ul元素是document.body的直接子元素。
+
+
+
 **13.4.7 HTML5事件**
 **13.4.8 设备事件**
 **13.4.9 触摸与手势事件**
