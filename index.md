@@ -67,3 +67,4 @@ Github？？？访问下面链接，开始你的Git之旅
 [DevDocs API Documentation](http://devdocs.io/)
 [https://www.html5rocks.com/](https://www.html5rocks.com/)
 [http://html5doctor.com/](http://html5doctor.com/)
+[http://javascript.info/](http://javascript.info/)
