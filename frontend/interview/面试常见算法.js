@@ -12,7 +12,7 @@
  * 这个思路很重要，我们可以拥有更多的自由度去进行字符串的一些操作。
  */
 
-function checkPalindrom(str) {  
+function checkPalindrom(str) {
   return str == str.split('').reverse().join('');
 }
 
