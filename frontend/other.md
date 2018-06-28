@@ -147,6 +147,8 @@
 
 [Shimo Docs](https://github.com/shimohq)
 https://stackshare.io/shimo
+https://zhuanlan.zhihu.com/shimo
+https://dribbble.com/shimo
 
 工具
 -------
