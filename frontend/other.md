@@ -143,6 +143,11 @@
 
 [yued-fe](https://github.com/yued-fe)
 
+**石墨文档**
+
+[Shimo Docs](https://github.com/shimohq)
+https://stackshare.io/shimo
+
 工具
 -------
 
