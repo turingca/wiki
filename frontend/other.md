@@ -150,6 +150,10 @@ https://stackshare.io/shimo
 https://zhuanlan.zhihu.com/shimo
 https://dribbble.com/shimo
 
+**用友网络大前端技术团队**
+
+[github](https://github.com/iuap-design)
+
 工具
 -------
 
