@@ -68,3 +68,5 @@ Github？？？访问下面链接，开始你的Git之旅
 [https://www.html5rocks.com/](https://www.html5rocks.com/)
 [http://html5doctor.com/](http://html5doctor.com/)
 [http://javascript.info/](http://javascript.info/)
+[阮一峰https://wangdoc.com/](https://wangdoc.com/)
+[阮一峰http://es6.ruanyifeng.com/](http://es6.ruanyifeng.com/)
