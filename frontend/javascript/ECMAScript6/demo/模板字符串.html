@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="main"></div>
+    <script>
+    // 模板嵌套
+    const data = [
+      { first: '<Jane>', last: 'Bond' },
+      { first: 'Lars', last: '<Croft>' }
+    ];
+    const tmpl = addrs => `
+      <table>
+      ${addrs.map(addr => `
+        <tr><td>${addr.first}</td></tr>
+        <tr><td>${addr.last}</td></tr>
+      `).join('')}
+      </table>
+    `;
+    console.log(tmpl(data));
+
+    // 模板编译
+
+    let mainElement = document.getElementById('main');
+    let template = `
+    <ul>
+      <% for(let i=0; i < data.supplies.length; i++) { %>
+        <li><%= data.supplies[i] %></li>
+      <% } %>
+    </ul>
+    `;
+
+    function compile(template) {
+      const evalExpr = /<%=(.+?)%>/g;
+      const expr = /<%([\s\S]+?)%>/g;
+
+      template = template
+        .replace(evalExpr, '`); \n  echo( $1 ); \n  echo(`')
+        .replace(expr, '`); \n $1 \n  echo(`');
+
+      template = 'echo(`' + template + '`);';
+
+      let script =
+      `(function parse(data){
+        let output = "";
+
+        function echo(html){
+          output += html;
+        }
+
+        ${ template }
+
+        return output;
+      })`;
+
+      return script;
+    }
+
+    let parse = eval(compile(template));
+    mainElement.innerHTML = parse({ supplies: [ "broom", "mop", "cleaner" ] });
+
+    // 标签模板
+    // 标签模板”的一个重要应用，就是过滤 HTML 字符串，防止用户输入恶意内容。
+    let sender = '<script>alert("abc")';
+    let message =
+      SaferHTML`<p>${sender} has sent you a message.</p>`;
+    console.log(message);
+
+    function SaferHTML(templateData) {
+      let s = templateData[0];
+      for (let i = 1; i < arguments.length; i++) {
+        let arg = String(arguments[i]);
+
+        // Escape special characters in the substitution.
+        s += arg.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+        // Don't escape special characters in the template.
+        s += templateData[i];
+      }
+      return s;
+    }
+    // 标签模板的另一个应用，就是多语言转换（国际化处理）
+    
+    </script>
+</body>
+
+</html>

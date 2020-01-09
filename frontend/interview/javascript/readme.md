@@ -1,0 +1,1 @@
+http://www.ecma-international.org/ecma-262/
